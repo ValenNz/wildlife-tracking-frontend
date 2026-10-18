@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/utils/format";
-import type { TYPE_ANIMAL, TYPE_ANIMAL_GENDER } from "@/types/wildlife/animal.type";
+import type { TYPE_ANIMAL, TYPE_ANIMAL_GENDER } from "@/types/animal.type";
 
 const GENDER_GLYPH: Record<TYPE_ANIMAL_GENDER, string> = {
   Jantan: "♂",
@@ -28,14 +28,14 @@ export const getAnimalColumns = (): ColumnDef<TYPE_ANIMAL, unknown>[] => [
   },
   {
     id: "species",
-    accessorFn: (row) => row.species_name ?? "",
+    accessorFn: (row) => row.species?.common_name ?? "",
     header: "Spesies",
     cell: ({ row }) =>
-      row.original.species_name ? (
+      row.original.species?.common_name ? (
         <div>
-          <p className="text-zinc-800">{row.original.species_name}</p>
+          <p className="text-zinc-800">{row.original.species?.common_name}</p>
           <p className="text-xs italic text-zinc-500">
-            {row.original.species_scientific_name}
+            {row.original.species?.scientific_name}
           </p>
         </div>
       ) : (

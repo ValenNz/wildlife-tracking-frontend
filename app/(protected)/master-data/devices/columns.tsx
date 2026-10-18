@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { BadgeVariant } from "@/components/ui/status-badge";
 import { formatDate } from "@/utils/format";
-import type { DeviceCondition, TrackingDevice } from "@/types/tracking-device";
+import type { DeviceCondition, TrackingDevice } from "@/types/tracking-device.type";
 
 const CONDITION_LABEL: Record<DeviceCondition, string> = {
   normal: "Normal",

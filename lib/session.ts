@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import type { UserRole } from "@/types/user";
+import type { TYPE_USER_ROLE } from "@/types/user.type";
 
 export const SESSION_COOKIE = "wms_session";
 
@@ -7,18 +7,18 @@ export type SessionUser = {
   user_id: number;
   name: string;
   email: string;
-  role: UserRole;
+  role: TYPE_USER_ROLE;
 };
 
-const USER_ROLES: UserRole[] = [
+const USER_ROLES: TYPE_USER_ROLE[] = [
   "konservasionis_lapangan",
   "peneliti_ekologi",
   "administrator_sistem",
   "pengambil_kebijakan",
 ];
 
-const isUserRole = (value: unknown): value is UserRole =>
-  typeof value === "string" && USER_ROLES.includes(value as UserRole);
+const isUserRole = (value: unknown): value is TYPE_USER_ROLE =>
+  typeof value === "string" && USER_ROLES.includes(value as TYPE_USER_ROLE);
 
 const readString = (record: Record<string, unknown>, key: string): string => {
   const value = record[key];

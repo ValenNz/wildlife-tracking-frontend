@@ -10,9 +10,9 @@ import {
   CONSERVATION_OPTIONS,
   DEFAULT_SPECIES_FILTERS,
 } from "@/app/(protected)/master-data/species/filter";
-import { useSpecies } from "@/hooks/useSpecies";
+import { useSpecies } from "@/hooks/species.hook";
 import { toApiErrorState } from "@/services/api-client";
-import type { TYPE_CONSERVATION_STATUS, TYPE_SPECIES } from "@/types/wildlife/species.type";
+import type { TYPE_CONSERVATION_STATUS, TYPE_SPECIES } from "@/types/species.type";
 
 export function SpeciesListView() {
   const router = useRouter();

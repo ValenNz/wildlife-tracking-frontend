@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { NAV_SECTIONS, isRouteActive } from "@/lib/navigation";
 import type { NavIcon } from "@/lib/navigation";
 import type { SessionUser } from "@/lib/session";
-import { ROLE_LABELS } from "@/types/user";
+import { TYPE_ROLE_LABELS } from "@/types/user.type";
 
 const ICON_PATHS: Record<NavIcon, string> = {
   grid: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z",
@@ -89,7 +89,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
 
       <div className="border-t border-zinc-200 px-4 py-3">
         <p className="truncate text-sm font-medium text-zinc-900">{user.name}</p>
-        <p className="truncate text-xs text-zinc-500">{ROLE_LABELS[user.role]}</p>
+        <p className="truncate text-xs text-zinc-500">{TYPE_ROLE_LABELS[user.role]}</p>
         <button
           type="button"
           onClick={onLogout}

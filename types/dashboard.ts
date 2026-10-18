@@ -1,4 +1,4 @@
-import type { DeviceAlert } from "@/types/tracking-device";
+import type { DeviceAlert } from "@/types/tracking-device.type";
 import type { GpsReading } from "@/types/gps-reading";
 import type { Notification } from "@/types/notification";
 

@@ -1,5 +1,5 @@
 import type { FilterOption, FilterValues } from "@/components/ui/data-filters";
-import type { DeviceCondition } from "@/types/tracking-device";
+import type { DeviceCondition } from "@/types/tracking-device.type";
 
 export type DeviceConditionFilter = "all" | "normal" | "damaged" | "lost";
 

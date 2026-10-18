@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { BadgeVariant } from "@/components/ui/status-badge";
-import type { TYPE_CONSERVATION_STATUS, TYPE_SPECIES } from "@/types/wildlife/species.type";
+import type { TYPE_CONSERVATION_STATUS, TYPE_SPECIES } from "@/types/species.type";
 
 const CONSERVATION_VARIANT: Record<TYPE_CONSERVATION_STATUS, BadgeVariant> = {
   "Critically Endangered": "danger",

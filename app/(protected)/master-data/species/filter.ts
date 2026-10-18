@@ -1,5 +1,5 @@
 import type { FilterOption, FilterValues } from "@/components/ui/data-filters";
-import type { TYPE_CONSERVATION_STATUS } from "@/types/wildlife/species.type";
+import type { TYPE_CONSERVATION_STATUS } from "@/types/species.type";
 
 export type SpeciesStatusFilter = "all" | TYPE_CONSERVATION_STATUS;
 

@@ -5,11 +5,11 @@ import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loading } from "@/components/ui/loading";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { useAnimals } from "@/hooks/useAnimals";
+import { useAnimal } from "@/hooks/animal.hook";
 import { useGPSReadingsByAnimal } from "@/hooks/useGPSReadings";
 import { toApiErrorState } from "@/services/api-client";
 import { formatDate } from "@/utils/format";
-import type { TYPE_ANIMAL } from "@/types/wildlife/animal.type";
+import type { TYPE_ANIMAL } from "@/types/animal.type";
 
 type AnimalPosition = {
   animal: TYPE_ANIMAL;
@@ -91,7 +91,7 @@ export function LiveMapView() {
     [speciesId, onlyActive],
   );
 
-  const animals = useAnimals(animalsParams);
+  const animals = useAnimal(animalsParams);
   const selected = useGPSReadingsByAnimal(selectedAnimalId ?? -1);
 
   const animalItems = useMemo(
@@ -179,7 +179,7 @@ export function LiveMapView() {
                   ).values(),
                 ).map((animal) => (
                   <option key={animal.species_id} value={String(animal.species_id)}>
-                    {animal.species_name ?? `Spesies #${animal.species_id}`}
+                    {animal.species?.common_name ?? `Spesies #${animal.species_id}`}
                   </option>
                 ))}
               </select>
@@ -222,7 +222,7 @@ export function LiveMapView() {
                         {animal.animal_code}
                       </span>
                       <span className="text-xs text-zinc-500">
-                        {animal.species_name ?? `Spesies #${animal.species_id}`}
+                        {animal.species?.common_name ?? `Spesies #${animal.species_id}`}
                       </span>
                     </button>
                   </li>

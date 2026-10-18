@@ -1,26 +1,32 @@
-export { useAsyncResource } from "@/hooks/useAsyncResource";
-export type { AsyncResource } from "@/hooks/useAsyncResource";
-
 export {
+  useAnimal,
   useAnimalById,
-  useAnimals,
-  useAllAnimals,
-  useCreateAnimal,
-  useDeleteAnimal,
-  useInfiniteAnimals,
-  useUpdateAnimal,
-} from "@/hooks/useAnimals";
+  useAnimalCreate,
+  useAnimalDelete,
+  useInfiniteAnimal,
+  useAnimalUpdate,
+} from "@/hooks/animal.hook";
 
 export {
-  useAllSpecies,
-  useCreateSpecies,
-  useDeleteSpecies,
-  useInfiniteSpecies,
   useSpecies,
   useSpeciesById,
-  useUpdateSpecies,
-} from "@/hooks/useSpecies";
+  useSpeciesCreate,
+  useSpeciesDelete,
+  useInfiniteSpecies,
+  useSpeciesUpdate,
+} from "@/hooks/species.hook";
 
+export {
+  useUser,
+  useUserById,
+  useUserCreate,
+  useUserDelete,
+  useInfiniteUser,
+  useUserUpdate,
+} from "@/hooks/user.hook";
+
+export { useAsyncResource } from "@/hooks/useAsyncResource";
+export type { AsyncResource } from "@/hooks/useAsyncResource";
 export { useTrackingDevice, useTrackingDevices } from "@/hooks/useTrackingDevices";
 export {
   useGPSReadings,

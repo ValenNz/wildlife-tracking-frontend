@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useAsyncResource } from "@/hooks/useAsyncResource";
 import { getTrackingDeviceById, getTrackingDevices } from "@/services/tracking-device.service";
 import type { AsyncResource } from "@/hooks/useAsyncResource";
-import type { TrackingDevice, TrackingDeviceListParams } from "@/types/tracking-device";
+import type { TrackingDevice, TrackingDeviceListParams } from "@/types/tracking-device.type";
 
 const EMPTY_DEVICES: TrackingDevice[] = [];
 const EMPTY_DEVICE: TrackingDevice | null = null;

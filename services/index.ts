@@ -1,8 +1,6 @@
 export { ANIMAL_SERVICE } from "@/services/animal.service";
-export type { TYPE_ANIMAL_QUERY_PARAMS } from "@/services/animal.service";
-
 export { SPECIES_SERVICE } from "@/services/species.service";
-export type { TYPE_SPECIES_QUERY_PARAMS } from "@/services/species.service";
+export { USER_SERVICE } from "@/services/user.service";
 
 export {
   getDeviceAlerts,

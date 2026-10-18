@@ -9,7 +9,7 @@ import { Loading } from "@/components/ui/loading";
 import { StatCard } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/utils/format";
-import type { DeviceCondition } from "@/types/tracking-device";
+import type { DeviceCondition } from "@/types/tracking-device.type";
 
 type DeviceDetailViewProps = {
   deviceId: number;
@@ -146,7 +146,7 @@ export function DeviceDetailView({ deviceId }: DeviceDetailViewProps) {
           >
             <span className="font-medium text-zinc-900">{record.animal.animal_code}</span>
             <span className="text-xs text-zinc-500">
-              {record.animal.species_name ?? `Spesies #${record.animal.species_id}`}
+              {record.animal.species?.common_name ?? `Spesies #${record.animal.species_id}`}
             </span>
           </Link>
         ) : (

@@ -1,5 +1,5 @@
 import { formatDate } from "@/utils/format";
-import type { DeviceAlert } from "@/types/tracking-device";
+import type { DeviceAlert } from "@/types/tracking-device.type";
 import type { GpsReading } from "@/types/gps-reading";
 
 type DeviceAlertsProps = {

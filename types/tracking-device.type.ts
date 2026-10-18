@@ -1,4 +1,4 @@
-import type { TYPE_ANIMAL } from "@/types/wildlife/animal.type";
+import type { TYPE_ANIMAL } from "@/types/animal.type";
 
 export type DeviceCondition = "normal" | "damaged" | "lost";
 

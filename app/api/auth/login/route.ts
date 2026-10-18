@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE } from "@/lib/session";
 import { SESSION_MAX_AGE_SECONDS, TOKEN_COOKIE } from "@/lib/cookie-names";
-import type { UserRole } from "@/types/user";
+import type { TYPE_USER_ROLE } from "@/types/user.type";
 
 const FALLBACK_BASE_URL = "http://localhost:8000/api";
-const USER_ROLES: UserRole[] = [
+const USER_ROLES: TYPE_USER_ROLE[] = [
   "konservasionis_lapangan",
   "peneliti_ekologi",
   "administrator_sistem",
@@ -21,8 +21,8 @@ const getBaseUrl = (): string => {
   return base.endsWith("/") ? base.slice(0, -1) : base;
 };
 
-const isUserRole = (value: unknown): value is UserRole =>
-  typeof value === "string" && USER_ROLES.includes(value as UserRole);
+const isUserRole = (value: unknown): value is TYPE_USER_ROLE =>
+  typeof value === "string" && USER_ROLES.includes(value as TYPE_USER_ROLE);
 
 const readString = (record: Record<string, unknown>, key: string): string => {
   const value = record[key];

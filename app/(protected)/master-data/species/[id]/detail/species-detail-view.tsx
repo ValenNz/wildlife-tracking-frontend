@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { useSpeciesById } from "@/hooks/useSpecies";
-import { useAnimals } from "@/hooks/useAnimals";
+import { useSpeciesById } from "@/hooks/species.hook";
+import { useAnimal } from "@/hooks/animal.hook";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loading } from "@/components/ui/loading";
@@ -11,7 +11,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toApiErrorState } from "@/services/api-client";
 import type { BadgeVariant } from "@/components/ui/status-badge";
-import type { TYPE_CONSERVATION_STATUS } from "@/types/wildlife/species.type";
+import type { TYPE_CONSERVATION_STATUS } from "@/types/species.type";
 
 type SpeciesDetailViewProps = {
   speciesId: number;
@@ -38,7 +38,7 @@ export function SpeciesDetailView({ speciesId }: SpeciesDetailViewProps) {
     [speciesId],
   );
 
-  const animals = useAnimals(animalsParams);
+  const animals = useAnimal(animalsParams);
 
   if (speciesQuery.isPending) {
     return <Loading label="Memuat detail spesies..." />;
@@ -58,7 +58,7 @@ export function SpeciesDetailView({ speciesId }: SpeciesDetailViewProps) {
     );
   }
 
-  const record = speciesQuery.data?.data.items[0];
+  const record = speciesQuery.data?.data.items;
 
   if (record === undefined) {
     return (

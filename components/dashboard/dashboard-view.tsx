@@ -10,7 +10,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DeviceAlerts, ReadingFeed } from "@/components/wildlife/device-alerts";
 import { formatDate, formatNumber } from "@/utils/format";
-import type { UserRole } from "@/types/user";
+import type { TYPE_USER_ROLE } from "@/types/user.type";
 
 type QuickLink = {
   label: string;
@@ -18,7 +18,7 @@ type QuickLink = {
   hint: string;
 };
 
-const QUICK_LINKS: Record<UserRole, QuickLink[]> = {
+const QUICK_LINKS: Record<TYPE_USER_ROLE, QuickLink[]> = {
   konservasionis_lapangan: [
     { label: "Live Map", href: "/tracking/live-map", hint: "Posisi satwa terkini" },
     { label: "Laporan Insiden", href: "/incidents", hint: "Catat kejadian lapangan" },
@@ -52,7 +52,7 @@ const QuickLinks = ({ links }: { links: QuickLink[] }) => (
   </div>
 );
 
-export function DashboardView({ role }: { role: UserRole }) {
+export function DashboardView({ role }: { role: TYPE_USER_ROLE }) {
   const summary = useDashboardSummary();
   const incidents = useIncidentReports();
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAnimalById } from "@/hooks/useAnimals";
+import { useAnimalById } from "@/hooks/animal.hook";
 import { useGPSReadingsByAnimal } from "@/hooks/useGPSReadings";
 import { useIncidentReports } from "@/hooks/useIncidentReports";
 import { ErrorState } from "@/components/ui/error-state";
@@ -48,7 +48,7 @@ export function AnimalDetailView({ animalId }: AnimalDetailViewProps) {
     );
   }
 
-  const record = animalQuery.data?.data.items[0];
+  const record = animalQuery.data?.data.items;
 
   if (record === undefined) {
     return (

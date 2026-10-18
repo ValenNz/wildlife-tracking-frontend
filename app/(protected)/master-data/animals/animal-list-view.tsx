@@ -11,9 +11,9 @@ import {
   STATUS_OPTIONS,
   toSpeciesId,
 } from "@/app/(protected)/master-data/animals/filter";
-import { useAnimals } from "@/hooks/useAnimals";
+import { useAnimal } from "@/hooks/animal.hook";
 import { toApiErrorState } from "@/services/api-client";
-import type { TYPE_ANIMAL } from "@/types/wildlife/animal.type";
+import type { TYPE_ANIMAL } from "@/types/animal.type";
 
 export function AnimalListView() {
   const router = useRouter();
@@ -31,13 +31,13 @@ export function AnimalListView() {
     [filters.search, filters.species_id, filters.status],
   );
 
-  const query = useAnimals(params);
+  const query = useAnimal(params);
 
   const speciesOptions = useMemo(
     () => [
       { label: "Semua spesies", value: "all" },
       ...(query.data?.data.items ?? []).map((animal) => ({
-        label: animal.species_name ?? `Spesies #${animal.species_id}`,
+        label: animal.species?.common_name ?? `Spesies #${animal.species_id}`,
         value: String(animal.species_id),
       })),
     ],

@@ -14,7 +14,7 @@ import {
   toOnlyActiveDevice,
 } from "@/app/(protected)/master-data/devices/filter";
 import { useTrackingDevices } from "@/hooks/useTrackingDevices";
-import type { TrackingDevice } from "@/types/tracking-device";
+import type { TrackingDevice } from "@/types/tracking-device.type";
 
 export function DeviceListView() {
   const router = useRouter();

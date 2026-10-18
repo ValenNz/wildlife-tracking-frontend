@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { findNavTitle } from "@/lib/navigation";
-import { ROLE_LABELS } from "@/types/user";
+import { TYPE_ROLE_LABELS } from "@/types/user.type";
 import type { SessionUser } from "@/lib/session";
 
 type HeaderProps = {
@@ -74,7 +74,7 @@ export function Header({ user, onLogout }: HeaderProps) {
                 {user.name}
               </span>
               <span className="block text-[0.65rem] text-zinc-500">
-                {ROLE_LABELS[user.role]}
+                {TYPE_ROLE_LABELS[user.role]}
               </span>
             </span>
           </button>

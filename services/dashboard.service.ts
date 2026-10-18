@@ -4,8 +4,8 @@ import { getDeviceAlerts, getTrackingDevices } from "@/services/tracking-device.
 import { getGpsReadings } from "@/services/gps-reading.service";
 import { getUnreadNotifications } from "@/services/notification.service";
 import type { DashboardSummary } from "@/types/dashboard";
-import type { TYPE_ANIMAL } from "@/types/wildlife/animal.type";
-import type { TYPE_SPECIES } from "@/types/wildlife/species.type";
+import type { TYPE_ANIMAL } from "@/types/animal.type";
+import type { TYPE_SPECIES } from "@/types/species.type";
 
 const MAX_RECENT_ITEMS = 5;
 const LOW_BATTERY_PERCENT = 25;

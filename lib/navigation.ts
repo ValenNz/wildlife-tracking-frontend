@@ -1,4 +1,4 @@
-import type { UserRole } from "@/types/user";
+import type { TYPE_USER_ROLE } from "@/types/user.type";
 
 export type NavIcon = "grid" | "map" | "bell" | "paw" | "alert" | "species" | "device" | "zone" | "chart";
 
@@ -39,7 +39,7 @@ const POLICY_ITEMS: NavItem[] = [
   { label: "Statistik", href: "/master-data/species", icon: "chart" },
 ];
 
-export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
+export const NAV_SECTIONS: Record<TYPE_USER_ROLE, NavSection[]> = {
   konservasionis_lapangan: [
     { title: "Umum", items: COMMON_ITEMS },
     { title: "Lapangan", items: CONSERVATION_ITEMS },
@@ -58,19 +58,19 @@ export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
   ],
 };
 
-export const DEFAULT_ROLE: UserRole = "konservasionis_lapangan";
+export const DEFAULT_ROLE: TYPE_USER_ROLE = "konservasionis_lapangan";
 
 export const isRouteActive = (pathname: string, href: string): boolean =>
   pathname === href || pathname.startsWith(`${href}/`);
 
-export const canAccessRoute = (role: UserRole, pathname: string): boolean =>
+export const canAccessRoute = (role: TYPE_USER_ROLE, pathname: string): boolean =>
   NAV_SECTIONS[role].some((section) =>
     section.items.some(
       (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
     ),
   );
 
-export const findNavTitle = (role: UserRole, pathname: string): string => {
+export const findNavTitle = (role: TYPE_USER_ROLE, pathname: string): string => {
   const items = NAV_SECTIONS[role].flatMap((section) => section.items);
 
   const match = items

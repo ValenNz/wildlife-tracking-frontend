@@ -5,7 +5,7 @@ import type {
   DeviceCondition,
   TrackingDevice,
   TrackingDeviceListParams,
-} from "@/types/tracking-device";
+} from "@/types/tracking-device.type";
 
 const BASE = "/api/wildlife";
 const LOW_BATTERY_THRESHOLD = 20;

@@ -12,13 +12,13 @@ tetap dalam Bahasa Inggris.
 
 ## 👥 Tim Proyek
 
-| Nama | Peran |
-| --- | --- |
-| Farrellino Ulung Satya Amando | PIC AI & Integration |
-| Nuevalen Refitra Alswando | PIC Database |
-| **Yohana Sinaga** | **PIC Frontend** ⭐ |
-| Laura Chyndearni Saragih | PIC Database |
-| Yohanna Purnomo | PIC Backend & PIC Documentation |
+| Nama                          | Peran                           |
+| ----------------------------- | ------------------------------- |
+| Farrellino Ulung Satya Amando | PIC AI & Integration            |
+| Nuevalen Refitra Alswando     | PIC Database                    |
+| **Yohana Sinaga**       | **PIC Frontend** ⭐       |
+| Laura Chyndearni Saragih      | PIC Database                    |
+| Yohanna Purnomo               | PIC Backend & PIC Documentation |
 
 Repo terkait: `wildlife-tracking-backend` (REST API Laravel) · `wildlife-tracking-database` (desain skema)
 
@@ -29,7 +29,7 @@ Repo terkait: `wildlife-tracking-backend` (REST API Laravel) · `wildlife-tracki
 1. [Gambaran Umum](#1-gambaran-umum)
 2. [Tech Stack](#2-tech-stack)
 3. [Struktur Proyek](#3-struktur-proyek)
-4. [Alur Data & Autentikasi](#4-alur-data--autentikasi)
+4. [Alur Data &amp; Autentikasi](#4-alur-data--autentikasi)
 5. [Konvensi Coding](#5-konvensi-coding-wajib-dihafal-)
 6. [Endpoint API](#6-endpoint-api-yang-tersedia)
 7. [Cara Menjalankan](#7-cara-menjalankan)
@@ -37,7 +37,7 @@ Repo terkait: `wildlife-tracking-backend` (REST API Laravel) · `wildlife-tracki
 9. [Matriks Akses Berbasis Role](#9-matriks-akses-berbasis-role)
 10. [Status Sprint](#10-status-sprint)
 11. [Panduan Cepat untuk Frontend PIC](#11-panduan-cepat-untuk-frontend-pic-yohana-)
-12. [Masalah Umum & Solusi](#12-masalah-umum--solusi)
+12. [Masalah Umum &amp; Solusi](#12-masalah-umum--solusi)
 13. [Referensi](#13-referensi)
 14. [Kontak](#14-kontak)
 
@@ -50,17 +50,17 @@ terpasang saat ini adalah **Next.js 16.3.8 / React 19.2.8**. Yang dipakai dalam 
 dokumen ini adalah **hasil baca langsung dari repository**, bukan brief lama.
 Daftar selisih yang sering menjadi sumber confusion:
 
-| Brief lama | Kenyataan di repo | Ikuti yang mana |
-| --- | --- | --- |
-| Next.js 14, React 18 | **Next.js 16.3.8, React 19.2.8** | ✅ Manifest |
-| `services/api.ts` | **`services/api-client.ts`** (mengekspor `api`, bukan default export) | ✅ Repo |
-| `types/export.type.ts` | **belum ada** | Jangan di-import sampai dibuat |
-| `app/auth/login/` | **`app/login/page.tsx`** | ✅ Repo |
-| `next.config.js`, `tailwind.config.ts` | **`next.config.ts`**, Tailwind 4 **tanpa** file config | ✅ Repo |
-| `NEXT_PUBLIC_COOKIE_SESSION` | Nama cookie sesi `wms_session` **hardcoded** di `lib/session.ts:4` | ✅ Repo |
-| `.env.local` | Repo memakai **`.env`** (`.env*` sudah di-gitignore) | Keduanya bisa |
-| `GET /api/export/gps` | Rutenya **`/api/export/gps/csv`** dan **`/api/export/gps/geojson`** | ✅ Repo |
-| `GET /api/animals/{id}` | **Belum ada** di backend | Jangan dipanggil |
+| Brief lama                                 | Kenyataan di repo                                                                   | Ikuti yang mana                |
+| ------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------ |
+| Next.js 14, React 18                       | **Next.js 16.3.8, React 19.2.8**                                              | ✅ Manifest                    |
+| `services/api.ts`                        | **`services/api-client.ts`** (mengekspor `api`, bukan default export)     | ✅ Repo                        |
+| `types/export.type.ts`                   | **belum ada**                                                                 | Jangan di-import sampai dibuat |
+| `app/auth/login/`                        | **`app/login/page.tsx`**                                                    | ✅ Repo                        |
+| `next.config.js`, `tailwind.config.ts` | **`next.config.ts`**, Tailwind 4 **tanpa** file config                | ✅ Repo                        |
+| `NEXT_PUBLIC_COOKIE_SESSION`             | Nama cookie sesi `wms_session` **hardcoded** di `lib/session.ts:4`        | ✅ Repo                        |
+| `.env.local`                             | Repo memakai **`.env`** (`.env*` sudah di-gitignore)                      | Keduanya bisa                  |
+| `GET /api/export/gps`                    | Rutenya **`/api/export/gps/csv`** dan **`/api/export/gps/geojson`** | ✅ Repo                        |
+| `GET /api/animals/{id}`                  | **Belum ada** di backend                                                      | Jangan dipanggil               |
 
 Alias import `@/` menunjuk ke **root frontend** (`tsconfig.json` → `"@/*": ["./*"]`).
 **Tidak ada folder `src/`.** Path bertuliskan `src/...` di dokumen lama itu salah.
@@ -88,12 +88,12 @@ database atau provider AI secara langsung — semuanya lewat backend Laravel.
 
 ### Peran pengguna
 
-| Nilai role (enum `users.role`) | Label di UI |
-| --- | --- |
-| `konservasionis_lapangan` | Konservasionis Lapangan |
-| `peneliti_ekologi` | Peneliti Ekologi |
-| `administrator_sistem` | Administrator Sistem |
-| `pengambil_kebijakan` | Pengambil Kebijakan |
+| Nilai role (enum `users.role`) | Label di UI             |
+| -------------------------------- | ----------------------- |
+| `konservasionis_lapangan`      | Konservasionis Lapangan |
+| `peneliti_ekologi`             | Peneliti Ekologi        |
+| `administrator_sistem`         | Administrator Sistem    |
+| `pengambil_kebijakan`          | Pengambil Kebijakan     |
 
 🔐 Role yang ditampilkan di sidebar hanya untuk **UX**. Otorisasi sesungguhnya ditegakkan backend
 (`auth:sanctum` + Policy).
@@ -102,22 +102,22 @@ database atau provider AI secara langsung — semuanya lewat backend Laravel.
 
 ## 2. Tech Stack
 
-| Lapisan | Teknologi | Versi terpasang |
-| --- | --- | --- |
-| Framework | Next.js (**App Router**) | `16.3.8` |
-| UI Library | React / React DOM | `19.2.8` |
-| Bahasa | TypeScript (`strict: true`) | `^5` |
-| Styling | Tailwind CSS (CSS-first config) | `^4` |
-| Data fetching & cache | `@tanstack/react-query` | `^5.104.4` |
-| Tabel | `@tanstack/react-table` | `^8.21.3` |
-| Form | `react-hook-form` + `@hookform/resolvers` | `^7.90.0` / `^5.9.2` |
-| Validasi | Zod | `^4.6.5` |
-| Utility class | `clsx` + `tailwind-merge` | `^2.1.1` / `^3.7.0` |
-| HTTP client | **Fetch API bawaan browser** (`services/api-client.ts`) — tanpa Axios | — |
-| Linter | ESLint (flat config) | `^9` |
-| **Backend** | Laravel | `^13.17` (PHP `^8.3`) — `http://localhost:8000` |
-| **Database** | MySQL | `8.0` — `127.0.0.1:3306` |
-| **Auth** | Laravel Sanctum (Bearer token disimpan di cookie httpOnly) | — |
+| Lapisan               | Teknologi                                                                      | Versi terpasang                                        |
+| --------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Framework             | Next.js (**App Router**)                                                 | `16.3.8`                                             |
+| UI Library            | React / React DOM                                                              | `19.2.8`                                             |
+| Bahasa                | TypeScript (`strict: true`)                                                  | `^5`                                                 |
+| Styling               | Tailwind CSS (CSS-first config)                                                | `^4`                                                 |
+| Data fetching & cache | `@tanstack/react-query`                                                      | `^5.104.4`                                           |
+| Tabel                 | `@tanstack/react-table`                                                      | `^8.21.3`                                            |
+| Form                  | `react-hook-form` + `@hookform/resolvers`                                  | `^7.90.0` / `^5.9.2`                               |
+| Validasi              | Zod                                                                            | `^4.6.5`                                             |
+| Utility class         | `clsx` + `tailwind-merge`                                                  | `^2.1.1` / `^3.7.0`                                |
+| HTTP client           | **Fetch API bawaan browser** (`services/api-client.ts`) — tanpa Axios | —                                                     |
+| Linter                | ESLint (flat config)                                                           | `^9`                                                 |
+| **Backend**     | Laravel                                                                        | `^13.17` (PHP `^8.3`) — `http://localhost:8000` |
+| **Database**    | MySQL                                                                          | `8.0` — `127.0.0.1:3306`                          |
+| **Auth**        | Laravel Sanctum (Bearer token disimpan di cookie httpOnly)                     | —                                                     |
 
 > **Tidak ada Axios.** Semua request memakai `fetch` bawaan browser melalui
 > `services/api-client.ts`.
@@ -142,7 +142,7 @@ wildlife-tracking-frontend/
 │   │   │   │   ├── columns.tsx           # Definisi kolom TanStack Table
 │   │   │   │   ├── filter.ts             # State filter + opsi dropdown
 │   │   │   │   └── [id]/detail/
-│   │   │   │       ├── page.tsx          # Server component pembungkus
+│   │   │   │       ├── page.tsx          # Server micomponent pembungkus
 │   │   │   │       └── animal-detail-view.tsx
 │   │   │   ├── species/                  # Pola identik dengan animals
 │   │   │   └── devices/                  # Pola identik dengan animals
@@ -259,20 +259,20 @@ wildlife-tracking-frontend/
 
 ### Route yang tersedia
 
-| URL | Keterangan |
-| --- | --- |
-| `/` | Redirect ke `/dashboard` atau `/login` |
-| `/login` | Form login (publik) |
-| `/dashboard` | Ringkasan per role |
-| `/master-data/animals` | Daftar satwa (+ `/[id]/detail`) |
-| `/master-data/species` | Daftar spesies (+ `/[id]/detail`) |
-| `/master-data/devices` | Daftar perangkat (+ `/[id]/detail`) |
-| `/incidents` | Daftar laporan insiden |
-| `/notifications` | Daftar notifikasi |
-| `/tracking/live-map` | Live map (provider map belum terintegrasi) |
-| `/api/wildlife/[...path]` | Proxy ke Laravel (**GET saja**) |
-| `/api/auth/login` | `POST` → Laravel `/api/login` |
-| `/api/auth/logout` | `POST` → hapus cookie auth |
+| URL                         | Keterangan                                 |
+| --------------------------- | ------------------------------------------ |
+| `/`                       | Redirect ke `/dashboard` atau `/login` |
+| `/login`                  | Form login (publik)                        |
+| `/dashboard`              | Ringkasan per role                         |
+| `/master-data/animals`    | Daftar satwa (+ `/[id]/detail`)          |
+| `/master-data/species`    | Daftar spesies (+ `/[id]/detail`)        |
+| `/master-data/devices`    | Daftar perangkat (+ `/[id]/detail`)      |
+| `/incidents`              | Daftar laporan insiden                     |
+| `/notifications`          | Daftar notifikasi                          |
+| `/tracking/live-map`      | Live map (provider map belum terintegrasi) |
+| `/api/wildlife/[...path]` | Proxy ke Laravel (**GET saja**)      |
+| `/api/auth/login`         | `POST` → Laravel `/api/login`         |
+| `/api/auth/logout`        | `POST` → hapus cookie auth              |
 
 Route group `(protected)` **tidak mengubah URL**, hanya menambah proteksi.
 
@@ -301,10 +301,10 @@ dari browser ke `:8000` akan diblokir. Karena itu semua request data harus **sam
 **Token tidak pernah menyentuh JavaScript client.** Setelah login berhasil,
 `app/api/auth/login/route.ts` menulis dua cookie **httpOnly**:
 
-| Cookie | Isi | Dibaca oleh |
-| --- | --- | --- |
-| `wms_session` | Payload user (JSON) untuk gating role | `lib/session.ts` |
-| `wms_token` | Bearer token Sanctum | `services/cookieToken.ts` → `lib/laravel-proxy.ts` |
+| Cookie          | Isi                                   | Dibaca oleh                                             |
+| --------------- | ------------------------------------- | ------------------------------------------------------- |
+| `wms_session` | Payload user (JSON) untuk gating role | `lib/session.ts`                                      |
+| `wms_token`   | Bearer token Sanctum                  | `services/cookieToken.ts` → `lib/laravel-proxy.ts` |
 
 > ⚠️ **Aturan keras:** hanya `lib/laravel-proxy.ts` yang boleh meng-import
 > `services/cookieToken.ts`. Jangan pernah meng-import `next/headers` di file yang akan
@@ -324,11 +324,11 @@ sampai backend benar-benar mengimplementasikan pagination.
 
 Tiga pola ini adalah inti dari seluruh codebase. Hafalkan, terapkan konsisten:
 
-| Lapisan | Pola | Contoh |
-| --- | --- | --- |
-| Type | `TYPE_[ENTITY]`, `TYPE_[ENTITY]_PAYLOAD`, `TYPE_[ENTITY]_GET_ALL_RESPONSE`, `TYPE_[ENTITY]_GET_BY_ID_RESPONSE` | `TYPE_ANIMAL`, `TYPE_ANIMAL_PAYLOAD` |
-| Service | konstanta `[ENTITY]_SERVICE` dengan method `GET_ALL` / `GET_BY_ID` / `CREATE` / `UPDATE` / `DELETE` | `ANIMAL_SERVICE` |
-| Hook | `use[Entity]`, `useInfinite[Entity]`, `use[Entity]ById`, `use[Entity]Create`, `use[Entity]Update`, `use[Entity]Delete` | `useAnimalById` |
+| Lapisan | Pola                                                                                                                               | Contoh                                   |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Type    | `TYPE_[ENTITY]`, `TYPE_[ENTITY]_PAYLOAD`, `TYPE_[ENTITY]_GET_ALL_RESPONSE`, `TYPE_[ENTITY]_GET_BY_ID_RESPONSE`             | `TYPE_ANIMAL`, `TYPE_ANIMAL_PAYLOAD` |
+| Service | konstanta `[ENTITY]_SERVICE` dengan method `GET_ALL` / `GET_BY_ID` / `CREATE` / `UPDATE` / `DELETE`                    | `ANIMAL_SERVICE`                       |
+| Hook    | `use[Entity]`, `useInfinite[Entity]`, `use[Entity]ById`, `use[Entity]Create`, `use[Entity]Update`, `use[Entity]Delete` | `useAnimalById`                        |
 
 > File name → nama symbol: `animal.type.ts` → `TYPE_ANIMAL`;
 > `animal.service.ts` → `ANIMAL_SERVICE`; `animal.hook.ts` → `useAnimal`.
@@ -336,16 +336,16 @@ Tiga pola ini adalah inti dari seluruh codebase. Hafalkan, terapkan konsisten:
 
 ### 5.1 Konvensi nama file
 
-| Jenis | Format | Contoh |
-| --- | --- | --- |
-| Types | `[entity].type.ts` (kecil, boleh hyphen) | `user.type.ts`, `tracking-device.type.ts`, `gps-reading.type.ts` |
-| Service | `[entity].service.ts` | `species.service.ts`, `tracking-device.service.ts` |
-| Hook | `[entity].hook.ts` | `animal.hook.ts`, `gps-reading.hook.ts` |
-| Komponen | `PascalCase.tsx` | `AnimalListView` di `animal-list-view.tsx` |
-| Kolom tabel | `columns.tsx` di dalam folder modul | `app/(protected)/master-data/animals/columns.tsx` |
-| Filter | `filter.ts` di dalam folder modul | `.../animals/filter.ts` |
-| View per halaman | `[nama]-list-view.tsx`, `[nama]-detail-view.tsx` | `incident-list-view.tsx` |
-| Server component | `page.tsx`, `layout.tsx` | selalu |
+| Jenis            | Format                                               | Contoh                                                                 |
+| ---------------- | ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| Types            | `[entity].type.ts` (kecil, boleh hyphen)           | `user.type.ts`, `tracking-device.type.ts`, `gps-reading.type.ts` |
+| Service          | `[entity].service.ts`                              | `species.service.ts`, `tracking-device.service.ts`                 |
+| Hook             | `[entity].hook.ts`                                 | `animal.hook.ts`, `gps-reading.hook.ts`                            |
+| Komponen         | `PascalCase.tsx`                                   | `AnimalListView` di `animal-list-view.tsx`                         |
+| Kolom tabel      | `columns.tsx` di dalam folder modul                | `app/(protected)/master-data/animals/columns.tsx`                    |
+| Filter           | `filter.ts` di dalam folder modul                  | `.../animals/filter.ts`                                              |
+| View per halaman | `[nama]-list-view.tsx`, `[nama]-detail-view.tsx` | `incident-list-view.tsx`                                             |
+| Server component | `page.tsx`, `layout.tsx`                         | selalu                                                                 |
 
 > Teks UI, comment, dan pesan error **Bahasa Indonesia**.
 > Nama identifier, nama file, dan istilah teknis **Bahasa Inggris**.
@@ -354,11 +354,11 @@ Tiga pola ini adalah inti dari seluruh codebase. Hafalkan, terapkan konsisten:
 
 Semua type memakai awalan `TYPE_` dan HURUF BESAR. Empat type wajib per entity:
 
-| Type | Isi |
-| --- | --- |
-| `TYPE_[ENTITY]` | Entitas tunggal |
-| `TYPE_[ENTITY]_PAYLOAD` | Body untuk create/update |
-| `TYPE_[ENTITY]_GET_ALL_RESPONSE` | `{ items: TYPE_X[]; meta: TYPE_META_PAGGINATION }` |
+| Type                                 | Isi                                                                           |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| `TYPE_[ENTITY]`                    | Entitas tunggal                                                               |
+| `TYPE_[ENTITY]_PAYLOAD`            | Body untuk create/update                                                      |
+| `TYPE_[ENTITY]_GET_ALL_RESPONSE`   | `{ items: TYPE_X[]; meta: TYPE_META_PAGGINATION }`                          |
 | `TYPE_[ENTITY]_GET_BY_ID_RESPONSE` | `{ items: TYPE_X; meta: null }` — `items` **tunggal**, bukan array |
 
 📄 **`types/animal.type.ts` — contoh lengkap (file ini sudah ada, tiru persis):**
@@ -476,6 +476,7 @@ export type ApiErrorState = {
 ```
 
 Aturan tambahan:
+
 - Gunakan `import type { … }` untuk type-only import.
 - **DILARANG** `interface` → selalu `type`.
 - **DILARANG** `any` → gunakan `unknown` lalu narrow.
@@ -678,11 +679,11 @@ export const useAnimalDelete = (id: number) => {
 
 📋 **Aturan query key** (jangan diacak):
 
-| Hook | `queryKey` |
-| --- | --- |
-| `useAnimal(params)` | `["animals", params]` |
+| Hook                          | `queryKey`                     |
+| ----------------------------- | -------------------------------- |
+| `useAnimal(params)`         | `["animals", params]`          |
 | `useInfiniteAnimal(params)` | `["animals-infinite", params]` |
-| `useAnimalById(id)` | `["animals", id]` |
+| `useAnimalById(id)`         | `["animals", id]`              |
 
 Suffix **jamak** untuk list (`"animals"`), **tunggal** untuk detail (`id` sebagai elemen
 kedua). Setelah mutasi sukses, selalu `invalidateQueries` dengan prefix yang sama.
@@ -701,11 +702,13 @@ export type ApiResponse<T> = {
 ```
 
 Sukses:
+
 ```json
 { "success": true, "message": "Data berhasil diambil.", "data": { "items": [], "meta": null } }
 ```
 
 Gagal:
+
 ```json
 { "success": false, "message": "Validasi gagal.", "data": null, "errors": { "animal_code": ["Kode satwa wajib diisi."] } }
 ```
@@ -713,14 +716,14 @@ Gagal:
 Pemetaan status HTTP → `ApiErrorKind` (dihandle `resolveErrorKind` di `types/api.type.ts`
 dan dipakai `services/api-client.ts`):
 
-| Status | `kind` | Perlakuan di UI |
-| --- | --- | --- |
-| 401 | `unauthorized` | Redirect `/login` / tampilkan "sesi berakhir" |
-| 403 | `forbidden` | "Anda tidak memiliki akses ke modul ini" |
-| 404 | `not_found` | `EmptyState` dengan pesan ramah |
-| 422 | `validation` | Tampilkan `errors` per field di form |
-| 5xx | `server` | `ErrorState` + tombol coba lagi |
-| 0 / timeout | `network` | "Pastikan backend berjalan di port 8000" |
+| Status      | `kind`         | Perlakuan di UI                                 |
+| ----------- | ---------------- | ----------------------------------------------- |
+| 401         | `unauthorized` | Redirect `/login` / tampilkan "sesi berakhir" |
+| 403         | `forbidden`    | "Anda tidak memiliki akses ke modul ini"        |
+| 404         | `not_found`    | `EmptyState` dengan pesan ramah               |
+| 422         | `validation`   | Tampilkan `errors` per field di form          |
+| 5xx         | `server`       | `ErrorState` + tombol coba lagi               |
+| 0 / timeout | `network`      | "Pastikan backend berjalan di port 8000"        |
 
 `services/api-client.ts` melempar `ApiError` yang selalu punya `.status`, `.kind`,
 `.message`, dan `.errors`. Gunakan `toApiErrorState(error)` untuk mengubahnya jadi objek
@@ -849,20 +852,20 @@ export const STATUS_OPTIONS: FilterOption[] = [
 
 ### 5.7 Aturan tambahan yang tidak boleh dilanggar
 
-| # | Aturan |
-| --- | --- |
-| 1 | **Tidak boleh** memanggil `fetch` langsung di dalam component. Selalu lewat hook. |
-| 2 | **Tidak boleh** ada `any`. Gunakan `unknown` + narrowing. |
-| 3 | **Tidak boleh** ada `interface`. Selalu `type`. |
-| 4 | Client component yang memakai `react-hook-form`, state, event handler, atau komponen browser **wajib** diawali `"use client"`. Build akan gagal dengan *"Export useForm doesn't exist in target module"* bila lupa. |
-| 5 | Server component tidak boleh memakai `useState`/`useEffect`. Ambil data lewat hook client. |
-| 6 | Validasi Zod hanya untuk **UX**. Backend tetap memvalidasi authoritative. |
-| 7 | Setiap halaman wajib menangani: loading, empty, error, 401, 403, 422. |
-| 8 | Jangan pernah menaruh secret di `NEXT_PUBLIC_*` — semuanya terlihat publik. |
-| 9 | Provider AI hanya dipanggil lewat endpoint backend, tidak pernah langsung dari browser. |
-| 10 | `eslint-disable` hanya dengan alasan tertulis dan persetujuan PIC Frontend. |
-| 11 | **Nol komentar di kode.** Kode harus dijelaskan lewat arsitektur, alur, dan penamaan. |
-| 12 | Data domain harus realistis untuk Gunung Leuser (kode collar `ORN-01`, `HRM-01`, `BDK-01`, `GJS-01`, `RSA-01`; lat `3.5`–`3.7`, long `97.9`–`98.2`). |
+| #  | Aturan                                                                                                                                                                                                                          |
+| -- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1  | **Tidak boleh** memanggil `fetch` langsung di dalam component. Selalu lewat hook.                                                                                                                                       |
+| 2  | **Tidak boleh** ada `any`. Gunakan `unknown` + narrowing.                                                                                                                                                             |
+| 3  | **Tidak boleh** ada `interface`. Selalu `type`.                                                                                                                                                                       |
+| 4  | Client component yang memakai `react-hook-form`, state, event handler, atau komponen browser **wajib** diawali `"use client"`. Build akan gagal dengan *"Export useForm doesn't exist in target module"* bila lupa. |
+| 5  | Server component tidak boleh memakai `useState`/`useEffect`. Ambil data lewat hook client.                                                                                                                                  |
+| 6  | Validasi Zod hanya untuk **UX**. Backend tetap memvalidasi authoritative.                                                                                                                                                 |
+| 7  | Setiap halaman wajib menangani: loading, empty, error, 401, 403, 422.                                                                                                                                                           |
+| 8  | Jangan pernah menaruh secret di `NEXT_PUBLIC_*` — semuanya terlihat publik.                                                                                                                                                  |
+| 9  | Provider AI hanya dipanggil lewat endpoint backend, tidak pernah langsung dari browser.                                                                                                                                         |
+| 10 | `eslint-disable` hanya dengan alasan tertulis dan persetujuan PIC Frontend.                                                                                                                                                   |
+| 11 | **Nol komentar di kode.** Kode harus dijelaskan lewat arsitektur, alur, dan penamaan.                                                                                                                                     |
+| 12 | Data domain harus realistis untuk Gunung Leuser (kode collar `ORN-01`, `HRM-01`, `BDK-01`, `GJS-01`, `RSA-01`; lat `3.5`–`3.7`, long `97.9`–`98.2`).                                                        |
 
 ### 5.8 Mutasi (create / update / delete)
 
@@ -888,11 +891,12 @@ proxy).
 
 ### Auth (publik)
 
-| Method | Path | Keterangan |
-| --- | --- | --- |
+| Method   | Path           | Keterangan                                                       |
+| -------- | -------------- | ---------------------------------------------------------------- |
 | `POST` | `/api/login` | Login dengan `username` + `password`. **Bukan email.** |
 
 Response sukses:
+
 ```json
 {
   "success": true,
@@ -915,32 +919,32 @@ Kredensial salah → **401** dengan `errors.credentials`. Field kosong → **422
 
 ### Terlindungi (butuh bearer token)
 
-| Method | Path | Status | Dipakai oleh |
-| --- | --- | --- | --- |
-| `GET` | `/api/me` | ✅ jalan | Pemeriksaan sesi |
-| `POST` | `/api/logout` | ✅ jalan | Tombol logout |
-| `GET` | `/api/dashboard` | ✅ jalan | Dashboard |
-| `GET` | `/api/animals` | ✅ jalan | Daftar satwa |
-| `GET` | `/api/species` | ✅ jalan | Daftar spesies |
-| `GET` | `/api/devices` | ✅ jalan | Daftar perangkat |
-| `GET` | `/api/devices/{id}` | ✅ jalan | Detail perangkat |
-| `GET` | `/api/gps-readings` | ✅ jalan | Peta & grafik (dibatasi 100 baris terbaru) |
-| `GET` | `/api/gps-readings/{animal_id}` | ✅ jalan | Riwayat satwa |
-| `GET` | `/api/incidents` | ✅ jalan | Daftar insiden |
-| `GET` | `/api/notifications` | ✅ jalan | Daftar notifikasi |
-| `GET` | `/api/export/gps/csv` | ✅ jalan | Export CSV |
-| `GET` | `/api/export/gps/geojson` | ✅ jalan | Export GeoJSON |
-| `GET` | `/api/geo-zones` | ⚠️ **rusak di backend** | Lihat catatan di bawah |
+| Method   | Path                              | Status                          | Dipakai oleh                               |
+| -------- | --------------------------------- | ------------------------------- | ------------------------------------------ |
+| `GET`  | `/api/me`                       | ✅ jalan                        | Pemeriksaan sesi                           |
+| `POST` | `/api/logout`                   | ✅ jalan                        | Tombol logout                              |
+| `GET`  | `/api/dashboard`                | ✅ jalan                        | Dashboard                                  |
+| `GET`  | `/api/animals`                  | ✅ jalan                        | Daftar satwa                               |
+| `GET`  | `/api/species`                  | ✅ jalan                        | Daftar spesies                             |
+| `GET`  | `/api/devices`                  | ✅ jalan                        | Daftar perangkat                           |
+| `GET`  | `/api/devices/{id}`             | ✅ jalan                        | Detail perangkat                           |
+| `GET`  | `/api/gps-readings`             | ✅ jalan                        | Peta & grafik (dibatasi 100 baris terbaru) |
+| `GET`  | `/api/gps-readings/{animal_id}` | ✅ jalan                        | Riwayat satwa                              |
+| `GET`  | `/api/incidents`                | ✅ jalan                        | Daftar insiden                             |
+| `GET`  | `/api/notifications`            | ✅ jalan                        | Daftar notifikasi                          |
+| `GET`  | `/api/export/gps/csv`           | ✅ jalan                        | Export CSV                                 |
+| `GET`  | `/api/export/gps/geojson`       | ✅ jalan                        | Export GeoJSON                             |
+| `GET`  | `/api/geo-zones`                | ⚠️ **rusak di backend** | Lihat catatan di bawah                     |
 
 ### 🚫 Endpoint yang TIDAK boleh dipanggil
 
-| Endpoint | Alasan |
-| --- | --- |
-| `GET /api/animals/{id}` | Belum terdaftar di `routes/api.php`. `GET_BY_ID` akan 404. |
-| `GET /api/export/gps` | Rutenya `/csv` dan `/geojson`, bukan polos. |
-| `GET /api/geo-zones` | `routes/api.php` meng-impor `GeoZonesController`, sedangkan file & class-nya bernama `GeozonesController` (perbedaan huruf besar). Gagal autoload pada filesystem case-sensitive. **Diberitahukan ke PIC Backend.** |
-| `GET /api/users` | Backend tidak punya endpoint user sama sekali. `USER_SERVICE` murni kontrak. |
-| Semua `POST` / `PUT` / `DELETE` | Hanya `/login` dan `/logout` yang ada. |
+| Endpoint                              | Alasan                                                                                                                                                                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/animals/{id}`             | Belum terdaftar di `routes/api.php`. `GET_BY_ID` akan 404.                                                                                                                                                                  |
+| `GET /api/export/gps`               | Rutenya `/csv` dan `/geojson`, bukan polos.                                                                                                                                                                                 |
+| `GET /api/geo-zones`                | `routes/api.php` meng-impor `GeoZonesController`, sedangkan file & class-nya bernama `GeozonesController` (perbedaan huruf besar). Gagal autoload pada filesystem case-sensitive. **Diberitahukan ke PIC Backend.** |
+| `GET /api/users`                    | Backend tidak punya endpoint user sama sekali. `USER_SERVICE` murni kontrak.                                                                                                                                                  |
+| Semua `POST` / `PUT` / `DELETE` | Hanya `/login` dan `/logout` yang ada.                                                                                                                                                                                      |
 
 ### Allow-list proxy frontend
 
@@ -957,12 +961,12 @@ resource baru, tambahkan ke `ALLOWED_RESOURCES` **dan** pastikan backend menduku
 
 ### Prasyarat
 
-| Kebutuhan | Keterangan |
-| --- | --- |
-| Node.js | **20.9+** (Next.js 16). Terpasang di mesin ini: `v24.18.0` |
-| npm | 10+ (terpasang: `11.16.0`) |
-| Backend Laravel | harus hidup di `http://localhost:8000` |
-| MySQL | `127.0.0.1:3306` (diatur di backend, bukan di frontend) |
+| Kebutuhan       | Keterangan                                                         |
+| --------------- | ------------------------------------------------------------------ |
+| Node.js         | **20.9+** (Next.js 16). Terpasang di mesin ini: `v24.18.0` |
+| npm             | 10+ (terpasang: `11.16.0`)                                       |
+| Backend Laravel | harus hidup di `http://localhost:8000`                           |
+| MySQL           | `127.0.0.1:3306` (diatur di backend, bukan di frontend)          |
 
 ### Instalasi
 
@@ -988,14 +992,14 @@ NEXT_PUBLIC_COOKIE_EXPIRES_AT=wms_expires_at
 NEXT_PUBLIC_COOKIE_TYPE=wms_type
 ```
 
-| Variabel | Dipakai oleh | Catatan |
-| --- | --- | --- |
-| `NEXT_PUBLIC_API_URL` | `lib/laravel-proxy.ts`, `app/api/auth/login/route.ts` | Wajib. Base URL API Laravel. |
-| `NEXT_PUBLIC_DOMAIN` | `services/cookieToken.ts` | `localhost` untuk dev. |
-| `NEXT_PUBLIC_COOKIE_TOKEN` | `lib/cookie-names.ts` | **Jangan dikosongkan.** |
-| `NEXT_PUBLIC_COOKIE_EXPIRES_AT` | `lib/cookie-names.ts` | Default `wms_expires_at`. |
-| `NEXT_PUBLIC_COOKIE_TYPE` | `lib/cookie-names.ts` | Default `wms_type`. |
-| `NEXT_PUBLIC_PORT`, `NEXT_PUBLIC_HOST_NAME`, `NEXT_PUBLIC_REQUEST_TIMEOUT_MS` | — | ⚠️ Dideklarasikan tapi **belum** dibaca kode mana pun. |
+| Variabel                                                                            | Dipakai oleh                                              | Catatan                                                        |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`                                                             | `lib/laravel-proxy.ts`, `app/api/auth/login/route.ts` | Wajib. Base URL API Laravel.                                   |
+| `NEXT_PUBLIC_DOMAIN`                                                              | `services/cookieToken.ts`                               | `localhost` untuk dev.                                       |
+| `NEXT_PUBLIC_COOKIE_TOKEN`                                                        | `lib/cookie-names.ts`                                   | **Jangan dikosongkan.**                                  |
+| `NEXT_PUBLIC_COOKIE_EXPIRES_AT`                                                   | `lib/cookie-names.ts`                                   | Default `wms_expires_at`.                                    |
+| `NEXT_PUBLIC_COOKIE_TYPE`                                                         | `lib/cookie-names.ts`                                   | Default `wms_type`.                                          |
+| `NEXT_PUBLIC_PORT`, `NEXT_PUBLIC_HOST_NAME`, `NEXT_PUBLIC_REQUEST_TIMEOUT_MS` | —                                                        | ⚠️ Dideklarasikan tapi **belum** dibaca kode mana pun. |
 
 > ⚠️ **Gotcha penting.** `lib/cookie-names.ts` memperlakukan variabel env yang **kosong**
 > sebagai tidak ter-set, lalu jatuh ke fallback `wms_token`. Jika `NEXT_PUBLIC_COOKIE_TOKEN=`
@@ -1051,13 +1055,13 @@ Baseline yang harus dijaga:
 
 Dari `UserSeeder` backend. **Hanya untuk pengembangan lokal.**
 
-| Username | Password | Role |
-| --- | --- | --- |
-| `admin_btnl` | `admin123` | `administrator_sistem` |
+| Username                    | Password     | Role                        |
+| --------------------------- | ------------ | --------------------------- |
+| `admin_btnl`              | `admin123` | `administrator_sistem`    |
 | `konservasis_bukitlawang` | `password` | `konservasionis_lapangan` |
 | `konservasis_kualabatang` | `password` | `konservasionis_lapangan` |
-| `peneliti_leuser` | `password` | `peneliti_ekologi` |
-| `kepala_balai` | `password` | `pengambil_kebijakan` |
+| `peneliti_leuser`         | `password` | `peneliti_ekologi`        |
+| `kepala_balai`            | `password` | `pengambil_kebijakan`     |
 
 ⚠️ Login memakai **`username`**, bukan email. `password` di-hash dengan `bcrypt`
 lewat cast `hashed` pada `User::$casts`. Second login akan **membatalkan** token pertama
@@ -1071,20 +1075,20 @@ Target desain per SKPL. Sidebar sudah memakai matriks ini lewat `lib/navigation.
 (`NAV_SECTIONS`). Kolom ✅/❌ di bawah menggambarkan **gating UI**; endpoint yang belum
 ada di backend ditandai terpisah di §6.
 
-| Modul | Konservasionis | Peneliti | Admin | Pengambil Kebijakan |
-| --- | :---: | :---: | :---: | :---: |
-| Dashboard | ✅ | ✅ | ✅ | ✅ |
-| Live Map | ✅ | ✅ | ✅ | ✅ |
-| Satwa (lihat) | ✅ | ✅ | ✅ | ✅ |
-| Satwa (CRUD) | ❌ | ❌ | ✅ | ❌ |
-| Spesies (CRUD) | ❌ | ❌ | ✅ | ❌ |
-| Perangkat (CRUD) | ❌ | ❌ | ✅ | ❌ |
-| Insiden | ✅ | ✅ | ✅ | ❌ |
-| Notifikasi | ✅ | ✅ | ✅ | ✅ |
-| Zona Geografis | ❌ | ❌ | ✅ | ❌ |
-| Activity Log | ❌ | ❌ | ✅ | ❌ |
-| Reports | ❌ | ✅ | ✅ | ✅ |
-| Backup / Restore | ❌ | ❌ | ✅ | ❌ |
+| Modul            | Konservasionis | Peneliti | Admin | Pengambil Kebijakan |
+| ---------------- | :------------: | :------: | :---: | :-----------------: |
+| Dashboard        |       ✅       |    ✅    |  ✅  |         ✅         |
+| Live Map         |       ✅       |    ✅    |  ✅  |         ✅         |
+| Satwa (lihat)    |       ✅       |    ✅    |  ✅  |         ✅         |
+| Satwa (CRUD)     |       ❌       |    ❌    |  ✅  |         ❌         |
+| Spesies (CRUD)   |       ❌       |    ❌    |  ✅  |         ❌         |
+| Perangkat (CRUD) |       ❌       |    ❌    |  ✅  |         ❌         |
+| Insiden          |       ✅       |    ✅    |  ✅  |         ❌         |
+| Notifikasi       |       ✅       |    ✅    |  ✅  |         ✅         |
+| Zona Geografis   |       ❌       |    ❌    |  ✅  |         ❌         |
+| Activity Log     |       ❌       |    ❌    |  ✅  |         ❌         |
+| Reports          |       ❌       |    ✅    |  ✅  |         ✅         |
+| Backup / Restore |       ❌       |    ❌    |  ✅  |         ❌         |
 
 > 🔐 Menyembunyikan menu **hanya untuk UX**. Backend tetap wajib menolak request
 > yang tidak sesuai role. Jangan pernah menganggap gating client cukup.
@@ -1132,12 +1136,12 @@ menyimpan daftar menu.
 Baca §5 sampai habis, lalu **baca file-file ini secara utuh**. Semuanya adalah templat
 untuk setiap modul yang akan kamu buat:
 
-| File | Pelajari apa |
-| --- | --- |
-| `types/user.type.ts` atau `types/animal.type.ts` | Bentuk 4 type wajib + enum string union |
-| `services/animal.service.ts` | Bentuk `ANIMAL_SERVICE` + `API_ENDPOINT` |
-| `hooks/animal.hook.ts` | Bentuk query key, mutation, dan `invalidateQueries` |
-| `app/(protected)/master-data/animals/` | Struktur folder modul CRUD |
+| File                                                 | Pelajari apa                                          |
+| ---------------------------------------------------- | ----------------------------------------------------- |
+| `types/user.type.ts` atau `types/animal.type.ts` | Bentuk 4 type wajib + enum string union               |
+| `services/animal.service.ts`                       | Bentuk `ANIMAL_SERVICE` + `API_ENDPOINT`          |
+| `hooks/animal.hook.ts`                             | Bentuk query key, mutation, dan `invalidateQueries` |
+| `app/(protected)/master-data/animals/`             | Struktur folder modul CRUD                            |
 
 Baru setelah itu sentuh file lain. 30 menit membaca 4 file ini menghemat berjam-jam.
 
@@ -1169,13 +1173,13 @@ Buat `useAnimal`, `useInfiniteAnimal`, `useAnimalById`, `useAnimalCreate`,
 
 **5️⃣ Halaman** — `app/(protected)/master-data/animals/`
 
-| File | Isi |
-| --- | --- |
-| `page.tsx` | Tipis, hanya `<AnimalListView />` |
-| `animal-list-view.tsx` | `"use client"`; `useAnimal(params)`; render `<DataFilters>`, `<DataTable>`, `<Loading>`, `<EmptyState>`, `<ErrorState>` |
-| `columns.tsx` | `getAnimalColumns(): ColumnDef<TYPE_ANIMAL, unknown>[]` |
-| `filter.ts` | `AnimalFilterValues`, `DEFAULT_ANIMAL_FILTERS`, opsi dropdown |
-| `[id]/detail/page.tsx` + `animal-detail-view.tsx` | Detail read-only via `useAnimalById(id)` |
+| File                                                  | Isi                                                                                                                                   |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `page.tsx`                                          | Tipis, hanya `<AnimalListView />`                                                                                                   |
+| `animal-list-view.tsx`                              | `"use client"`; `useAnimal(params)`; render `<DataFilters>`, `<DataTable>`, `<Loading>`, `<EmptyState>`, `<ErrorState>` |
+| `columns.tsx`                                       | `getAnimalColumns(): ColumnDef<TYPE_ANIMAL, unknown>[]`                                                                             |
+| `filter.ts`                                         | `AnimalFilterValues`, `DEFAULT_ANIMAL_FILTERS`, opsi dropdown                                                                     |
+| `[id]/detail/page.tsx` + `animal-detail-view.tsx` | Detail read-only via `useAnimalById(id)`                                                                                            |
 
 **6️⃣ Form create/edit** — ⏳ **tunda dulu**
 
@@ -1245,61 +1249,53 @@ adalah Technical Debt dengan nama baik.
 
 ## 12. Masalah Umum & Solusi
 
-| Gejala | Penyebab | Solusi |
-| --- | --- | --- |
-| **CORS error** di console | Backend tidak mengizinkan origin frontend | Backend PIC menambahkan `http://localhost:3000` di `config/cors.php`. Ingat: arsitektur kita memang **tidak** memanggil backend langsung dari browser, jadi CORS hanya relevan bila ada kode yang menyebut `localhost:8000` langsung. |
-| **401 Unauthorized** di semua halaman data | Cookie `wms_token` kosong / tidak terkirim | DevTools → Application → Cookies, cek `wms_session` dan `wms_token` ada. Jangan kosongkan `NEXT_PUBLIC_COOKIE_TOKEN`. |
-| **401 terus-menerus setelah login** | Login kedua membatalkan token pertama | `AuthController::login()` menghapus token lama. Logout dulu dari akun lain, atau jalankan ulang seeder. |
-| **Error "Route [login] not defined"** (500) | `redirectGuestsTo` belum disetel di backend | Backend PIC menambahkan `$middleware->redirectGuestsTo(fn () => null)` di `bootstrap/app.php`. |
-| **`TypeError: Cannot read properties of undefined`** saat baca `meta` | Backend belum mengirim pagination | `meta` disintesis di service/hook. Selalu gunakan optional chaining (`lastPage?.data?.meta`). |
-| **`GET_BY_ID` 404** | Backend belum punya `GET /api/animals/{id}` | Gunakan data dari list, atau tunggu route backend. Jangan bypass proxy. |
-| **`405 Method Not Allowed`** saat create/update/delete | Proxy hanya mengekspor `GET` | Tunggu backend route write + penambahan handler `POST`/`PUT`/`DELETE` di proxy. |
-| **Resource 404 dari proxy** | Nama resource tidak ada di `ALLOWED_RESOURCES` | Tambahkan ke allow-list **dan** pastikan backend mendukungnya. |
-| **Error TypeScript** | Typing tidak sinkron | `npx tsc --noEmit` untuk melihat semua error sekaligus. |
-| **`Export useForm doesn't exist in target module`** | Client component tidak diawali `"use client"` | Tambahkan `"use client"` di baris pertama file. |
-| **`Port 3000 already in use`** | Proses lain memakai port | `npm run dev -- -p 3001`, atau hentikan prosesnya. |
-| **`Port 8000 already in use`** | `php artisan serve` lama masih jalan | Hentikan, lalu jalankan ulang backend. |
-| **Data tidak berubah padahal create sukses** | Query key tidak di-invalidate | `queryClient.invalidateQueries({ queryKey: ["animals"] })` di `onSuccess`. |
-| **Perubahan `.env` tidak terbaca** | Dev server perlu restart | Hentikan dan jalankan ulang `npm run dev`. |
-| **`npm run lint` warning baru muncul** | Warning selain `react-hooks/incompatible-library` berarti ada bug | Perbaiki. Warning yang diizinkan hanya satu itu. |
-| **Halaman muncul tapi tidak ada di sidebar** | `href` belum didaftarkan di `NAV_SECTIONS` | Tambahkan ke `lib/navigation.ts` pada role yang berhak. |
+| Gejala                                                                          | Penyebab                                                            | Solusi                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CORS error** di console                                                 | Backend tidak mengizinkan origin frontend                           | Backend PIC menambahkan `http://localhost:3000` di `config/cors.php`. Ingat: arsitektur kita memang **tidak** memanggil backend langsung dari browser, jadi CORS hanya relevan bila ada kode yang menyebut `localhost:8000` langsung. |
+| **401 Unauthorized** di semua halaman data                                | Cookie `wms_token` kosong / tidak terkirim                        | DevTools → Application → Cookies, cek `wms_session` dan `wms_token` ada. Jangan kosongkan `NEXT_PUBLIC_COOKIE_TOKEN`.                                                                                                                     |
+| **401 terus-menerus setelah login**                                       | Login kedua membatalkan token pertama                               | `AuthController::login()` menghapus token lama. Logout dulu dari akun lain, atau jalankan ulang seeder.                                                                                                                                         |
+| **Error "Route [login] not defined"** (500)                               | `redirectGuestsTo` belum disetel di backend                       | Backend PIC menambahkan `$middleware->redirectGuestsTo(fn () => null)` di `bootstrap/app.php`.                                                                                                                                                |
+| **`TypeError: Cannot read properties of undefined`** saat baca `meta` | Backend belum mengirim pagination                                   | `meta` disintesis di service/hook. Selalu gunakan optional chaining (`lastPage?.data?.meta`).                                                                                                                                                 |
+| **`GET_BY_ID` 404**                                                     | Backend belum punya `GET /api/animals/{id}`                       | Gunakan data dari list, atau tunggu route backend. Jangan bypass proxy.                                                                                                                                                                           |
+| **`405 Method Not Allowed`** saat create/update/delete                  | Proxy hanya mengekspor `GET`                                      | Tunggu backend route write + penambahan handler `POST`/`PUT`/`DELETE` di proxy.                                                                                                                                                             |
+| **Resource 404 dari proxy**                                               | Nama resource tidak ada di `ALLOWED_RESOURCES`                    | Tambahkan ke allow-list **dan** pastikan backend mendukungnya.                                                                                                                                                                              |
+| **Error TypeScript**                                                      | Typing tidak sinkron                                                | `npx tsc --noEmit` untuk melihat semua error sekaligus.                                                                                                                                                                                         |
+| **`Export useForm doesn't exist in target module`**                     | Client component tidak diawali `"use client"`                     | Tambahkan `"use client"` di baris pertama file.                                                                                                                                                                                                 |
+| **`Port 3000 already in use`**                                          | Proses lain memakai port                                            | `npm run dev -- -p 3001`, atau hentikan prosesnya.                                                                                                                                                                                              |
+| **`Port 8000 already in use`**                                          | `php artisan serve` lama masih jalan                              | Hentikan, lalu jalankan ulang backend.                                                                                                                                                                                                            |
+| **Data tidak berubah padahal create sukses**                              | Query key tidak di-invalidate                                       | `queryClient.invalidateQueries({ queryKey: ["animals"] })` di `onSuccess`.                                                                                                                                                                    |
+| **Perubahan `.env` tidak terbaca**                                      | Dev server perlu restart                                            | Hentikan dan jalankan ulang `npm run dev`.                                                                                                                                                                                                      |
+| **`npm run lint` warning baru muncul**                                  | Warning selain `react-hooks/incompatible-library` berarti ada bug | Perbaiki. Warning yang diizinkan hanya satu itu.                                                                                                                                                                                                  |
+| **Halaman muncul tapi tidak ada di sidebar**                              | `href` belum didaftarkan di `NAV_SECTIONS`                      | Tambahkan ke `lib/navigation.ts` pada role yang berhak.                                                                                                                                                                                         |
 
 ---
 
 ## 13. Referensi
 
-| Dokumen | Isi |
-| --- | --- |
-| `00-PM-OVERVIEW.md` | Ringkasan proyek dari Product Manager |
-| `Project Development Guideline - Wildlife Tracking Monitoring System.md` | Panduan pengembangan proyek |
-| **SKPL** | Spesifikasi Kebutuhan Perangkat Lunak |
-| **DPPL** | Desain Perancangan Perangkat Lunak |
-| **Laporan Week 5** | Implementasi Basis Data — 14 tabel + ERD |
-| `../wildlife-tracking-backend/routes/api.php` | **Sumber kebenaran** daftar endpoint yang benar-benar ada |
-| `../wildlife-tracking-backend/AGENTS.md` | Catatan kondisi repo backend |
-| `AGENTS.md` (root) | Konvensi lintas repo tim |
-| Figma | Desain UI/UX — tautan dapat diminta ke PIC Frontend |
+| Dokumen                                                                    | Isi                                                             |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `00-PM-OVERVIEW.md`                                                      | Ringkasan proyek dari Product Manager                           |
+| `Project Development Guideline - Wildlife Tracking Monitoring System.md` | Panduan pengembangan proyek                                     |
+| **SKPL**                                                             | Spesifikasi Kebutuhan Perangkat Lunak                           |
+| **DPPL**                                                             | Desain Perancangan Perangkat Lunak                              |
+| **Laporan Week 5**                                                   | Implementasi Basis Data — 14 tabel + ERD                       |
+| `../wildlife-tracking-backend/routes/api.php`                            | **Sumber kebenaran** daftar endpoint yang benar-benar ada |
+| `../wildlife-tracking-backend/AGENTS.md`                                 | Catatan kondisi repo backend                                    |
+| `AGENTS.md` (root)                                                       | Konvensi lintas repo tim                                        |
+| Figma                                                                      | Desain UI/UX — tautan dapat diminta ke PIC Frontend            |
 
 ---
 
 ## 14. Kontak
 
-| Kewenangan | PIC |
-| --- | --- |
-| Frontend (Next.js, UI, integrasi API) | **Yohana Sinaga** |
-| Backend (Laravel, API, autentikasi) | Yohanna Purnomo |
-| Database (skema, migration, seeder) | Nuevalen Refitra Alswando · Laura Chyndearni Saragih |
-| AI & Integration | Farrellino Ulung Satya Amando |
-| Dokumentasi (SKPL, DPPL, laporan) | Yohanna Purnomo |
+| Kewenangan                            | PIC                                                   |
+| ------------------------------------- | ----------------------------------------------------- |
+| Frontend (Next.js, UI, integrasi API) | **Yohana Sinaga**                               |
+| Backend (Laravel, API, autentikasi)   | Yohanna Purnomo                                       |
+| Database (skema, migration, seeder)   | Nuevalen Refitra Alswando · Laura Chyndearni Saragih |
+| AI & Integration                      | Farrellino Ulung Satya Amando                         |
+| Dokumentasi (SKPL, DPPL, laporan)     | Yohanna Purnomo                                       |
 
 ---
 
 <div align="center">
-
-**🐾 Wildlife Tracking Monitoring System — Frontend**
-`main` (stabil) ← `develop` (integrasi) ← `feature/*` · `fix/*`
-
-Conventional Commits: `feat:` `fix:` `refactor:` `docs:` `test:` `chore:`
-Dilarang push langsung ke `main`/`develop`. Pull request wajib, minimal satu reviewer.
-
-</div>

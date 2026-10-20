@@ -26,13 +26,13 @@ Frontend (Next.js) → Laravel API → AI Service/API
 
 ## 3. Technology Stack
 
-| Layer | Teknologi |
-| --- | --- |
+| Layer    | Teknologi                                                                 |
+| -------- | ------------------------------------------------------------------------- |
 | Frontend | Next.js (App Router), React, TypeScript strict, Tailwind CSS, Zod, ESLint |
-| Backend | Laravel, PHP, MVC, Eloquent, Sanctum (token auth), PHPUnit/Pest |
-| Database | MySQL/PostgreSQL, Laravel migration/seeder/factory |
-| AI | Provider LLM via HTTP dari Laravel Service |
-| Tools | Git + GitHub, Postman/Scribe (API docs) |
+| Backend  | Laravel, PHP, MVC, Eloquent, Sanctum (token auth), PHPUnit/Pest           |
+| Database | MySQL/PostgreSQL, Laravel migration/seeder/factory                        |
+| AI       | Provider LLM via HTTP dari Laravel Service                                |
+| Tools    | Git + GitHub, Postman/Scribe (API docs)                                   |
 
 ## 4. Repository Structure
 
@@ -69,18 +69,18 @@ frontend/
 └── README.md
 ```
 
-| Folder | Pakai ketika |
-| --- | --- |
-| `app/` | Mendefinisikan halaman/route. Isi halaman tipis: rakit komponen saja. |
-| `components/` | Dipakai ≥2 fitur, tidak tahu soal domain (generic UI). |
-| `features/` | Spesifik satu domain, misal `features/wildlife/WildlifeTable.tsx`. |
-| `hooks/` | State + efek yang memanggil service (loading, error, data). |
-| `services/` | Satu-satunya tempat memanggil API. |
-| `types/` | Type yang dipakai banyak tempat. Type lokal tetap di dekat file-nya. |
-| `schemas/` | Validasi form (Zod). Dipisah dari component. |
-| `utils/` | Fungsi pembantu tanpa side effect. |
-| `constants/` | Nilai tetap (jangan hard-code string berulang). |
-| `lib/` | Setup `apiClient`, konfigurasi library. |
+| Folder          | Pakai ketika                                                          |
+| --------------- | --------------------------------------------------------------------- |
+| `app/`        | Mendefinisikan halaman/route. Isi halaman tipis: rakit komponen saja. |
+| `components/` | Dipakai ≥2 fitur, tidak tahu soal domain (generic UI).               |
+| `features/`   | Spesifik satu domain, misal `features/wildlife/WildlifeTable.tsx`.  |
+| `hooks/`      | State + efek yang memanggil service (loading, error, data).           |
+| `services/`   | Satu-satunya tempat memanggil API.                                    |
+| `types/`      | Type yang dipakai banyak tempat. Type lokal tetap di dekat file-nya.  |
+| `schemas/`    | Validasi form (Zod). Dipisah dari component.                          |
+| `utils/`      | Fungsi pembantu tanpa side effect.                                    |
+| `constants/`  | Nilai tetap (jangan hard-code string berulang).                       |
+| `lib/`        | Setup `apiClient`, konfigurasi library.                             |
 
 > Jangan buat folder kosong "biar lengkap". Buat saat dibutuhkan.
 
@@ -230,13 +230,13 @@ backend/
 
 ## 10. Laravel MVC Rules
 
-| Komponen | Tugas | Dilarang |
-| --- | --- | --- |
-| Model | Data, relasi, scope | Logic request/response |
-| Controller | Terima request, panggil service, return | Query panjang, validasi manual, logic AI |
-| Request | Validasi input | Query database kompleks |
-| Resource | Format response | Business logic |
-| Service | Logic kompleks (hitung, AI, multi-model) | Mengakses `request()` langsung |
+| Komponen   | Tugas                                    | Dilarang                                 |
+| ---------- | ---------------------------------------- | ---------------------------------------- |
+| Model      | Data, relasi, scope                      | Logic request/response                   |
+| Controller | Terima request, panggil service, return  | Query panjang, validasi manual, logic AI |
+| Request    | Validasi input                           | Query database kompleks                  |
+| Resource   | Format response                          | Business logic                           |
+| Service    | Logic kompleks (hitung, AI, multi-model) | Mengakses `request()` langsung         |
 
 Gunakan Service **hanya jika logic lebih dari CRUD sederhana**. CRUD biasa boleh langsung Controller + Model.
 
@@ -290,17 +290,17 @@ GET    /api/wildlife/{id}     PUT    /api/wildlife/{id}     DELETE /api/wildlife
 
 Resource memakai **bentuk jamak/nama benda, huruf kecil, kebab-case**; prefix `/api`.
 
-| Code | Kapan |
-| --- | --- |
-| 200 | GET/PUT berhasil |
-| 201 | POST berhasil membuat data |
-| 204 | DELETE berhasil tanpa body (jika memakai ini, FE jangan parse JSON) |
-| 400 | Request salah/tidak bisa diproses (format rusak) |
-| 401 | Belum login / token tidak valid |
-| 403 | Sudah login tapi tidak punya izin |
-| 404 | Data tidak ditemukan |
-| 422 | Validasi gagal |
-| 500 | Error server tak terduga |
+| Code | Kapan                                                               |
+| ---- | ------------------------------------------------------------------- |
+| 200  | GET/PUT berhasil                                                    |
+| 201  | POST berhasil membuat data                                          |
+| 204  | DELETE berhasil tanpa body (jika memakai ini, FE jangan parse JSON) |
+| 400  | Request salah/tidak bisa diproses (format rusak)                    |
+| 401  | Belum login / token tidak valid                                     |
+| 403  | Sudah login tapi tidak punya izin                                   |
+| 404  | Data tidak ditemukan                                                |
+| 422  | Validasi gagal                                                      |
+| 500  | Error server tak terduga                                            |
 
 **Format response (WAJIB sama di FE & BE):**
 
@@ -316,16 +316,16 @@ Pagination: `data` berisi list, `meta` berisi `current_page`, `last_page`, `per_
 
 Hanya tabel yang diperlukan (tanpa tabel berlebihan):
 
-| Tabel | Isi penting |
-| --- | --- |
-| `users` | id, name, email (unique), password, role (enum) |
-| `species` | id, common_name, scientific_name (unique), conservation_status |
-| `locations` | id, name, latitude, longitude, region |
-| `wildlife` | id, species_id (FK), name/tag_code (unique), sex, status, nullable birth_date |
-| `monitoring_records` | id, wildlife_id (FK), location_id (FK), recorded_by (FK users), health_condition, notes, recorded_at |
-| `sightings` | id, wildlife_id (FK, nullable), species_id (FK), location_id (FK), reported_by (FK), sighted_at, count |
-| `reports` | id, created_by (FK), title, content, period_start, period_end |
-| `ai_summaries` | id, requested_by (FK), subject_type, subject_id, content, model, created_at |
+| Tabel                  | Isi penting                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `users`              | id, name, email (unique), password, role (enum)                                                        |
+| `species`            | id, common_name, scientific_name (unique), conservation_status                                         |
+| `locations`          | id, name, latitude, longitude, region                                                                  |
+| `wildlife`           | id, species_id (FK), name/tag_code (unique), sex, status, nullable birth_date                          |
+| `monitoring_records` | id, wildlife_id (FK), location_id (FK), recorded_by (FK users), health_condition, notes, recorded_at   |
+| `sightings`          | id, wildlife_id (FK, nullable), species_id (FK), location_id (FK), reported_by (FK), sighted_at, count |
+| `reports`            | id, created_by (FK), title, content, period_start, period_end                                          |
+| `ai_summaries`       | id, requested_by (FK), subject_type, subject_id, content, model, created_at                            |
 
 > `sightings` dan `monitoring_records` bisa digabung jika tim merasa terlalu rumit: sighting = laporan melihat satwa (bisa tanpa individu terdaftar), monitoring = pencatatan rutin individu terdaftar.
 
@@ -371,12 +371,12 @@ Schema::create('monitoring_records', function (Blueprint $t) {
 - **Authentication** = "Siapa pengguna?" → Laravel Sanctum (login → token, dikirim `Authorization: Bearer <token>`).
 - **Authorization** = "Apa yang boleh dilakukan?" → Policy/Gate di backend.
 
-| Role | Hak akses |
-| --- | --- |
-| Admin | Semua, termasuk kelola user |
+| Role       | Hak akses                                     |
+| ---------- | --------------------------------------------- |
+| Admin      | Semua, termasuk kelola user                   |
 | Researcher | CRUD satwa/monitoring/laporan, pakai fitur AI |
-| Observer | Input sighting & monitoring, lihat data |
-| User | Hanya baca data publik |
+| Observer   | Input sighting & monitoring, lihat data       |
+| User       | Hanya baca data publik                        |
 
 ```php
 Route::post('/login', [AuthController::class, 'login']);
@@ -461,20 +461,20 @@ fix/*     → perbaikan    (fix/api-validation)
 
 ## 18. Naming Convention
 
-| Area | Aturan | Contoh |
-| --- | --- | --- |
-| FE component | PascalCase | `UserTable.tsx` |
-| FE function/variable | camelCase | `getUsers()`, `userData` |
-| FE type | PascalCase | `type User = {}` |
-| FE file service/hook | `x.service.ts`, `useX.ts` | `wildlife.service.ts` |
-| FE folder | kebab-case/lowercase | `features/wildlife` |
-| Controller | `<Nama>Controller` | `WildlifeController` |
-| Model | Singular PascalCase | `Wildlife` |
-| Request | `Store/Update<Nama>Request` | `StoreWildlifeRequest` |
-| Resource | `<Nama>Resource` | `WildlifeResource` |
-| Service | `<Nama>Service` | `WildlifeService` |
-| Tabel & kolom DB | snake_case, tabel jamak | `monitoring_records` |
-| Route API | kebab-case | `/api/monitoring-records` |
+| Area                 | Aturan                        | Contoh                       |
+| -------------------- | ----------------------------- | ---------------------------- |
+| FE component         | PascalCase                    | `UserTable.tsx`            |
+| FE function/variable | camelCase                     | `getUsers()`, `userData` |
+| FE type              | PascalCase                    | `type User = {}`           |
+| FE file service/hook | `x.service.ts`, `useX.ts` | `wildlife.service.ts`      |
+| FE folder            | kebab-case/lowercase          | `features/wildlife`        |
+| Controller           | `<Nama>Controller`          | `WildlifeController`       |
+| Model                | Singular PascalCase           | `Wildlife`                 |
+| Request              | `Store/Update<Nama>Request` | `StoreWildlifeRequest`     |
+| Resource             | `<Nama>Resource`            | `WildlifeResource`         |
+| Service              | `<Nama>Service`             | `WildlifeService`          |
+| Tabel & kolom DB     | snake_case, tabel jamak       | `monitoring_records`       |
+| Route API            | kebab-case                    | `/api/monitoring-records`  |
 
 ## 19. Error Handling
 
@@ -491,11 +491,11 @@ return <WildlifeTable data={data} />;
 
 ## 20. Testing
 
-| Area | Minimum |
-| --- | --- |
-| Backend | Feature test tiap endpoint utama (sukses, 401, 403, 404), validation test (422) |
-| Frontend | Manual integration test, uji validasi form; component test jika perlu |
-| AI | Test dengan `Http::fake()` agar tidak memakai API sungguhan |
+| Area     | Minimum                                                                         |
+| -------- | ------------------------------------------------------------------------------- |
+| Backend  | Feature test tiap endpoint utama (sukses, 401, 403, 404), validation test (422) |
+| Frontend | Manual integration test, uji validasi form; component test jika perlu           |
+| AI       | Test dengan `Http::fake()` agar tidak memakai API sungguhan                   |
 
 ```php
 public function test_researcher_can_create_wildlife(): void
@@ -528,11 +528,11 @@ docs/
 
 ## 22. Team Responsibilities
 
-| Peran | Tanggung jawab |
-| --- | --- |
-| Frontend | Next.js, UI, component, integrasi API, state, TypeScript, form, UX |
-| Backend | Laravel, REST API, MVC, business logic, auth, authorization, validasi, integrasi AI |
-| Database | Skema, ERD, migration, relasi, seeder, index, constraint |
+| Peran           | Tanggung jawab                                                                                                |
+| --------------- | ------------------------------------------------------------------------------------------------------------- |
+| Frontend        | Next.js, UI, component, integrasi API, state, TypeScript, form, UX                                            |
+| Backend         | Laravel, REST API, MVC, business logic, auth, authorization, validasi, integrasi AI                           |
+| Database        | Skema, ERD, migration, relasi, seeder, index, constraint                                                      |
 | Project Manager | Requirement, pembagian task, prioritas, integrasi FE/BE/DB, koordinasi review, dokumentasi, tracking progress |
 
 ## 23. Feature Development Workflow
@@ -564,18 +564,18 @@ Fitur dianggap selesai jika:
 
 ## 25. Do & Don't
 
-| ✅ DO | ❌ DON'T |
-| --- | --- |
-| Gunakan `type` dan `unknown` | Pakai `any` / `interface` |
-| Panggil API lewat service | `fetch` di dalam component |
-| Validasi di FE **dan** BE | Percaya validasi FE saja |
-| Cek otorisasi di backend | Mengandalkan UI yang disembunyikan |
-| Simpan secret di `.env` | Hard-code / commit API key |
-| Migration untuk semua perubahan skema | Ubah DB manual |
-| PR kecil + review | Push langsung ke `main`/`develop` |
-| Controller tipis | Query panjang & logic AI di controller |
-| Format response seragam | Response berbeda-beda tiap endpoint |
-| Buat folder saat dibutuhkan | Over-engineering |
+| ✅ DO                                 | ❌ DON'T                               |
+| ------------------------------------- | -------------------------------------- |
+| Gunakan `type` dan `unknown`      | Pakai `any` / `interface`          |
+| Panggil API lewat service             | `fetch` di dalam component           |
+| Validasi di FE **dan** BE       | Percaya validasi FE saja               |
+| Cek otorisasi di backend              | Mengandalkan UI yang disembunyikan     |
+| Simpan secret di `.env`             | Hard-code / commit API key             |
+| Migration untuk semua perubahan skema | Ubah DB manual                         |
+| PR kecil + review                     | Push langsung ke `main`/`develop`  |
+| Controller tipis                      | Query panjang & logic AI di controller |
+| Format response seragam               | Response berbeda-beda tiap endpoint    |
+| Buat folder saat dibutuhkan           | Over-engineering                       |
 
 ## 26. Example Feature Flow: "Tambah Data Satwa"
 

@@ -1,3 +1,4 @@
+import "leaflet/dist/leaflet.css";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { getSessionUser } from "@/lib/session";

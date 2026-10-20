@@ -83,106 +83,142 @@ export default function LoginPage() {
     }
   };
 
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-100 px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
-          <h1 className="text-xl font-semibold text-zinc-900">
-            Wildlife Monitoring System
+
+return (
+  <main className="flex min-h-screen items-center justify-center bg-[#f3f3f3] px-4 py-8">
+    <div className="w-full max-w-[360px]">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        className="flex flex-col gap-5 bg-white px-5 py-8 shadow-sm sm:rounded-sm"
+      >
+        <div className="mb-2 text-center">
+          <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full border-2 border-[#d6c58a] bg-[#f8f3d9] text-center text-xs font-bold text-[#426b45]">
+            TNGL
+          </div>
+
+          <h1 className="text-left text-2xl font-bold tracking-tight text-black">
+            Sign In
           </h1>
-          <p className="mt-1 text-sm text-zinc-600">
-            Balai Taman Nasional Gunung Leuser
+          <p className="mt-1 text-left text-xs text-zinc-600">
+            Give credential to sign in your account
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          noValidate
-          className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"
-        >
-          <div className="flex flex-col gap-1">
-            <label htmlFor="username" className="text-sm font-medium text-zinc-700">
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              autoComplete="username"
-              aria-invalid={errors.username !== undefined}
-              aria-describedby={errors.username ? "username-error" : undefined}
-              {...register("username")}
-              className={
-                errors.username
-                  ? "rounded-lg border border-red-400 px-3 py-2 text-sm outline-none"
-                  : "rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-500"
-              }
-            />
-            {errors.username ? (
-              <p id="username-error" role="alert" className="text-xs text-red-700">
-                {errors.username.message}
-              </p>
-            ) : null}
-          </div>
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="username"
+            className="text-sm font-semibold text-zinc-900"
+          >
+            Username
+          </label>
+          <input
+            id="username"
+            type="text"
+            autoComplete="username"
+            aria-invalid={errors.username !== undefined}
+            aria-describedby={
+              errors.username ? "username-error" : undefined
+            }
+            {...register("username")}
+            placeholder="Masukkan username"
+            className={`h-10 rounded-xl border px-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-[#4d8050] ${
+              errors.username
+                ? "border-red-400"
+                : "border-zinc-400"
+            }`}
+          />
+          {errors.username && (
+            <p
+              id="username-error"
+              role="alert"
+              className="text-xs text-red-700"
+            >
+              {errors.username.message}
+            </p>
+          )}
+        </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium text-zinc-700">
-              Kata sandi
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              aria-invalid={errors.password !== undefined}
-              aria-describedby={errors.password ? "password-error" : undefined}
-              {...register("password")}
-              className={
-                errors.password
-                  ? "rounded-lg border border-red-400 px-3 py-2 text-sm outline-none"
-                  : "rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-500"
-              }
-            />
-            {errors.password ? (
-              <p id="password-error" role="alert" className="text-xs text-red-700">
-                {errors.password.message}
-              </p>
-            ) : null}
-          </div>
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="password"
+            className="text-sm font-semibold text-zinc-900"
+          >
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            aria-invalid={errors.password !== undefined}
+            aria-describedby={
+              errors.password ? "password-error" : undefined
+            }
+            {...register("password")}
+            placeholder="Type your password"
+            className={`h-10 rounded-xl border px-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-[#4d8050] ${
+              errors.password
+                ? "border-red-400"
+                : "border-zinc-400"
+            }`}
+          />
+          {errors.password && (
+            <p
+              id="password-error"
+              role="alert"
+              className="text-xs text-red-700"
+            >
+              {errors.password.message}
+            </p>
+          )}
+        </div>
 
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-xs text-zinc-600">
-              <input
-                type="checkbox"
-                {...register("rememberMe")}
-                className="size-3.5 rounded border-zinc-300"
-              />
-              Ingat saya
-            </label>
-            <span className="text-xs text-zinc-400">Lupa kata sandi?</span>
-          </div>
+        <div className="flex items-center justify-between gap-2">
+          <label className="flex items-center gap-2 text-xs text-zinc-600">
+            <input
+              type="checkbox"
+              {...register("rememberMe")}
+              className="size-4 accent-[#4d8050]"
+            />
+            Remember Me
+          </label>
 
           <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-60"
+            type="button"
+            className="text-[10px] font-semibold text-zinc-800"
+            onClick={() => {
+              alert("Silakan hubungi administrator untuk reset kata sandi.")
+            }}
           >
-            {isSubmitting ? "Memproses..." : "Masuk"}
+            FORGOT PASSWORD?
           </button>
-        </form>
+        </div>
 
-        {failure ? (
-          <div className="mt-4">
-            <ErrorState
-              kind={failure.kind}
-              message={failure.message}
-              status={failure.status}
-              errors={failure.errors}
-            />
-          </div>
-        ) : null}
-      </div>
-    </main>
-  );
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="mt-4 h-11 rounded-xl bg-[#4d8050] px-4 text-sm font-bold text-white transition hover:bg-[#416e44] disabled:opacity-60"
+        >
+          {isSubmitting ? "SIGNING IN..." : "SIGN IN"}
+        </button>
+      </form>
+
+      {failure && (
+        <div className="mt-4">
+          <ErrorState
+            kind={failure.kind}
+            message={failure.message}
+            status={failure.status}
+            errors={failure.errors}
+          />
+        </div>
+      )}
+    </div>
+  </main>
+);
+
 }
+
 
 const resolveKind = (status: number): ApiErrorKind => {
   if (status === 401 || status === 403) return "unauthorized";

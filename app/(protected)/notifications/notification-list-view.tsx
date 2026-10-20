@@ -1,5 +1,7 @@
+
 "use client";
 
+import { AlertTriangle, Bell, CheckCircle, Cpu } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -34,11 +36,17 @@ const UNREAD_OPTIONS = [
 ];
 
 export function NotificationListView() {
-  const [filters, setFilters] = useState({ type: "all", unread: "all" });
+  const [filters, setFilters] = useState({
+    type: "all",
+    unread: "all",
+  });
 
   const load = useMemo(
     () => ({
-      type: filters.type === "all" ? undefined : (filters.type as NotificationType),
+      type:
+        filters.type === "all"
+          ? undefined
+          : (filters.type as NotificationType),
       onlyUnread: filters.unread === "unread",
     }),
     [filters.type, filters.unread],
@@ -49,7 +57,9 @@ export function NotificationListView() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-lg font-semibold text-zinc-900">Notifikasi</h2>
+        <h2 className="text-lg font-semibold text-zinc-900">
+          Notifikasi
+        </h2>
         <p className="text-sm text-zinc-600">
           Peringatan risiko zona dan kondisi perangkat pelacak.
         </p>
@@ -57,16 +67,23 @@ export function NotificationListView() {
 
       <div className="flex flex-wrap gap-3 rounded-xl border border-zinc-200 bg-white p-4">
         <div className="flex min-w-[12rem] flex-col gap-1">
-          <label htmlFor="notif-type" className="text-xs font-medium text-zinc-600">
+          <label
+            htmlFor="notif-type"
+            className="text-xs font-medium text-zinc-600"
+          >
             Jenis
           </label>
+
           <select
             id="notif-type"
             value={filters.type}
             onChange={(event) =>
-              setFilters((current) => ({ ...current, type: event.target.value }))
+              setFilters((current) => ({
+                ...current,
+                type: event.target.value,
+              }))
             }
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm"
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
           >
             {TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -77,16 +94,23 @@ export function NotificationListView() {
         </div>
 
         <div className="flex min-w-[12rem] flex-col gap-1">
-          <label htmlFor="notif-unread" className="text-xs font-medium text-zinc-600">
+          <label
+            htmlFor="notif-unread"
+            className="text-xs font-medium text-zinc-600"
+          >
             Status Baca
           </label>
+
           <select
             id="notif-unread"
             value={filters.unread}
             onChange={(event) =>
-              setFilters((current) => ({ ...current, unread: event.target.value }))
+              setFilters((current) => ({
+                ...current,
+                unread: event.target.value,
+              }))
             }
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm"
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
           >
             {UNREAD_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -115,24 +139,68 @@ export function NotificationListView() {
       ) : (
         <ul className="divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white">
           {notifications.data.map((notification) => {
-            const unread = notification.is_read === false || notification.is_read === 0;
+            const unread =
+              notification.is_read === false ||
+              notification.is_read === 0;
 
             return (
               <li
                 key={notification.notif_id}
-                className={unread ? "bg-sky-50/40 px-4 py-3" : "px-4 py-3"}
+                className={
+                  unread
+                    ? "border-l-4 border-emerald-700 bg-emerald-50 px-4 py-4"
+                    : "border-l-4 border-transparent px-4 py-4 transition hover:bg-emerald-50/40"
+                }
               >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm text-zinc-900">{notification.message}</p>
-                    <p className="mt-0.5 text-xs text-zinc-500">
-                      {formatDate(notification.created_at)}
-                    </p>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <div
+                      className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${
+                        notification.notification_type === "risk_zone"
+                          ? "bg-red-100 text-red-700"
+                          : notification.notification_type === "device_alert"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-emerald-100 text-emerald-700"
+                      }`}
+                    >
+                      {notification.notification_type === "risk_zone" ? (
+                        <AlertTriangle className="size-5" />
+                      ) : notification.notification_type === "device_alert" ? (
+                        <Cpu className="size-5" />
+                      ) : (
+                        <Bell className="size-5" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium leading-6 text-zinc-900">
+                        {notification.message}
+                      </p>
+
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {formatDate(notification.created_at)}
+                      </p>
+
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <StatusBadge
+                          label={TYPE_LABEL[notification.notification_type]}
+                          variant={TYPE_VARIANT[notification.notification_type]}
+                        />
+
+                        {unread ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">
+                            <span className="size-1.5 rounded-full bg-emerald-600" />
+                            Belum dibaca
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs text-zinc-500">
+                            <CheckCircle className="size-3.5" />
+                            Sudah dibaca
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <StatusBadge
-                    label={TYPE_LABEL[notification.notification_type]}
-                    variant={TYPE_VARIANT[notification.notification_type]}
-                  />
                 </div>
               </li>
             );

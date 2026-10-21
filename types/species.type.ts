@@ -27,7 +27,7 @@ export type TYPE_SPECIES_GET_ALL_RESPONSE = {
 };
 
 export type TYPE_SPECIES_GET_BY_ID_RESPONSE = {
-  items: TYPE_SPECIES;
+  items: TYPE_SPECIES | null;
   meta: null;
 };
 

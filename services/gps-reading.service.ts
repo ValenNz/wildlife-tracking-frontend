@@ -1,8 +1,8 @@
-import { api, unwrapData } from "@/services/api-client";
+import { api } from "@/services/api-client";
+import { API_ENDPOINT, WILDLIFE_BASE_PATH } from "@/services/endpoint";
 import type { ApiResponse } from "@/types/api.type";
-import type { GpsReading } from "@/types/gps-reading";
-
-const BASE = "/api/wildlife";
+import type { QUERY_PARAMS_API_GET_ALL } from "@/types/endpoint.type";
+import type { GpsReading, GpsReadingListParams } from "@/types/gps-reading";
 
 const sortByRecordedAt = (readings: GpsReading[]): GpsReading[] =>
   [...readings].sort(
@@ -10,28 +10,41 @@ const sortByRecordedAt = (readings: GpsReading[]): GpsReading[] =>
       new Date(right.recorded_at).getTime() - new Date(left.recorded_at).getTime(),
   );
 
-export const getGpsReadings = async (): Promise<GpsReading[]> => {
-  const response = await api.get<ApiResponse<GpsReading[]>>(`${BASE}/gps-readings`);
-  const payload = unwrapData(response);
+export const getGpsReadings = async (
+  params?: Partial<QUERY_PARAMS_API_GET_ALL> & GpsReadingListParams,
+): Promise<ApiResponse<GpsReading[]>> => {
+  const response = await api.get<GpsReading[]>(
+    `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.GPS_READINGS.GET_ALL(params)}`,
+  );
 
-  return sortByRecordedAt(Array.isArray(payload) ? (payload as GpsReading[]) : []);
+  const readings = Array.isArray(response) ? (response as GpsReading[]) : [];
+
+  return {
+    success: true,
+    message: "OK",
+    data: sortByRecordedAt(readings),
+  };
 };
 
 export const getGpsReadingsByAnimal = async (
   animalId: number,
-): Promise<GpsReading[]> => {
-  const response = await api.get<ApiResponse<GpsReading[]>>(
-    `${BASE}/gps-readings/${animalId}`,
+): Promise<ApiResponse<GpsReading[]>> => {
+  const response = await api.get<GpsReading[]>(
+    `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.GPS_READINGS.GET_BY_ANIMAL(animalId)}`,
   );
-  const payload = unwrapData(response);
 
-  return sortByRecordedAt(Array.isArray(payload) ? (payload as GpsReading[]) : []);
+  const readings = Array.isArray(response) ? (response as GpsReading[]) : [];
+
+  return {
+    success: true,
+    message: "OK",
+    data: sortByRecordedAt(readings),
+  };
 };
 
 export const getGpsReadingsByDevice = async (
   deviceId: number,
-): Promise<GpsReading[]> => {
-  const readings = await getGpsReadings();
-
-  return readings.filter((reading) => reading.device_id === deviceId);
+): Promise<ApiResponse<GpsReading[]>> => {
+  const response = await getGpsReadings({ deviceId });
+  return response;
 };

@@ -1,13 +1,9 @@
 import { api, unwrapData } from "@/services/api-client";
+import { API_ENDPOINT, WILDLIFE_BASE_PATH } from "@/services/endpoint";
 import type { ApiResponse } from "@/types/api.type";
-import type {
-  DeviceAlert,
-  DeviceCondition,
-  TrackingDevice,
-  TrackingDeviceListParams,
-} from "@/types/tracking-device.type";
+import type { QUERY_PARAMS_API_GET_ALL } from "@/types/endpoint.type";
+import type { TrackingDevice, DeviceAlert, DeviceCondition, TrackingDeviceListParams } from "@/types/tracking-device.type";
 
-const BASE = "/api/wildlife";
 const LOW_BATTERY_THRESHOLD = 20;
 const WEAK_SIGNAL_THRESHOLD = 3;
 
@@ -62,36 +58,48 @@ const toAlert = (device: TrackingDevice): DeviceAlert | null => {
 };
 
 export const getTrackingDevices = async (
-  params?: TrackingDeviceListParams,
-): Promise<TrackingDevice[]> => {
-  const response = await api.get<ApiResponse<TrackingDevice[]>>(`${BASE}/devices`);
-  const payload = unwrapData(response);
-  const devices = Array.isArray(payload) ? (payload as TrackingDevice[]) : [];
-
-  return filterDevices(devices, params).sort(
-    (left, right) => left.device_id - right.device_id,
+  params?: Partial<QUERY_PARAMS_API_GET_ALL> & TrackingDeviceListParams,
+): Promise<ApiResponse<TrackingDevice[]>> => {
+  const response = await api.get<TrackingDevice[]>(
+    `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.DEVICES.GET_ALL(params)}`,
   );
+
+  const devices = Array.isArray(response) ? (response as TrackingDevice[]) : [];
+
+  return {
+    success: true,
+    message: "OK",
+    data: filterDevices(devices, params).sort(
+      (left, right) => left.device_id - right.device_id,
+    ),
+  };
 };
 
 export const getTrackingDeviceById = async (
   deviceId: number,
-): Promise<TrackingDevice | null> => {
-  const response = await api.get<ApiResponse<TrackingDevice>>(
-    `${BASE}/devices/${deviceId}`,
+): Promise<ApiResponse<TrackingDevice | null>> => {
+  const response = await api.get<TrackingDevice | null>(
+    `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.DEVICES.GET_BY_ID(deviceId)}`,
   );
-  const payload = unwrapData(response);
 
-  return payload && typeof payload === "object" && "device_id" in payload
-    ? (payload as TrackingDevice)
-    : null;
+  return {
+    success: true,
+    message: "OK",
+    data: response,
+  };
 };
 
-export const getDeviceAlerts = async (): Promise<DeviceAlert[]> => {
-  const devices = await getTrackingDevices();
+export const getDeviceAlerts = async (): Promise<ApiResponse<DeviceAlert[]>> => {
+  const response = await api.get<TrackingDevice[]>(
+    `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.DEVICES.GET_ALL()}`,
+  );
+  const devices = Array.isArray(response) ? (response as TrackingDevice[]) : [];
 
-  return devices
+  const alerts = devices
     .map(toAlert)
     .filter((alert): alert is DeviceAlert => alert !== null);
+
+  return { success: true, message: "OK", data: alerts };
 };
 
 export const isDeviceCondition = (

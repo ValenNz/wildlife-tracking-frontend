@@ -29,7 +29,7 @@ export type TYPE_ANIMAL_GET_ALL_RESPONSE = {
 };
 
 export type TYPE_ANIMAL_GET_BY_ID_RESPONSE = {
-  items: TYPE_ANIMAL;
+  items: TYPE_ANIMAL | null;
   meta: null;
 };
 

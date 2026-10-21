@@ -4,7 +4,7 @@ import { SESSION_COOKIE } from "@/lib/session";
 import { SESSION_MAX_AGE_SECONDS, TOKEN_COOKIE } from "@/lib/cookie-names";
 import type { TYPE_USER_ROLE } from "@/types/user.type";
 
-const FALLBACK_BASE_URL = "http://localhost:8000/api";
+const FALLBACK_BASE_URL = "http://127.0.0.1:8000/api"; // Pastikan port sesuai dengan Laravel Anda
 const USER_ROLES: TYPE_USER_ROLE[] = [
   "konservasionis_lapangan",
   "peneliti_ekologi",
@@ -26,13 +26,11 @@ const isUserRole = (value: unknown): value is TYPE_USER_ROLE =>
 
 const readString = (record: Record<string, unknown>, key: string): string => {
   const value = record[key];
-
   return typeof value === "string" ? value : "";
 };
 
 const readNumber = (record: Record<string, unknown>, key: string): number => {
   const value = record[key];
-
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 };
 
@@ -56,29 +54,33 @@ export const POST = async (request: Request): Promise<NextResponse> => {
   }
 
   const body = payload as Record<string, unknown>;
-  const username = readString(body, "username").trim();
+  
+  // 1. Baca field 'email' dan 'password'
+  const email = readString(body, "email").trim();
   const password = readString(body, "password");
 
-  if (username.length === 0 || password.length === 0) {
-    return fail(422, "Username dan kata sandi wajib diisi.", {
-      username: username.length === 0 ? ["Username wajib diisi"] : [],
+  // 2. Validasi
+  if (email.length === 0 || password.length === 0) {
+    return fail(422, "Email dan kata sandi wajib diisi.", {
+      email: email.length === 0 ? ["Email wajib diisi"] : [],
       password: password.length === 0 ? ["Kata sandi wajib diisi"] : [],
     });
   }
 
-  let response: Response;
+  let response: Response; // Deklarasikan variabel response di sini
 
+  // 3. Forward ke Laravel
   try {
     response = await fetch(`${getBaseUrl()}/login`, {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }), // Kirim sebagai 'email'
       cache: "no-store",
     });
   } catch {
     return fail(
       503,
-      "Tidak dapat menghubungi API backend. Pastikan server Laravel berjalan di port 8000.",
+      "Tidak dapat menghubungi API backend. Pastikan server Laravel berjalan.",
     );
   }
 
@@ -132,8 +134,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
   const sessionUser = {
     user_id: readNumber(userRecord, "user_id"),
-    username: readString(userRecord, "username"),
-    name: readString(userRecord, "full_name"),
+    username: readString(userRecord, "username"), // Sesuai dengan presentUser di Laravel
+    name: readString(userRecord, "full_name"),    // Sesuai dengan presentUser di Laravel
     email: readString(userRecord, "email"),
     role: userRecord.role,
   };

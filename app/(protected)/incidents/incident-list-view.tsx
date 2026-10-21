@@ -6,10 +6,12 @@ import { DataTable } from "@/components/ui/data-table";
 import { DataFilters } from "@/components/ui/data-filters";
 import { ErrorState } from "@/components/ui/error-state";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { useIncidentReports } from "@/hooks/useIncidentReports";
+import { useIncidentReports } from "@/hooks/incident-report.hook";
 import { formatDate } from "@/utils/format";
+import { toApiErrorState } from "@/services/api-client";
 import type { IncidentReport } from "@/types/incident-report";
 import type { IncidentSyncStatus } from "@/types/incident-report";
+import type { ApiErrorState } from "@/types/api.type";
 
 const SYNC_LABEL: Record<IncidentSyncStatus, string> = {
   synced: "Tersinkron",
@@ -25,7 +27,10 @@ const SYNC_VARIANT = {
 
 const INCIDENT_TYPES = [
   { label: "Semua jenis", value: "all" },
-  { label: "Pengamatan", value: "demo_observation" },
+  { label: "Pengamatan", value: "observasi" },
+  { label: "Konflik", value: "konflik" },
+  { label: "Perambahan", value: "perambahan" },
+  { label: "Peringatan Perangkat", value: "device_alert" },
 ];
 
 const SYNC_OPTIONS = [
@@ -81,8 +86,14 @@ const COLUMNS: ColumnDef<IncidentReport, unknown>[] = [
     header: "Status",
     cell: ({ row }) => (
       <StatusBadge
-        label={SYNC_LABEL[row.original.sync_status]}
-        variant={SYNC_VARIANT[row.original.sync_status]}
+        label={row.original.sync_status}
+        variant={
+          row.original.sync_status === "synced"
+            ? "success"
+            : row.original.sync_status === "pending_sync"
+            ? "warning"
+            : "danger"
+        }
       />
     ),
   },
@@ -100,11 +111,11 @@ const isWithinRange = (value: string, from: string, to: string): boolean => {
 
 export function IncidentListView() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const incidents = useIncidentReports();
+  const { data, isLoading, error, refetch } = useIncidentReports();
 
   const visibleReports = useMemo(
     () =>
-      incidents.data.filter((report) => {
+      (data?.data ?? []).filter((report: IncidentReport) => {
         const matchesType =
           filters.incident_type === "all" ||
           report.incident_type === filters.incident_type;
@@ -121,7 +132,7 @@ export function IncidentListView() {
 
         return matchesType && matchesSync && matchesRange;
       }),
-    [incidents.data, filters],
+    [data, filters],
   );
 
   return (
@@ -141,33 +152,44 @@ export function IncidentListView() {
             key: "incident_type",
             kind: "select",
             label: "Jenis Insiden",
-            options: INCIDENT_TYPES,
+            options: [
+              { label: "Semua jenis", value: "all" },
+              { label: "Observasi", value: "observasi" },
+              { label: "Konflik", value: "konflik" },
+              { label: "Perambahan", value: "perambahan" },
+              { label: "Peringatan Perangkat", value: "device_alert" },
+            ],
           },
           {
             key: "sync_status",
             kind: "select",
             label: "Status Sinkron",
-            options: SYNC_OPTIONS,
+            options: [
+              { label: "Semua status", value: "all" },
+              { label: "Tersinkron", value: "synced" },
+              { label: "Menunggu sinkron", value: "pending_sync" },
+              { label: "Gagal sinkron", value: "failed" },
+            ],
           },
         ]}
         values={filters}
-        onFilterChange={(values) => setFilters({ ...DEFAULT_FILTERS, ...values })}
-        onReset={() => setFilters(DEFAULT_FILTERS)}
+        onFilterChange={(values) => setFilters({ ...filters, ...values })}
+        onReset={() => setFilters({ date_from: "", date_to: "", incident_type: "all", sync_status: "all" })}
       />
 
-      {incidents.error ? (
+      {error ? (
         <ErrorState
-          kind={incidents.error.kind}
-          message={incidents.error.message}
-          status={incidents.error.status}
-          errors={incidents.error.errors}
-          onRetry={incidents.refetch}
+          kind={toApiErrorState(error).kind}
+          message={toApiErrorState(error).message}
+          status={toApiErrorState(error).status}
+          errors={toApiErrorState(error).errors}
+          onRetry={refetch}
         />
       ) : (
         <DataTable
           data={visibleReports}
           columns={COLUMNS}
-          loading={incidents.isLoading}
+          loading={isLoading}
           getRowId={(row) => String(row.report_id)}
           label="daftar laporan insiden"
           emptyTitle="Belum ada laporan insiden"

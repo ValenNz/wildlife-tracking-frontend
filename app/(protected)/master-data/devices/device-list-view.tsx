@@ -13,43 +13,33 @@ import {
   toDeviceCondition,
   toOnlyActiveDevice,
 } from "@/app/(protected)/master-data/devices/filter";
-import { useTrackingDevices } from "@/hooks/useTrackingDevices";
+import { useTrackingDevices } from "@/hooks/tracking-device.hook";
+import { toApiErrorState } from "@/services/api-client";
 import type { TrackingDevice } from "@/types/tracking-device.type";
 
 export function DeviceListView() {
   const router = useRouter();
   const [filters, setFilters] = useState(DEFAULT_DEVICE_FILTERS);
 
-  const load = useCallback(
-    () => ({
-      onlyActive: toOnlyActiveDevice(filters.only_active),
-      deviceCondition: toDeviceCondition(filters.device_condition),
-    }),
-    [filters.only_active, filters.device_condition],
-  );
+  const { data, isLoading, error, refetch } = useTrackingDevices({
+    onlyActive: toOnlyActiveDevice(filters.only_active),
+    deviceCondition: toDeviceCondition(filters.device_condition),
+  });
 
-  const devices = useTrackingDevices(load());
   const columns = useMemo(() => getDeviceColumns(), []);
-
-  const handleRowClick = useCallback(
-    (row: TrackingDevice) => {
-      router.push(`/master-data/devices/${row.device_id}/detail`);
-    },
-    [router],
-  );
 
   const visibleDevices = useMemo(() => {
     const search = filters.search.trim().toLowerCase();
 
-    if (search.length === 0) return devices.data;
+    if (search.length === 0) return data?.data ?? [];
 
-    return devices.data.filter(
+    return (data?.data ?? []).filter(
       (device) =>
         device.model.toLowerCase().includes(search) ||
         (device.animal?.animal_code ?? "").toLowerCase().includes(search) ||
         String(device.device_id).includes(search),
     );
-  }, [devices.data, filters.search]);
+  }, [data, filters.search]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -77,26 +67,24 @@ export function DeviceListView() {
           { key: "only_active", kind: "select", label: "Aktif", options: ACTIVE_OPTIONS },
         ]}
         values={filters}
-        onFilterChange={(values) =>
-          setFilters({ ...DEFAULT_DEVICE_FILTERS, ...values })
-        }
+        onFilterChange={(values) => setFilters({ ...DEFAULT_DEVICE_FILTERS, ...values })}
         onReset={() => setFilters(DEFAULT_DEVICE_FILTERS)}
       />
 
-      {devices.error ? (
+      {error ? (
         <ErrorState
-          kind={devices.error.kind}
-          message={devices.error.message}
-          status={devices.error.status}
-          errors={devices.error.errors}
-          onRetry={devices.refetch}
+          kind={toApiErrorState(error).kind}
+          message={toApiErrorState(error).message}
+          status={toApiErrorState(error).status}
+          errors={toApiErrorState(error).errors}
+          onRetry={refetch}
         />
       ) : (
         <DataTable
-          data={visibleDevices}
+          data={data?.data ?? []}
           columns={columns}
-          loading={devices.isLoading}
-          onRowClick={handleRowClick}
+          loading={isLoading}
+          onRowClick={(row) => router.push(`/master-data/devices/${row.device_id}/detail`)}
           getRowId={(row) => String(row.device_id)}
           label="daftar perangkat"
           emptyTitle="Belum ada perangkat"

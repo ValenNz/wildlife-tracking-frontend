@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AlertTriangle, Bell, CheckCircle, Cpu } from "lucide-react";
@@ -7,7 +6,8 @@ import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loading } from "@/components/ui/loading";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/hooks/notification.hook";
+import { toApiErrorState } from "@/services/api-client";
 import { formatDate } from "@/utils/format";
 import type { NotificationType } from "@/types/notification";
 
@@ -46,13 +46,13 @@ export function NotificationListView() {
       type:
         filters.type === "all"
           ? undefined
-          : (filters.type as NotificationType),
+          : (filters.type as "risk_zone" | "device_alert" | "system"),
       onlyUnread: filters.unread === "unread",
     }),
     [filters.type, filters.unread],
   );
 
-  const notifications = useNotifications(load);
+  const { data, isLoading, error, refetch } = useNotifications(load);
 
   return (
     <div className="flex flex-col gap-4">
@@ -121,24 +121,24 @@ export function NotificationListView() {
         </div>
       </div>
 
-      {notifications.error ? (
+      {error ? (
         <ErrorState
-          kind={notifications.error.kind}
-          message={notifications.error.message}
-          status={notifications.error.status}
-          errors={notifications.error.errors}
-          onRetry={notifications.refetch}
+          kind={toApiErrorState(error).kind}
+          message={toApiErrorState(error).message}
+          status={toApiErrorState(error).status}
+          errors={toApiErrorState(error).errors}
+          onRetry={refetch}
         />
-      ) : notifications.isLoading ? (
+      ) : isLoading ? (
         <Loading label="Memuat notifikasi..." />
-      ) : notifications.isEmpty ? (
+      ) : !data?.data?.length ? (
         <EmptyState
           title="Tidak ada notifikasi"
           description="Belum ada peringatan risiko zona atau perangkat yang tercatat."
         />
       ) : (
         <ul className="divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white">
-          {notifications.data.map((notification) => {
+          {data?.data?.map((notification) => {
             const unread =
               notification.is_read === false ||
               notification.is_read === 0;
@@ -159,8 +159,8 @@ export function NotificationListView() {
                         notification.notification_type === "risk_zone"
                           ? "bg-red-100 text-red-700"
                           : notification.notification_type === "device_alert"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-emerald-100 text-emerald-700"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-emerald-100 text-emerald-700"
                       }`}
                     >
                       {notification.notification_type === "risk_zone" ? (
@@ -183,8 +183,20 @@ export function NotificationListView() {
 
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <StatusBadge
-                          label={TYPE_LABEL[notification.notification_type]}
-                          variant={TYPE_VARIANT[notification.notification_type]}
+                          label={
+                            notification.notification_type === "risk_zone"
+                              ? "Zona Berisiko"
+                              : notification.notification_type === "device_alert"
+                              ? "Peringatan Perangkat"
+                              : "Sistem"
+                          }
+                          variant={
+                            notification.notification_type === "risk_zone"
+                              ? "danger"
+                              : notification.notification_type === "device_alert"
+                              ? "warning"
+                              : "info"
+                          }
                         />
 
                         {unread ? (

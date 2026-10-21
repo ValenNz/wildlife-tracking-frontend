@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useUnreadNotifications } from "@/hooks/notification.hook";
 import { findNavTitle } from "@/lib/navigation";
 import { TYPE_ROLE_LABELS } from "@/types/user.type";
 import type { SessionUser } from "@/lib/session";
@@ -16,9 +16,9 @@ type HeaderProps = {
 export function Header({ user, onLogout }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const pathname = usePathname();
-  const notifications = useNotifications({ onlyUnread: true });
+  const { data, isLoading, error, refetch } = useUnreadNotifications();
 
-  const unreadCount = notifications.isEmpty ? 0 : notifications.data.length;
+  const unreadCount = data?.data?.length ?? 0;
   const title = findNavTitle(user.role, pathname);
 
   return (

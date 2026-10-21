@@ -6,6 +6,8 @@ import { getUnreadNotifications } from "@/services/notification.service";
 import type { DashboardSummary } from "@/types/dashboard";
 import type { TYPE_ANIMAL } from "@/types/animal.type";
 import type { TYPE_SPECIES } from "@/types/species.type";
+import type { ApiResponse } from "@/types/api.type";
+import type { TrackingDevice } from "@/types/tracking-device.type";
 
 const MAX_RECENT_ITEMS = 5;
 const LOW_BATTERY_PERCENT = 25;
@@ -38,8 +40,10 @@ const fetchSpecies = async (): Promise<TYPE_SPECIES[]> => {
   return response.data.items;
 };
 
-export const getDashboardSummary = async (): Promise<DashboardSummary> => {
-  const [animals, species, devices, readings, notifications] = await Promise.all([
+const unwrap = <T>(response: ApiResponse<T>): T => response.data;
+
+export const getDashboardSummary = async (): Promise<ApiResponse<DashboardSummary>> => {
+  const [animals, species, devicesResponse, readingsResponse, notificationsResponse] = await Promise.all([
     fetchAnimals(),
     fetchSpecies(),
     getTrackingDevices(),
@@ -47,19 +51,28 @@ export const getDashboardSummary = async (): Promise<DashboardSummary> => {
     getUnreadNotifications(),
   ]);
 
+  const devices = unwrap(devicesResponse);
+  const readings = unwrap(readingsResponse);
+  const notifications = unwrap(notificationsResponse);
+  const alerts = unwrap(await getDeviceAlerts());
+
   return {
-    totalAnimals: animals.length,
-    activeAnimals: animals.filter((animal) => isActiveFlag(animal.is_active)).length,
-    totalSpecies: species.length,
-    totalDevices: devices.filter((device) => isActiveFlag(device.is_active)).length,
-    lowBatteryDevices: devices.filter(
-      (device) =>
-        device.battery_level !== null && device.battery_level < LOW_BATTERY_PERCENT,
-    ).length,
-    deviceAlerts: await getDeviceAlerts(),
-    totalReadings: readings.length,
-    latestReadings: readings.slice(0, MAX_RECENT_ITEMS),
-    latestNotifications: notifications.slice(0, MAX_RECENT_ITEMS),
-    degradedSources: [],
+    success: true,
+    message: "OK",
+    data: {
+      totalAnimals: animals.length,
+      activeAnimals: animals.filter((animal) => isActiveFlag(animal.is_active)).length,
+      totalSpecies: species.length,
+      totalDevices: devices.filter((device: TrackingDevice) => isActiveFlag(device.is_active)).length,
+      lowBatteryDevices: devices.filter(
+        (device: TrackingDevice) =>
+          device.battery_level !== null && device.battery_level < LOW_BATTERY_PERCENT,
+      ).length,
+      deviceAlerts: alerts,
+      totalReadings: readings.length,
+      latestReadings: readings.slice(0, MAX_RECENT_ITEMS),
+      latestNotifications: notifications.slice(0, MAX_RECENT_ITEMS),
+      degradedSources: [],
+    },
   };
 };

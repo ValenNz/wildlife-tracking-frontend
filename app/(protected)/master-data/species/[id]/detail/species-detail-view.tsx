@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useSpeciesById } from "@/hooks/species.hook";
-import { useAnimal } from "@/hooks/animal.hook";
+import { useAnimals } from "@/hooks/animal.hook";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loading } from "@/components/ui/loading";
@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { toApiErrorState } from "@/services/api-client";
 import type { BadgeVariant } from "@/components/ui/status-badge";
 import type { TYPE_CONSERVATION_STATUS } from "@/types/species.type";
+import type { TYPE_ANIMAL } from "@/types/animal.type";
 
 type SpeciesDetailViewProps = {
   speciesId: number;
@@ -38,7 +39,7 @@ export function SpeciesDetailView({ speciesId }: SpeciesDetailViewProps) {
     [speciesId],
   );
 
-  const animals = useAnimal(animalsParams);
+  const animals = useAnimals(animalsParams);
 
   if (speciesQuery.isPending) {
     return <Loading label="Memuat detail spesies..." />;
@@ -60,7 +61,7 @@ export function SpeciesDetailView({ speciesId }: SpeciesDetailViewProps) {
 
   const record = speciesQuery.data?.data.items;
 
-  if (record === undefined) {
+  if (record === undefined || record === null) {
     return (
       <EmptyState
         title={`Spesies dengan ID ${speciesId} tidak ditemukan`}
@@ -126,7 +127,7 @@ export function SpeciesDetailView({ speciesId }: SpeciesDetailViewProps) {
           />
         ) : (
           <ul className="divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white">
-            {relatedAnimals.map((animal) => (
+            {relatedAnimals.map((animal: TYPE_ANIMAL) => (
               <li key={animal.animal_id}>
                 <Link
                   href={`/master-data/animals/${animal.animal_id}/detail`}

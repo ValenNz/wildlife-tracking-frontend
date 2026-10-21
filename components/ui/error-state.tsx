@@ -26,6 +26,16 @@ const HINTS: Record<ApiErrorKind, string[]> = {
   unknown: ["Format respons tidak sesuai kontrak API."],
 };
 
+const VALID_KINDS: ApiErrorKind[] = [
+  "unauthorized",
+  "forbidden",
+  "validation",
+  "not_found",
+  "server",
+  "network",
+  "unknown",
+];
+
 type ErrorStateProps = {
   kind: ApiErrorKind;
   message: string;
@@ -45,6 +55,9 @@ export function ErrorState({
 }: ErrorStateProps) {
   const validationEntries = errors ? Object.entries(errors) : [];
 
+  // Ensure kind is valid, fallback to "unknown"
+  const safeKind = VALID_KINDS.includes(kind) ? kind : "unknown";
+
   return (
     <div
       role="alert"
@@ -55,7 +68,7 @@ export function ErrorState({
       }
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-sm font-semibold">{TITLES[kind]}</p>
+        <p className="text-sm font-semibold">{TITLES[safeKind]}</p>
         {status !== undefined && status > 0 ? (
           <span className="text-xs font-medium opacity-70">HTTP {status}</span>
         ) : null}
@@ -73,7 +86,7 @@ export function ErrorState({
         </ul>
       ) : (
         <ul className="list-inside list-disc space-y-1 text-xs opacity-70">
-          {HINTS[kind].map((hint) => (
+          {HINTS[safeKind].map((hint) => (
             <li key={hint}>{hint}</li>
           ))}
         </ul>

@@ -5,6 +5,7 @@ type StatCardProps = {
   value: string;
   hint?: string;
   tone?: "neutral" | "positive" | "warning";
+  color?: string;
   className?: string;
 };
 
@@ -19,13 +20,18 @@ export function StatCard({
   value,
   hint,
   tone = "neutral",
+  color,
   className,
 }: StatCardProps) {
+  const style = color
+    ? `border-transparent bg-transparent text-inherit ${color}`
+    : TONE_STYLES[tone];
+
   return (
     <div
       className={cn(
         "flex flex-col gap-1 rounded-xl border px-4 py-3",
-        TONE_STYLES[tone],
+        style,
         className,
       )}
     >

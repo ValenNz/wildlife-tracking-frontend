@@ -1,9 +1,9 @@
 export {
-  useAnimal,
+  useAnimals,
   useAnimalById,
   useAnimalCreate,
   useAnimalDelete,
-  useInfiniteAnimal,
+  useInfiniteAnimals,
   useAnimalUpdate,
 } from "@/hooks/animal.hook";
 
@@ -25,15 +25,34 @@ export {
   useUserUpdate,
 } from "@/hooks/user.hook";
 
-export { useAsyncResource } from "@/hooks/useAsyncResource";
-export type { AsyncResource } from "@/hooks/useAsyncResource";
-export { useTrackingDevice, useTrackingDevices } from "@/hooks/useTrackingDevices";
 export {
-  useGPSReadings,
-  useGPSReadingsByAnimal,
-  useGPSReadingsByDevice,
-} from "@/hooks/useGPSReadings";
-export { useGeoZones } from "@/hooks/useGeoZones";
-export { useIncidentReports } from "@/hooks/useIncidentReports";
-export { useNotifications } from "@/hooks/useNotifications";
-export { useDashboardSummary } from "@/hooks/useDashboardSummary";
+  useTrackingDevices,
+  useTrackingDeviceById,
+  useInfiniteTrackingDevices,
+  useDeviceAlerts,
+} from "@/hooks/tracking-device.hook";
+
+export {
+  useNotifications,
+  useNotificationById,
+  useInfiniteNotifications,
+  useUnreadNotifications,
+} from "@/hooks/notification.hook";
+
+export {
+  useGpsReadings,
+  useGpsReadingsByAnimal,
+  useGpsReadingsByDevice,
+  useInfiniteGpsReadings,
+} from "@/hooks/gps-reading.hook";
+
+export {
+  useIncidentReports,
+  useIncidentReportById,
+  useInfiniteIncidentReports,
+  usePendingSyncReports,
+} from "@/hooks/incident-report.hook";
+
+export { useDashboardSummary } from "@/hooks/dashboard.hook";
+
+export { useDebounce } from "@/hooks/use-debounce";

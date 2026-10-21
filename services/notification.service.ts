@@ -1,8 +1,8 @@
-import { api, unwrapData } from "@/services/api-client";
+import { api } from "@/services/api-client";
+import { API_ENDPOINT, WILDLIFE_BASE_PATH } from "@/services/endpoint";
 import type { ApiResponse } from "@/types/api.type";
+import type { QUERY_PARAMS_API_GET_ALL } from "@/types/endpoint.type";
 import type { Notification, NotificationListParams } from "@/types/notification";
-
-const BASE = "/api/wildlife";
 
 const isUnread = (value: boolean | number | null | undefined): boolean =>
   value === false || value === 0;
@@ -21,21 +21,25 @@ const filterNotifications = (
   });
 
 export const getNotifications = async (
-  params?: NotificationListParams,
-): Promise<Notification[]> => {
-  const response = await api.get<ApiResponse<Notification[]>>(
-    `${BASE}/notifications`,
+  params?: Partial<QUERY_PARAMS_API_GET_ALL> & NotificationListParams,
+): Promise<ApiResponse<Notification[]>> => {
+  const response = await api.get<Notification[]>(
+    `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.NOTIFICATIONS.GET_ALL(params)}`,
   );
-  const payload = unwrapData(response);
-  const notifications = Array.isArray(payload)
-    ? (payload as Notification[])
-    : [];
 
-  return filterNotifications(notifications, params).sort(
-    (left, right) =>
-      new Date(right.created_at).getTime() - new Date(left.created_at).getTime(),
-  );
+  const notifications = Array.isArray(response) ? (response as Notification[]) : [];
+
+  return {
+    success: true,
+    message: "OK",
+    data: filterNotifications(notifications, params).sort(
+      (left, right) =>
+        new Date(right.created_at).getTime() - new Date(left.created_at).getTime(),
+    ),
+  };
 };
 
-export const getUnreadNotifications = async (): Promise<Notification[]> =>
-  getNotifications({ onlyUnread: true });
+export const getUnreadNotifications = async (): Promise<ApiResponse<Notification[]>> => {
+  const response = await getNotifications({ onlyUnread: true });
+  return response;
+};

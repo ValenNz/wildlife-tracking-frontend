@@ -9,7 +9,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import type { ApiErrorKind } from "@/types/api.type";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Username wajib diisi"),
+  email: z.string().email("Format email tidak valid").min(1, "Email wajib diisi"),
   password: z.string().min(1, "Kata sandi wajib diisi"),
   rememberMe: z.boolean(),
 });
@@ -33,55 +33,57 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { username: "", password: "", rememberMe: false },
+    defaultValues: { email: "", password: "", rememberMe: false },
   });
 
-  const onSubmit = async (values: LoginFormValues) => {
-    setFailure(null);
+  // Di dalam onSubmit function LoginPage.tsx
+const onSubmit = async (values: LoginFormValues) => {
+  setFailure(null);
 
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: values.username, password: values.password }),
-      });
+  try {
+    // UBAH: Gunakan Next.js API Route, bukan Laravel langsung
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    // UBAH INI: Kirim langsung sebagai 'email'
+    body: JSON.stringify({ email: values.email, password: values.password }),
+  });
 
-      const body: unknown = await response.json().catch(() => null);
+    const body: unknown = await response.json().catch(() => null);
 
-      const record =
-        typeof body === "object" && body !== null
-          ? (body as Record<string, unknown>)
-          : null;
+    const record =
+      typeof body === "object" && body !== null
+        ? (body as Record<string, unknown>)
+        : null;
 
-      if (!response.ok || record?.success !== true) {
-        setFailure({
-          kind: response.status === 422 ? "validation" : resolveKind(response.status),
-
-          status: response.status,
-          message:
-            typeof record?.message === "string"
-              ? record.message
-              : "Login gagal. Silakan coba lagi.",
-          errors:
-            typeof record?.errors === "object" && record.errors !== null
-              ? (record.errors as Record<string, string[]>)
-              : null,
-        });
-        return;
-      }
-
-      router.push("/dashboard");
-      router.refresh();
-    } catch {
+    if (!response.ok || record?.success !== true) {
       setFailure({
-        kind: "network",
-
-        status: 0,
-        message: "Tidak dapat menghubungi server aplikasi.",
-        errors: null,
+        kind: response.status === 422 ? "validation" : resolveKind(response.status),
+        status: response.status,
+        message:
+          typeof record?.message === "string"
+            ? record.message
+            : "Login gagal. Silakan coba lagi.",
+        errors:
+          typeof record?.errors === "object" && record.errors !== null
+            ? (record.errors as Record<string, string[]>)
+            : null,
       });
+      return;
     }
-  };
+
+    // API Route Next.js sudah menyimpan cookie, langsung redirect
+    router.push("/dashboard");
+    router.refresh();
+  } catch {
+    setFailure({
+      kind: "network",
+      status: 0,
+      message: "Tidak dapat menghubungi server aplikasi.",
+      errors: null,
+    });
+  }
+};
 
 
 return (
@@ -106,35 +108,24 @@ return (
         </div>
 
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="username"
-            className="text-sm font-semibold text-zinc-900"
-          >
-            Username
+          <label htmlFor="email" className="text-sm font-semibold text-zinc-900">
+            Email
           </label>
           <input
-            id="username"
-            type="text"
-            autoComplete="username"
-            aria-invalid={errors.username !== undefined}
-            aria-describedby={
-              errors.username ? "username-error" : undefined
-            }
-            {...register("username")}
-            placeholder="Masukkan username"
+            id="email"
+            type="email"
+            autoComplete="email"
+            aria-invalid={errors.email !== undefined}
+            aria-describedby={errors.email ? "email-error" : undefined}
+            {...register("email")}
+            placeholder="Masukkan email Anda"
             className={`h-10 rounded-xl border px-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-[#4d8050] ${
-              errors.username
-                ? "border-red-400"
-                : "border-zinc-400"
+              errors.email ? "border-red-400" : "border-zinc-400"
             }`}
           />
-          {errors.username && (
-            <p
-              id="username-error"
-              role="alert"
-              className="text-xs text-red-700"
-            >
-              {errors.username.message}
+          {errors.email && (
+            <p id="email-error" role="alert" className="text-xs text-red-700">
+              {errors.email.message}
             </p>
           )}
         </div>

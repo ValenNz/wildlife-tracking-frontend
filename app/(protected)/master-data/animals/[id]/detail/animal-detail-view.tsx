@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAnimalById } from "@/hooks/animal.hook";
-import { useGPSReadingsByAnimal } from "@/hooks/useGPSReadings";
-import { useIncidentReports } from "@/hooks/useIncidentReports";
+import { useGpsReadingsByAnimal } from "@/hooks/gps-reading.hook";
+import { useIncidentReports } from "@/hooks/incident-report.hook";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loading } from "@/components/ui/loading";
@@ -12,23 +12,17 @@ import { StatCard } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toApiErrorState } from "@/services/api-client";
 import { formatDate } from "@/utils/format";
+import type { TYPE_ANIMAL } from "@/types/animal.type";
 
 type AnimalDetailViewProps = {
   animalId: number;
 };
 
-const DetailField = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</dt>
-    <dd className="mt-0.5 text-sm text-zinc-900">{value}</dd>
-  </div>
-);
-
 export function AnimalDetailView({ animalId }: AnimalDetailViewProps) {
   const router = useRouter();
   const animalQuery = useAnimalById(animalId);
-  const readings = useGPSReadingsByAnimal(animalId);
-  const incidents = useIncidentReports();
+  const { data: readingsData, isLoading: readingsLoading, error: readingsError, refetch: readingsRefetch } = useGpsReadingsByAnimal(animalId);
+  const { data: incidentsData, isLoading: incidentsLoading, error: incidentsError, refetch: incidentsRefetch } = useIncidentReports();
 
   if (animalQuery.isPending) {
     return <Loading label="Memuat detail satwa..." />;
@@ -48,9 +42,9 @@ export function AnimalDetailView({ animalId }: AnimalDetailViewProps) {
     );
   }
 
-  const record = animalQuery.data?.data.items;
+  const record = animalQuery.data?.data?.items;
 
-  if (record === undefined) {
+  if (record === undefined || record === null) {
     return (
       <EmptyState
         title={`Satwa dengan ID ${animalId} tidak ditemukan`}
@@ -63,9 +57,9 @@ export function AnimalDetailView({ animalId }: AnimalDetailViewProps) {
     );
   }
 
-  const relatedIncidents = incidents.data.filter(
-    (report) => report.location === record.animal_code,
-  );
+  const relatedIncidents = (incidentsData?.data ?? []).filter(
+    (report: { location: string }) => report.location === record.animal_code,
+  ) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -110,7 +104,7 @@ export function AnimalDetailView({ animalId }: AnimalDetailViewProps) {
       <section aria-label="Data terkait" className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         <StatCard
           label="Pembacaan GPS"
-          value={readings.isEmpty ? "0" : String(readings.data.length)}
+          value={readingsData?.data?.length === 0 ? "0" : String(readingsData?.data?.length ?? 0)}
           hint="Total posisi tercatat"
         />
         <StatCard
@@ -135,22 +129,22 @@ export function AnimalDetailView({ animalId }: AnimalDetailViewProps) {
           Posisi Terakhir
         </h3>
 
-        {readings.error ? (
+        {readingsError ? (
           <ErrorState
-            kind={readings.error.kind}
-            message={readings.error.message}
-            status={readings.error.status}
-            errors={readings.error.errors}
-            onRetry={readings.refetch}
+            kind={toApiErrorState(readingsError).kind}
+            message={toApiErrorState(readingsError).message}
+            status={toApiErrorState(readingsError).status}
+            errors={toApiErrorState(readingsError).errors}
+            onRetry={readingsRefetch}
           />
-        ) : readings.isEmpty ? (
+        ) : !readingsData?.data?.length ? (
           <EmptyState
             title="Belum ada pembacaan GPS"
             description="Collar untuk satwa ini belum mengirim posisi."
           />
         ) : (
           <ul className="divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white">
-            {readings.data.slice(0, 5).map((reading) => (
+            {readingsData?.data?.slice(0, 5).map((reading) => (
               <li
                 key={reading.reading_id}
                 className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
@@ -170,3 +164,10 @@ export function AnimalDetailView({ animalId }: AnimalDetailViewProps) {
     </div>
   );
 }
+
+const DetailField = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</dt>
+    <dd className="mt-0.5 text-sm text-zinc-900">{value}</dd>
+  </div>
+);

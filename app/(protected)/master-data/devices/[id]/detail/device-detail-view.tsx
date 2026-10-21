@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useTrackingDevice } from "@/hooks/useTrackingDevices";
-import { useGPSReadingsByDevice } from "@/hooks/useGPSReadings";
+import { useTrackingDeviceById } from "@/hooks/tracking-device.hook";
+import { useGpsReadingsByDevice } from "@/hooks/gps-reading.hook";
 import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loading } from "@/components/ui/loading";
 import { StatCard } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { toApiErrorState } from "@/services/api-client";
 import { formatDate } from "@/utils/format";
 import type { DeviceCondition } from "@/types/tracking-device.type";
 
@@ -27,34 +28,28 @@ const CONDITION_VARIANT = {
   lost: "danger",
 } as const;
 
-const DetailField = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</dt>
-    <dd className="mt-0.5 text-sm text-zinc-900">{value}</dd>
-  </div>
-);
-
 export function DeviceDetailView({ deviceId }: DeviceDetailViewProps) {
-  const device = useTrackingDevice(deviceId);
-  const readings = useGPSReadingsByDevice(deviceId);
+  const { data, isLoading, error, refetch } = useTrackingDeviceById(deviceId);
+  const { data: readingsData, isLoading: readingsLoading, error: readingsError, refetch: readingsRefetch } = useGpsReadingsByDevice(deviceId);
 
-  if (device.isLoading && device.error === null) {
+  if (isLoading) {
     return <Loading label="Memuat detail perangkat..." />;
   }
 
-  if (device.error) {
+  if (error) {
+    const apiError = toApiErrorState(error);
     return (
       <ErrorState
-        kind={device.error.kind}
-        message={device.error.message}
-        status={device.error.status}
-        errors={device.error.errors}
-        onRetry={device.refetch}
+        kind={apiError.kind}
+        message={apiError.message}
+        status={apiError.status}
+        errors={apiError.errors}
+        onRetry={refetch}
       />
     );
   }
 
-  if (device.isEmpty || device.data === null) {
+  if (!data?.data) {
     return (
       <EmptyState
         title={`Perangkat dengan ID ${deviceId} tidak ditemukan`}
@@ -63,7 +58,7 @@ export function DeviceDetailView({ deviceId }: DeviceDetailViewProps) {
     );
   }
 
-  const record = device.data;
+  const record = data.data;
   const isActive = record.is_active === true || record.is_active === 1;
 
   return (
@@ -82,8 +77,8 @@ export function DeviceDetailView({ deviceId }: DeviceDetailViewProps) {
 
         <div className="flex gap-2">
           <StatusBadge
-            label={CONDITION_LABEL[record.device_condition]}
-            variant={CONDITION_VARIANT[record.device_condition]}
+            label={record.device_condition === "normal" ? "Normal" : record.device_condition === "damaged" ? "Rusak" : "Hilang"}
+            variant={record.device_condition === "normal" ? "success" : record.device_condition === "damaged" ? "warning" : "danger"}
           />
           <StatusBadge
             label={isActive ? "Aktif" : "Tidak Aktif"}
@@ -130,7 +125,7 @@ export function DeviceDetailView({ deviceId }: DeviceDetailViewProps) {
         />
         <StatCard
           label="Pembacaan GPS"
-          value={readings.isEmpty ? "0" : String(readings.data.length)}
+          value={readingsData?.data?.length === 0 ? "0" : String(readingsData?.data?.length ?? 0)}
         />
       </section>
 
@@ -159,3 +154,10 @@ export function DeviceDetailView({ deviceId }: DeviceDetailViewProps) {
     </div>
   );
 }
+
+const DetailField = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</dt>
+    <dd className="mt-0.5 text-sm text-zinc-900">{value}</dd>
+  </div>
+);

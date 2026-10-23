@@ -135,12 +135,85 @@ export function IncidentListView() {
     [data, filters],
   );
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-lg font-semibold text-zinc-900">Laporan Insiden</h2>
-        <p className="text-sm text-zinc-600">
-          Kejadian lapangan yang dilaporkan oleh konservasionis.
+  
+return (
+  <div className="flex flex-col gap-6">
+    {/* Header */}
+    <div>
+      <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
+        Laporan Insiden
+      </h2>
+      <p className="mt-1 text-sm text-zinc-500">
+        Pantau kejadian lapangan dan status sinkronisasi laporan.
+      </p>
+    </div>
+
+    {/* Ringkasan */}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {[
+        {
+          label: "Total Insiden",
+          value: visibleReports.length,
+          icon: "📋",
+          style: "bg-emerald-50 text-emerald-700",
+        },
+        {
+          label: "Tersinkron",
+          value: visibleReports.filter(
+            (item) => item.sync_status === "synced",
+          ).length,
+          icon: "✓",
+          style: "bg-green-50 text-green-700",
+        },
+        {
+          label: "Menunggu Sinkron",
+          value: visibleReports.filter(
+            (item) => item.sync_status === "pending_sync",
+          ).length,
+          icon: "◷",
+          style: "bg-amber-50 text-amber-700",
+        },
+        {
+          label: "Gagal Sinkron",
+          value: visibleReports.filter(
+            (item) => item.sync_status === "failed",
+          ).length,
+          icon: "!",
+          style: "bg-red-50 text-red-700",
+        },
+      ].map((item) => (
+        <div
+          key={item.label}
+          className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-zinc-500">
+              {item.label}
+            </p>
+            <span
+              className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg font-bold ${item.style}`}
+            >
+              {item.icon}
+            </span>
+          </div>
+          <p className="mt-4 text-3xl font-bold text-zinc-900">
+            {item.value}
+          </p>
+          <p className="mt-1 text-xs text-zinc-500">
+            Berdasarkan laporan yang ditampilkan
+          </p>
+        </div>
+      ))}
+    </div>
+
+    {/* Filter */}
+    <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <div className="mb-4">
+        <h3 className="font-semibold text-zinc-900">
+          Filter Laporan
+        </h3>
+        <p className="mt-1 text-sm text-zinc-500">
+          Cari laporan berdasarkan tanggal, jenis, dan status sinkron.
         </p>
       </div>
 
@@ -157,7 +230,10 @@ export function IncidentListView() {
               { label: "Observasi", value: "observasi" },
               { label: "Konflik", value: "konflik" },
               { label: "Perambahan", value: "perambahan" },
-              { label: "Peringatan Perangkat", value: "device_alert" },
+              {
+                label: "Peringatan Perangkat",
+                value: "device_alert",
+              },
             ],
           },
           {
@@ -167,35 +243,62 @@ export function IncidentListView() {
             options: [
               { label: "Semua status", value: "all" },
               { label: "Tersinkron", value: "synced" },
-              { label: "Menunggu sinkron", value: "pending_sync" },
+              {
+                label: "Menunggu sinkron",
+                value: "pending_sync",
+              },
               { label: "Gagal sinkron", value: "failed" },
             ],
           },
         ]}
         values={filters}
-        onFilterChange={(values) => setFilters({ ...filters, ...values })}
-        onReset={() => setFilters({ date_from: "", date_to: "", incident_type: "all", sync_status: "all" })}
+        onFilterChange={(values) =>
+          setFilters({ ...filters, ...values })
+        }
+        onReset={() =>
+          setFilters({
+            date_from: "",
+            date_to: "",
+            incident_type: "all",
+            sync_status: "all",
+          })
+        }
       />
+    </section>
 
-      {error ? (
-        <ErrorState
-          kind={toApiErrorState(error).kind}
-          message={toApiErrorState(error).message}
-          status={toApiErrorState(error).status}
-          errors={toApiErrorState(error).errors}
-          onRetry={refetch}
-        />
-      ) : (
-        <DataTable
-          data={visibleReports}
-          columns={COLUMNS}
-          loading={isLoading}
-          getRowId={(row) => String(row.report_id)}
-          label="daftar laporan insiden"
-          emptyTitle="Belum ada laporan insiden"
-          emptyDescription="Tidak ada laporan yang cocok dengan filter saat ini."
-        />
-      )}
-    </div>
-  );
+    {/* Daftar laporan */}
+    <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+      <div className="border-b border-zinc-200 px-5 py-4">
+        <h3 className="font-semibold text-zinc-900">
+          Daftar Laporan Insiden
+        </h3>
+        <p className="mt-1 text-sm text-zinc-500">
+          Informasi kejadian dan status sinkronisasi data.
+        </p>
+      </div>
+
+      <div className="p-4">
+        {error ? (
+          <ErrorState
+            kind={toApiErrorState(error).kind}
+            message={toApiErrorState(error).message}
+            status={toApiErrorState(error).status}
+            errors={toApiErrorState(error).errors}
+            onRetry={refetch}
+          />
+        ) : (
+          <DataTable
+            data={visibleReports}
+            columns={COLUMNS}
+            loading={isLoading}
+            getRowId={(row) => String(row.report_id)}
+            label="daftar laporan insiden"
+            emptyTitle="Belum ada laporan insiden"
+            emptyDescription="Belum ada laporan yang sesuai dengan filter yang dipilih."
+          />
+        )}
+      </div>
+    </section>
+  </div>
+);
 }

@@ -36,7 +36,7 @@ const ADMIN_ITEMS: NavItem[] = [
 ];
 
 const POLICY_ITEMS: NavItem[] = [
-  { label: "Statistik", href: "/master-data/species", icon: "chart" },
+  { label: "Statistik", href: "/statistics", icon: "chart" },
 ];
 
 export const NAV_SECTIONS: Record<TYPE_USER_ROLE, NavSection[]> = {

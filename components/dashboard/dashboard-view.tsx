@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { formatDate } from "@/utils/format";
+import type { IncidentReport } from "@/types/incident-report";
 import { useDashboardSummary } from "@/hooks";
 import { Loading } from "@/components/ui/loading";
 import { ErrorState } from "@/components/ui/error-state";
@@ -20,6 +22,7 @@ const EMPTY_DASHBOARD_SUMMARY = {
   totalReadings: 0,
   latestReadings: [],
   latestNotifications: [],
+  latestIncidentReports: [],
   degradedSources: [],
 };
 
@@ -361,79 +364,92 @@ export function DashboardView({
         </section>
       </div>
 
-<section>
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold text-zinc-900">
-              Laporan Insiden Terbaru
-            </h2>
-            <p className="mt-1 text-sm text-zinc-500">
-              Laporan yang membutuhkan perhatian.
-            </p>
-          </div>
-          <Link
-            href="/incidents"
-            className="shrink-0 text-sm font-medium text-emerald-700 hover:underline"
-          >
-            Lihat semua
-          </Link>
-        </div>
 
-        {summary.latestNotifications.length === 0 ? (
-          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-            <EmptyState
-              title="Tidak ada laporan terbaru"
-              description="Belum ada laporan insiden yang masuk."
-            />
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-            {summary.latestNotifications.map((notification: Notification, index: number) => (
-              <div
-                key={`${notification.notif_id}-${index}`}
-                className={`flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between ${
-                  index !== 0 ? "border-t border-zinc-100" : ""
+<section>
+  <div className="mb-4 flex items-center justify-between gap-3">
+    <div>
+      <h2 className="text-lg font-bold text-zinc-900">
+        Laporan Insiden Terbaru
+      </h2>
+      <p className="mt-1 text-sm text-zinc-500">
+        Laporan yang membutuhkan perhatian.
+      </p>
+    </div>
+    <Link
+      href="/incidents"
+      className="shrink-0 text-sm font-medium text-emerald-700 hover:underline"
+    >
+      Lihat semua
+    </Link>
+  </div>
+
+  {summary.latestIncidentReports.length === 0 ? (
+    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+      <EmptyState
+        title="Tidak ada laporan terbaru"
+        description="Belum ada laporan insiden yang masuk."
+      />
+    </div>
+  ) : (
+    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+      {summary.latestIncidentReports.map(
+        (report: IncidentReport, index: number) => (
+          <div
+            key={report.report_id}
+            className={`flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between ${
+              index !== 0 ? "border-t border-zinc-100" : ""
+            }`}
+          >
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-lg">
+                📝
+              </span>
+
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-zinc-900">
+                  {report.incident_type.replaceAll("_", " ")}
+                  {report.animal_code
+                    ? ` - ${report.animal_code}`
+                    : ""}
+                </p>
+
+                <p className="mt-1 text-sm text-zinc-600">
+                  {report.description}
+                </p>
+
+                <p className="mt-1 text-xs text-zinc-500">
+                  Lokasi: {report.location}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+              <span className="text-xs text-zinc-500">
+                {formatDate(report.timestamp)}
+                </span>
+
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  report.sync_status === "synced"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : report.sync_status === "pending_sync"
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-red-50 text-red-700"
                 }`}
               >
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-lg">
-                    📝
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-900">
-                      {notification.message.slice(0, 80)}
-                      {notification.message.length > 80 ? "..." : ""}
-                    </p>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      {notification.notification_type.replace("_", " ")}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-                  <span className="text-xs text-zinc-500">
-                    {new Date(notification.created_at).toLocaleDateString("id-ID", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </span>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      notification.notification_type === "risk_zone"
-                        ? "bg-red-50 text-red-700"
-                        : notification.notification_type === "device_alert"
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-sky-50 text-sky-700"
-                    }`}
-                  >
-                    {notification.notification_type.replace("_", " ")}
-                  </span>
-                </div>
-              </div>
-            ))}
+                {report.sync_status === "synced"
+                  ? "Tersinkron"
+                  : report.sync_status === "pending_sync"
+                    ? "Menunggu Sinkron"
+                    : "Gagal Sinkron"}
+              </span>
+            </div>
           </div>
-        )}
-      </section>
+        ),
+      )}
+    </div>
+  )}
+</section>
 
       {isEmpty && (
         <p className="text-center text-xs text-zinc-400">

@@ -11,8 +11,8 @@ export type TYPE_SPECIES = {
   scientific_name: string;
   conservation_status: TYPE_CONSERVATION_STATUS;
   animal_count?: number;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 export type TYPE_SPECIES_PAYLOAD = {

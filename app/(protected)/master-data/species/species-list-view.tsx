@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useDebounce } from "@/hooks/use-debounce";
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Leaf, SlidersHorizontal } from "lucide-react";
@@ -13,8 +14,12 @@ import {
   CONSERVATION_OPTIONS,
   DEFAULT_SPECIES_FILTERS,
 } from "@/app/(protected)/master-data/species/filter";
+
 import { useSpecies } from "@/hooks/species.hook";
+import { useAnimals } from "@/hooks/animal.hook";
+
 import { toApiErrorState } from "@/services/api-client";
+
 import type {
   TYPE_CONSERVATION_STATUS,
   TYPE_SPECIES,
@@ -22,22 +27,27 @@ import type {
 
 export function SpeciesListView() {
   const router = useRouter();
+
   const [filters, setFilters] = useState(DEFAULT_SPECIES_FILTERS);
+
+  const debouncedSearch = useDebounce(filters.search, 500);
 
   const params = useMemo(
     () => ({
       page: 1,
       per_page: 25,
-      search: filters.search,
+      search: debouncedSearch,
       conservation_status:
         filters.conservation_status === "all"
           ? undefined
           : (filters.conservation_status as TYPE_CONSERVATION_STATUS),
     }),
-    [filters.search, filters.conservation_status],
+    [debouncedSearch, filters.conservation_status],
   );
 
   const query = useSpecies(params);
+  const animalQuery = useAnimals();
+
   const columns = useMemo(() => getSpeciesColumns(), []);
 
   const handleRowClick = useCallback(
@@ -47,7 +57,7 @@ export function SpeciesListView() {
     [router],
   );
 
-  if (query.isPending) {
+  if (query.isPending || animalQuery.isPending) {
     return (
       <DataTable
         data={[]}
@@ -58,8 +68,10 @@ export function SpeciesListView() {
     );
   }
 
-  if (query.isError) {
-    const error = toApiErrorState(query.error);
+  if (query.isError || animalQuery.isError) {
+    const error = toApiErrorState(
+      query.error ?? animalQuery.error,
+    );
 
     return (
       <ErrorState
@@ -67,12 +79,23 @@ export function SpeciesListView() {
         message={error.message}
         status={error.status}
         errors={error.errors}
-        onRetry={() => void query.refetch()}
+        onRetry={() => {
+          void query.refetch();
+          void animalQuery.refetch();
+        }}
       />
     );
   }
 
-  const items = query.data?.data?.items ?? [];
+  const speciesItems = query.data?.data?.items ?? [];
+  const animalItems = animalQuery.data?.data?.items ?? [];
+
+  const items: TYPE_SPECIES[] = speciesItems.map((species) => ({
+    ...species,
+    animal_count: animalItems.filter(
+      (animal) => animal.species_id === species.species_id,
+    ).length,
+  }));
 
   return (
     <div className="min-h-full space-y-6 bg-[#F7F9F6] p-1">
@@ -104,6 +127,7 @@ export function SpeciesListView() {
               <h3 className="text-base font-semibold text-[#174C35]">
                 Cari dan Filter Spesies
               </h3>
+
               <p className="mt-1 text-sm leading-5 text-zinc-600">
                 Cari berdasarkan nama umum, nama ilmiah, atau status konservasi.
               </p>
@@ -129,7 +153,10 @@ export function SpeciesListView() {
             ]}
             values={filters}
             onFilterChange={(values) =>
-              setFilters({ ...DEFAULT_SPECIES_FILTERS, ...values })
+              setFilters({
+                ...DEFAULT_SPECIES_FILTERS,
+                ...values,
+              })
             }
             onReset={() => setFilters(DEFAULT_SPECIES_FILTERS)}
           />
@@ -142,6 +169,7 @@ export function SpeciesListView() {
             <h3 className="text-base font-semibold text-[#174C35]">
               Daftar Spesies
             </h3>
+
             <p className="mt-1 text-sm text-zinc-500">
               Menampilkan {items.length} spesies pada halaman ini.
             </p>
@@ -149,14 +177,14 @@ export function SpeciesListView() {
 
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#D8E8DA] bg-[#F0F7F0] px-3 py-1.5 text-xs font-medium text-[#286747]">
             <span className="h-2 w-2 rounded-full bg-[#43845A]" />
-            Data spesies
+            Data API
           </div>
         </div>
 
         <DataTable
           data={items}
           columns={columns}
-          loading={query.isFetching}
+          loading={query.isFetching || animalQuery.isFetching}
           onRowClick={handleRowClick}
           getRowId={(row) => String(row.species_id)}
           label="daftar spesies"

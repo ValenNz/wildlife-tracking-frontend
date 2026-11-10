@@ -7,7 +7,11 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { getNotifications, getUnreadNotifications } from "@/services/notification.service";
+import {
+  getNotifications,
+  getUnreadNotifications,
+  markNotificationAsRead,
+} from "@/services/notification.service";
 import type { Notification, NotificationListParams } from "@/types/notification";
 import type { TYPE_META_PAGGINATION } from "@/types/meta.type";
 import type { ApiResponse } from "@/types/api.type";
@@ -53,5 +57,24 @@ export const useUnreadNotifications = () => {
   return useQuery<NotificationApiResponse>({
     queryKey: ["notifications-unread"],
     queryFn: () => getUnreadNotifications(),
+  });
+};
+
+export const useMarkNotificationAsRead = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => markNotificationAsRead(id),
+
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["notifications"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["notifications-unread"],
+        }),
+      ]);
+    },
   });
 };

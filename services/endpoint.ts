@@ -26,14 +26,14 @@ const listPath = (
   return `/${resource}${query ? `?${query}` : ""}`;
 };
 
-export const WILDLIFE_BASE_PATH = "/api/wildlife";
+export const WILDLIFE_BASE_PATH = "/api/backend";
 
 export const API_ENDPOINT = {
   AUTH: {
-    LOGIN: "/auth/login",
-    LOGOUT: "/auth/logout",
-    ME: "/me",
-  },
+  LOGIN: "/api/auth/login",
+  LOGOUT: "/api/backend/logout",
+  ME: "/api/backend/me",
+},
   WILDLIFE: {
     USER: {
       GET_ALL: (params?: Partial<QUERY_PARAMS_API_GET_ALL>) =>
@@ -95,6 +95,8 @@ export const API_ENDPOINT = {
     NOTIFICATIONS: {
       GET_ALL: (params?: Partial<QUERY_PARAMS_API_GET_ALL>) =>
         listPath("notifications", params),
+      UNREAD: "/notifications/unread",
+      MARK_AS_READ: (id: number) => `/notifications/${id}/read`,
       GET_BY_ID: (id: number) => `/notifications/${id}`,
       CREATE: "/notifications",
       UPDATE: (id: number) => `/notifications/${id}`,

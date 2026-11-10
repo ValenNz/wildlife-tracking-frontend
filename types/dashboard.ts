@@ -1,6 +1,7 @@
 import type { DeviceAlert } from "@/types/tracking-device.type";
 import type { GpsReading } from "@/types/gps-reading";
 import type { Notification } from "@/types/notification";
+import type { IncidentReport } from "@/types/incident-report";
 
 export type DashboardSummary = {
   totalAnimals: number;
@@ -12,5 +13,6 @@ export type DashboardSummary = {
   totalReadings: number;
   latestReadings: GpsReading[];
   latestNotifications: Notification[];
+  latestIncidentReports: IncidentReport[];
   degradedSources: string[];
 };

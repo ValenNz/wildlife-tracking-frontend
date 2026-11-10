@@ -1,25 +1,29 @@
+
 "use client";
 
-import { useCallback } from "react";
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { getIncidentReports, getPendingSyncReports } from "@/services/incident-report.service";
-import type { IncidentReport, IncidentReportListParams, IncidentSyncStatus } from "@/types/incident-report";
-import type { TYPE_META_PAGGINATION } from "@/types/meta.type";
+import {
+  createIncidentReport,
+  getIncidentReports,
+  getPendingSyncReports,
+} from "@/services/incident-report.service";
+import type {
+  IncidentReport,
+  IncidentReportListParams,
+} from "@/types/incident-report";
 import type { ApiResponse } from "@/types/api.type";
-
-type IncidentReportGetAllResponse = {
-  items: IncidentReport[];
-  meta: TYPE_META_PAGGINATION;
-};
+import type { CreateIncidentReportPayload } from "@/services/incident-report.service";
 
 type IncidentReportApiResponse = ApiResponse<IncidentReport[]>;
 
-export const useIncidentReports = (params?: IncidentReportListParams) => {
+export const useIncidentReports = (
+  params?: IncidentReportListParams,
+) => {
   return useQuery<IncidentReportApiResponse>({
     queryKey: ["incident-reports", params],
     queryFn: () => getIncidentReports(params),
@@ -27,17 +31,17 @@ export const useIncidentReports = (params?: IncidentReportListParams) => {
 };
 
 export const useInfiniteIncidentReports = (
-  params: Omit<IncidentReportListParams, "page">,
+  params: IncidentReportListParams,
 ) => {
   return useInfiniteQuery<IncidentReportApiResponse>({
     queryKey: ["incident-reports-infinite", params],
     queryFn: ({ pageParam = 1 }) =>
-      getIncidentReports({ ...params, page: pageParam as number } as IncidentReportListParams),
+      getIncidentReports({
+        ...params,
+        page: pageParam as number,
+      }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      // The backend doesn't provide pagination meta for incident-reports
-      return undefined;
-    },
+    getNextPageParam: () => undefined,
   });
 };
 
@@ -53,5 +57,23 @@ export const usePendingSyncReports = () => {
   return useQuery<IncidentReportApiResponse>({
     queryKey: ["incident-reports", "pending-sync"],
     queryFn: () => getPendingSyncReports(),
+  });
+};
+
+export const useCreateIncidentReport = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateIncidentReportPayload) =>
+      createIncidentReport(payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["incident-reports"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["dashboard-summary"],
+      });
+    },
   });
 };

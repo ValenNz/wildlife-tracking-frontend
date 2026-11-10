@@ -1,5 +1,9 @@
-export type GeoZoneType = "settlement" | "road" | "plantation" | "corridor";
-
+export type GeoZoneType =
+  | "jalan_raya"
+  | "koridor_ekologis"
+  | "perkebunan"
+  | "permukiman";
+  
 export type GeoZone = {
   zone_id: number;
   zone_name: string;

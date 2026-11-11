@@ -74,6 +74,9 @@ export const useMarkNotificationAsRead = () => {
         queryClient.invalidateQueries({
           queryKey: ["notifications-unread"],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ["notifications-infinite"],
+        }),
       ]);
     },
   });

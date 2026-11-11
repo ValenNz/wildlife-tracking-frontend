@@ -58,8 +58,8 @@ export function AnimalDetailView({ animalId }: AnimalDetailViewProps) {
   }
 
   const relatedIncidents = (incidentsData?.data ?? []).filter(
-    (report: { location: string }) => report.location === record.animal_code,
-  ) ?? [];
+    (report) => report.animal_code === record.animal_code,
+  );
 
   return (
     <div className="flex flex-col gap-6">

@@ -7,6 +7,15 @@ export type GpsReading = {
   altitude_meters: number | string | null;
   accuracy_meters: number | string | null;
   checksum: string | null;
+
+  device?: {
+    device_id: number;
+    animal?: {
+      animal_id: number;
+      name: string;
+    } | null;
+  } | null;
+
   trackingDevice?: {
     device_id: number;
     model: string;

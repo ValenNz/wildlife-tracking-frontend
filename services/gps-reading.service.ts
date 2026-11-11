@@ -45,11 +45,14 @@ export const getGpsReadingsByAnimal = async (
     return GPS_READING_MOCK_SERVICE.GET_BY_ANIMAL(animalId);
   }
 
-  const response = await api.get<ApiResponse<GpsReading[]>>(
-    `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.GPS_READINGS.GET_BY_ANIMAL(animalId)}`,
-  );
+  // Ambil seluruh pembacaan GPS dari backend
+  const response = await getGpsReadings();
 
-  const readings = unwrapData(response);
+  // Filter berdasarkan ID satwa melalui relasi device
+  const readings = response.data.filter(
+    (reading) =>
+      Number(reading.device?.animal?.animal_id) === Number(animalId),
+  );
 
   return {
     success: true,
@@ -57,7 +60,6 @@ export const getGpsReadingsByAnimal = async (
     data: sortByRecordedAt(readings),
   };
 };
-
 
 export const getGpsReadingsByDevice = async (
   deviceId: number,
@@ -69,7 +71,7 @@ export const getGpsReadingsByDevice = async (
   const response = await getGpsReadings();
 
   const readings = response.data.filter(
-    (reading) => Number(reading.device_id) === deviceId,
+    (reading) => Number(reading.device_id) === Number(deviceId),
   );
 
   return {

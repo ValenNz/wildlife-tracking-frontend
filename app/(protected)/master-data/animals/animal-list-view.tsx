@@ -14,6 +14,7 @@ import {
 
 import { useAnimals } from "@/hooks/animal.hook";
 import { useSpecies } from "@/hooks/species.hook";
+import { useGpsReadings } from "@/hooks/gps-reading.hook";
 
 import type { TYPE_ANIMAL } from "@/types/animal.type";
 
@@ -37,11 +38,34 @@ export default function AnimalListView() {
 
   const animalQuery = useAnimals();
   const speciesQuery = useSpecies();
+  const gpsQuery = useGpsReadings();
 
   const animals = animalQuery.data?.data?.items ?? [];
   const speciesList = speciesQuery.data?.data?.items ?? [];
+  const gpsReadings = gpsQuery.data?.data ?? [];
 
-  const isLoading = animalQuery.isLoading || speciesQuery.isLoading;
+  const isLoading =
+    animalQuery.isLoading ||
+    speciesQuery.isLoading ||
+    gpsQuery.isLoading;
+
+  const latestGpsByDevice = useMemo(() => {
+  const gpsMap = new Map<number, (typeof gpsReadings)[number]>();
+
+  const sortedReadings = [...gpsReadings].sort(
+    (a, b) =>
+      new Date(b.recorded_at).getTime() -
+      new Date(a.recorded_at).getTime(),
+  );
+
+  sortedReadings.forEach((reading) => {
+    if (!gpsMap.has(Number(reading.device_id))) {
+      gpsMap.set(Number(reading.device_id), reading);
+    }
+  });
+
+  return gpsMap;
+}, [gpsReadings]);
 
   const filterFields = useMemo<FilterField[]>(
     () => [
@@ -206,16 +230,34 @@ export default function AnimalListView() {
       {
         id: "coordinates",
         header: "Koordinat",
-        cell: () => (
-          <span className="text-zinc-400">-</span>
-        ),
+        cell: ({ row }) => {
+          const deviceId = row.original.tracking_device?.device_id;
+
+          const reading = deviceId
+            ? latestGpsByDevice.get(Number(deviceId))
+            : undefined;
+
+          return reading ? (
+            <div className="text-sm text-zinc-700">
+              <p>Lat: {Number(reading.latitude).toFixed(6)}</p>
+              <p>Long: {Number(reading.longitude).toFixed(6)}</p>
+            </div>
+          ) : (
+            <span className="text-zinc-400">-</span>
+          );
+        },
       },
       {
         id: "recordedAt",
         header: "Waktu Pencatatan",
         cell: ({ row }) => {
-          const recordedAt =
-            row.original.tracking_device?.last_recorded_at;
+          const deviceId = row.original.tracking_device?.device_id;
+
+          const reading = deviceId
+            ? latestGpsByDevice.get(Number(deviceId))
+            : undefined;
+
+          const recordedAt = reading?.recorded_at;
 
           return recordedAt ? (
             <span className="text-sm text-zinc-700">
@@ -230,14 +272,18 @@ export default function AnimalListView() {
         },
       },
     ],
-    [],
+    [latestGpsByDevice],
   );
 
   const activeCount = animals.filter(
     (animal) => animal.is_active,
   ).length;
 
-  if (animalQuery.isError || speciesQuery.isError) {
+  if (
+    animalQuery.isError ||
+    speciesQuery.isError ||
+    gpsQuery.isError
+  ) {
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
         Gagal mengambil data satwa atau spesies dari API.

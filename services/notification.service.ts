@@ -50,23 +50,13 @@ export const getNotifications = async (
 export const getUnreadNotifications = async (): Promise<
   ApiResponse<Notification[]>
 > => {
-  const response = await api.get<ApiResponse<Notification[]>>(
-    `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.NOTIFICATIONS.UNREAD}`,
-  );
-
-  const notifications = unwrapData(response);
-
-  return {
-    success: true,
-    message: response.message ?? "OK",
-    data: notifications,
-  };
+  return getNotifications({ onlyUnread: true });
 };
 
 export const markNotificationAsRead = async (
   id: number,
 ): Promise<ApiResponse<unknown>> => {
-  return api.post<ApiResponse<unknown>>(
+  return api.put<ApiResponse<unknown>>(
     `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.NOTIFICATIONS.MARK_AS_READ(id)}`,
   );
 };

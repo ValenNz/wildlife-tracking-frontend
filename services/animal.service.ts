@@ -93,6 +93,7 @@ export const ANIMAL_SERVICE = {
     return buildGetAllResponse(items);
   },
 
+  
   GET_BY_ID: async (
     id: number,
   ): Promise<ApiResponse<TYPE_ANIMAL_GET_BY_ID_RESPONSE>> => {
@@ -100,14 +101,21 @@ export const ANIMAL_SERVICE = {
       return ANIMAL_MOCK_SERVICE.GET_BY_ID(id);
     }
 
-    const response = await api.get<ApiResponse<API_ANIMAL>>(
-      `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.ANIMALS.GET_BY_ID(id)}`,
+    const response = await api.get<ApiResponse<API_ANIMAL[]>>(
+      `${WILDLIFE_BASE_PATH}${API_ENDPOINT.WILDLIFE.ANIMALS.GET_ALL()}`,
     );
 
-    const animal = unwrapData(response);
+    const animals = unwrapData(response);
 
-    return buildGetByIdResponse(mapAnimalFromApi(animal));
+    const animal = animals.find(
+      (item) => Number(item.animal_id) === Number(id),
+    );
+
+    return buildGetByIdResponse(
+      animal ? mapAnimalFromApi(animal) : null,
+    );
   },
+
 
   CREATE: async (
     payload: TYPE_ANIMAL_PAYLOAD,

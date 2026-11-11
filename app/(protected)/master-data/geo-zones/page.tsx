@@ -3,10 +3,7 @@
 
 import { useMemo, useState } from "react";
 
-import {
-  useGeoZones,
-  useGeoZoneById,
-} from "@/hooks/use-geo-zones";
+import { useGeoZones } from "@/hooks/use-geo-zones";
 
 import type { GeoZone } from "@/types/geo-zone";
 
@@ -21,15 +18,11 @@ export default function GeoZonesPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("Semua");
   const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
+  
+  const selectedZone = zones.find(
+    (zone) => zone.zone_id === selectedZoneId,
+  );
 
-  // Mengambil detail zona langsung dari backend berdasarkan ID
-  const {
-    data: selectedZone,
-    isLoading: isDetailLoading,
-    error: detailError,
-  } = useGeoZoneById(selectedZoneId ?? 0);
-
-  // Filter zona
   const filteredZones = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
@@ -326,25 +319,7 @@ export default function GeoZonesPage() {
             </div>
 
             {/* Loading */}
-            {isDetailLoading ? (
-              <p className="py-8 text-center text-gray-500">
-                Memuat detail zona...
-              </p>
-            ) : detailError ? (
-              <div className="py-8 text-center">
-                <p className="text-red-600">
-                  Gagal mengambil detail zona dari backend.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={closeDetail}
-                  className="mt-3 text-sm font-medium text-green-700"
-                >
-                  Tutup
-                </button>
-              </div>
-            ) : !selectedZone ? (
+            {!selectedZone ? (
               <p className="py-8 text-center text-gray-500">
                 Data zona tidak ditemukan.
               </p>

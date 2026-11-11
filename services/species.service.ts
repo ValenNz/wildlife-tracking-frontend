@@ -6,6 +6,7 @@ import type { QUERY_PARAMS_API_GET_ALL } from "@/types/endpoint.type";
 import type {
   TYPE_SPECIES,
   TYPE_SPECIES_GET_ALL_RESPONSE,
+  TYPE_SPECIES_GET_BY_ID_RESPONSE,
 } from "@/types/species.type";
 
 const buildGetAllResponse = (
@@ -36,5 +37,23 @@ export const SPECIES_SERVICE = {
     const items = unwrapData(response);
 
     return buildGetAllResponse(items);
+  },
+  GET_BY_ID: async (
+    id: number,
+  ): Promise<ApiResponse<TYPE_SPECIES_GET_BY_ID_RESPONSE>> => {
+    const response = await api.get<ApiResponse<TYPE_SPECIES>>(
+      `${WILDLIFE_BASE_PATH}/species/${id}`,
+    );
+
+    const species = unwrapData(response);
+
+    return {
+      success: true,
+      message: "OK",
+      data: {
+        items: species,
+        meta: null,
+      },
+    };
   },
 } as const;

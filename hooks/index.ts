@@ -10,10 +10,7 @@ export {
 export {
   useSpecies,
   useSpeciesById,
-  useSpeciesCreate,
-  useSpeciesDelete,
   useInfiniteSpecies,
-  useSpeciesUpdate,
 } from "@/hooks/species.hook";
 
 export {

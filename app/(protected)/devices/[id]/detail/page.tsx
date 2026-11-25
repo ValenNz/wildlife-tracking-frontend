@@ -17,6 +17,11 @@ import { formatDate } from "@/utils/format";
 
 import type { DeviceCondition } from "@/types/device.type";
 
+import { useUserRole } from "@/components/providers/preferences-provider";
+import { roleHasPermission } from "@/types/auth.type";
+import { DeviceTokenPanel } from "./device-token";
+import { DeviceOperations } from "./device-operations";
+
 const CONDITION_LABEL: Record<DeviceCondition, string> = {
   normal: "Normal",
   damaged: "Rusak",
@@ -48,6 +53,9 @@ const DetailField = ({
 );
 
 export default function DeviceDetailPage() {
+  const userRole = useUserRole();
+  const canManage = userRole ? roleHasPermission(userRole, "manage_master_data") : false;
+  const canWrite = userRole ? roleHasPermission(userRole, "create_data") : false;
   const params = useParams<{ id: string }>();
   const deviceId = Number(params.id);
 
@@ -251,6 +259,10 @@ export default function DeviceDetailPage() {
           />
         )}
       </section>
+
+      <DeviceOperations device={record} canManage={canManage} canWrite={canWrite} />
+
+      {canManage ? <DeviceTokenPanel deviceId={record.device_id} /> : null}
     </div>
   );
 }

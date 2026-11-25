@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# berkas agen lokal (dibuat otomatis oleh next dev; jangan di-commit)
+CLAUDE.md
+AGENTS.md
+.claude/

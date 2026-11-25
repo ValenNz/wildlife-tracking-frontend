@@ -9,6 +9,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { FormField, SelectInput, fieldDescribedBy } from "@/components/form";
 import { Modal } from "@/components/ui/modal";
 import { useAiPredictionVerification } from "@/hooks/use-ai";
+import { useAnimals } from "@/hooks/use-animals";
 import { useSpecies } from "@/hooks/use-species";
 import { formatApiError, getApiFieldErrors, toApiErrorState } from "@/services/api";
 import type {
@@ -19,6 +20,9 @@ import type {
 type AiPredictionVerificationProps = {
   predictionId: number;
   defaultSpeciesId?: number | null;
+  defaultAnimalId?: number | null;
+  /** Spesies wajib saat menerima hasil foto/video (aturan backend); audio boleh tanpa spesies. */
+  requireSpecies?: boolean;
   onVerified?: () => void;
 };
 
@@ -30,6 +34,8 @@ type VerificationAction = Extract<
 export function AiPredictionVerification({
   predictionId,
   defaultSpeciesId,
+  defaultAnimalId,
+  requireSpecies = true,
   onVerified,
 }: AiPredictionVerificationProps) {
   const { showToast } = useToast();
@@ -37,6 +43,12 @@ export function AiPredictionVerification({
   const verificationMutation = useAiPredictionVerification();
   const [action, setAction] = useState<VerificationAction | null>(null);
   const [speciesId, setSpeciesId] = useState("");
+  const [animalId, setAnimalId] = useState("");
+  const animalsQuery = useAnimals();
+  const animals = (animalsQuery.data?.data?.items ?? []).filter(
+    (animal) => speciesId === "" || animal.species_id === Number(speciesId),
+  );
+  const speciesRequired = action === "confirmed" && requireSpecies;
   const [fieldError, setFieldError] = useState<string | undefined>(undefined);
 
   const speciesList = speciesQuery.data?.data?.items ?? [];
@@ -47,6 +59,7 @@ export function AiPredictionVerification({
     setSpeciesId(
       defaultSpeciesId && defaultSpeciesId > 0 ? String(defaultSpeciesId) : "",
     );
+    setAnimalId(defaultAnimalId && defaultAnimalId > 0 ? String(defaultAnimalId) : "");
     setFieldError(undefined);
     verificationMutation.reset();
   };
@@ -60,14 +73,17 @@ export function AiPredictionVerification({
 
   const submitVerification = () => {
     if (action === null) return;
-    if (speciesId === "") {
+    if (speciesRequired && speciesId === "") {
       setFieldError("Pilih spesies hasil verifikasi.");
       return;
     }
 
     const payload: AiPredictionVerifyPayload = {
       verification_status: action,
-      verified_species_id: Number(speciesId),
+      verified_species_id: speciesId === "" ? null : Number(speciesId),
+      ...(action === "confirmed" && animalId !== ""
+        ? { verified_animal_id: Number(animalId) }
+        : {}),
     };
 
     verificationMutation.mutate(
@@ -127,7 +143,11 @@ export function AiPredictionVerification({
         open={action !== null}
         onClose={closeDialog}
         title={action === "confirmed" ? "Konfirmasi prediksi" : "Tolak prediksi"}
-        description="Pilih spesies hasil verifikasi. Spesies wajib diisi untuk kedua aksi."
+        description={
+          action === "confirmed"
+            ? "Pilih spesies dan, bila dikenali, individunya. Individu yang dipilih menambah galeri foto re-identifikasi."
+            : "Hasil AI ditandai salah. Spesies boleh dikosongkan."
+        }
         size="sm"
       >
         <div className="flex flex-col gap-4">
@@ -142,7 +162,7 @@ export function AiPredictionVerification({
           <FormField
             label="Spesies Hasil Verifikasi"
             htmlFor="ai-verification-species"
-            required
+            required={speciesRequired}
             error={fieldError}
           >
             <SelectInput
@@ -160,7 +180,7 @@ export function AiPredictionVerification({
                 setFieldError(undefined);
               }}
             >
-              <option value="">Pilih spesies</option>
+              <option value="">{speciesRequired ? "Pilih spesies" : "Tidak ditentukan"}</option>
               {speciesList.map((species) => (
                 <option key={species.species_id} value={species.species_id}>
                   {species.common_name} · {species.scientific_name}
@@ -169,6 +189,24 @@ export function AiPredictionVerification({
             </SelectInput>
           </FormField>
 
+          {action === "confirmed" ? (
+            <FormField label="Individu Satwa (opsional)" htmlFor="ai-verification-animal">
+              <SelectInput
+                id="ai-verification-animal"
+                value={animalId}
+                disabled={isPending || animalsQuery.isLoading}
+                onChange={(event) => setAnimalId(event.target.value)}
+              >
+                <option value="">Tidak diketahui</option>
+                {animals.map((animal) => (
+                  <option key={animal.animal_id} value={animal.animal_id}>
+                    {animal.animal_code}
+                  </option>
+                ))}
+              </SelectInput>
+            </FormField>
+          ) : null}
+
           <div className="flex flex-wrap justify-end gap-2 border-t border-line pt-4">
             <Button variant="outline" onClick={closeDialog} disabled={isPending}>
               Batal
@@ -176,7 +214,7 @@ export function AiPredictionVerification({
             <Button
               variant={action === "rejected" ? "danger" : "primary"}
               loading={isPending}
-              disabled={speciesQuery.isLoading || speciesList.length === 0}
+              disabled={speciesQuery.isLoading}
               onClick={submitVerification}
             >
               {isPending ? "Menyimpan..." : "Simpan Verifikasi"}

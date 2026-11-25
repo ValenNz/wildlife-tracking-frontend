@@ -11,20 +11,20 @@ type StatCardProps = {
   className?: string;
 };
 
-const TONE_STYLES = {
-  neutral: "border-natural-muted bg-white text-forest-black",
-  positive: "border-forest-primary/30 bg-white text-forest-deep",
-  warning: "border-warning/25 bg-white text-warning",
-  info: "border-info/25 bg-white text-info",
-  danger: "border-danger/25 bg-white text-danger",
+const ACCENT_BAR = {
+  neutral: "border-t-line",
+  positive: "border-t-forest-primary",
+  warning: "border-t-warning",
+  info: "border-t-forest-deep",
+  danger: "border-t-danger",
 } as const;
 
-const ICON_STYLES = {
-  neutral: "bg-natural-muted/50 text-forest-primary",
-  positive: "bg-forest-primary text-white",
-  warning: "bg-warning-soft text-warning",
-  info: "bg-info-soft text-info",
-  danger: "bg-danger-soft text-danger",
+const ICON_TONE = {
+  neutral: "text-muted",
+  positive: "text-forest-primary",
+  warning: "text-warning",
+  info: "text-info",
+  danger: "text-danger",
 } as const;
 
 export function StatCard({
@@ -39,33 +39,25 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "flex min-w-0 flex-col gap-3 rounded-card border px-4 py-4 shadow-sm",
-        TONE_STYLES[tone],
+        "flex min-w-0 flex-col justify-between gap-2.5 rounded-card border border-line border-t-2 bg-surface px-4 py-4 transition-colors hover:border-line-strong/60",
+        ACCENT_BAR[tone],
         color,
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] opacity-70">
-          {label}
-        </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-medium text-muted">{label}</p>
         {icon !== undefined ? (
-          <span
-            className={cn(
-              "flex size-9 shrink-0 items-center justify-center rounded-xl",
-              ICON_STYLES[tone],
-            )}
-            aria-hidden="true"
-          >
+          <span className={cn("shrink-0", ICON_TONE[tone])} aria-hidden="true">
             {icon}
           </span>
         ) : null}
       </div>
-      <p className="break-words text-2xl font-bold leading-tight tracking-tight tabular-nums sm:text-3xl">
+      <p className="break-words font-serif text-3xl font-medium leading-none tracking-tight text-ink tabular-nums">
         {value}
       </p>
       {hint !== undefined ? (
-        <p className="text-xs font-medium opacity-70">{hint}</p>
+        <p className="text-xs text-muted">{hint}</p>
       ) : null}
     </div>
   );

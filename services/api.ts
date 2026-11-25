@@ -482,6 +482,7 @@ const createActionApiClient = (): ApiClient => {
         type: contentType,
       }),
       contentType,
+      filename: result.filename,
     };
   };
 

@@ -1,6 +1,7 @@
 import type { FilterField, FilterValues } from "@/components/filter";
 import {
   AI_PROCESSING_STATUS_LABELS,
+  AI_THREAT_LEVEL_LABELS,
   AI_VERIFICATION_STATUS_LABELS,
 } from "@/types/ai.type";
 
@@ -8,6 +9,8 @@ export type AiHistoryFilters = FilterValues & {
   processing_status: string;
   verification_status: string;
   species_id: string;
+  threat_level: string;
+  analysis_type: string;
   min_confidence: string;
   start_date: string;
   end_date: string;
@@ -17,6 +20,8 @@ export const INITIAL_FILTERS: AiHistoryFilters = {
   processing_status: "all",
   verification_status: "all",
   species_id: "all",
+  threat_level: "all",
+  analysis_type: "all",
   min_confidence: "",
   start_date: "",
   end_date: "",
@@ -62,6 +67,28 @@ export const getHistoryFilterFields = (
         label: species.common_name,
         value: String(species.species_id),
       })),
+    ],
+  },
+  {
+    key: "threat_level",
+    kind: "select",
+    label: "Tingkat Ancaman",
+    options: [
+      { label: "Semua Ancaman", value: "all" },
+      ...Object.entries(AI_THREAT_LEVEL_LABELS).map(([value, label]) => ({
+        label,
+        value,
+      })),
+    ],
+  },
+  {
+    key: "analysis_type",
+    kind: "select",
+    label: "Jenis Analisis",
+    options: [
+      { label: "Foto, Video, dan Audio", value: "all" },
+      { label: "Foto & Video", value: "image" },
+      { label: "Audio", value: "audio" },
     ],
   },
   {

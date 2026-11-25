@@ -45,7 +45,7 @@ export default function DeviceListPage() {
     selectedDeleteDevice?.device_id ?? 0,
   );
 
-  const devices = query.data?.data ?? [];
+  const devices = useMemo(() => query.data?.data ?? [], [query.data]);
 
   const handleCreate = useCallback(() => {
     router.push("/devices/create");

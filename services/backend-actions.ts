@@ -1,5 +1,7 @@
 "use server";
 
+import { headers } from "next/headers";
+
 import {
   ApiError,
   createServerApiClient,
@@ -15,17 +17,37 @@ import {
   getAuthToken,
   setAuthCookies,
 } from "@/services/cookie-token";
-import { authenticateWithLaravel } from "@/services/laravel-auth.service";
+import {
+  authenticateWithLaravel,
+  registerWithLaravel,
+} from "@/services/laravel-auth.service";
 import type {
   BackendActionPayload,
   BackendActionResult,
   LoginActionResult,
   LogoutActionResult,
 } from "@/types/backend-action.type";
-import type { TYPE_LOGIN_REQUEST } from "@/types/auth.type";
+import type { TYPE_LOGIN_REQUEST, TYPE_REGISTER_CHALLENGE, TYPE_REGISTER_REQUEST } from "@/types/auth.type";
 
 const normalizePath = (path: string): string =>
   path.replace(/^\/api\/backend(?=\/|$)/, "") || "/";
+
+const isSafeApiPath = (path: string): boolean => {
+  if (!path.startsWith("/")) return false;
+  if (
+    path.includes("..") ||
+    path.includes("//") ||
+    path.includes("\\") ||
+    path.includes("://") ||
+    path.includes("@") ||
+    path.includes("?") ||
+    path.includes("#")
+  ) {
+    return false;
+  }
+  if (/[\x00-\x1f\x7f]/.test(path)) return false;
+  return /^\/[A-Za-z0-9/_.-]*$/.test(path);
+};
 
 const unauthorizedResult = (): BackendActionResult => ({
   ok: false,
@@ -35,22 +57,58 @@ const unauthorizedResult = (): BackendActionResult => ({
   errors: null,
 });
 
-const encodeBytesToBase64 = (bytes: Uint8Array): string => {
-  const chunkSize = 0x8000;
-  let encoded = "";
+// Base64 per potongan harus kelipatan 3 byte; dengan potongan 32 KB padding "=" muncul
+// di tengah string dan atob() di browser gagal untuk berkas > 32 KB. Buffer Node menangani semuanya.
+const encodeBytesToBase64 = (bytes: Uint8Array): string =>
+  Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString("base64");
 
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    let binary = "";
-    const end = Math.min(offset + chunkSize, bytes.length);
+/** Respons berkas (media, ekspor CSV/GeoJSON) diteruskan sebagai base64, bukan JSON. */
+const BINARY_CONTENT_TYPES = [
+  "image/",
+  "video/",
+  "audio/",
+  "text/csv",
+  "application/geo+json",
+  "application/pdf",
+  "application/octet-stream",
+  "model/",
+];
 
-    for (let index = offset; index < end; index += 1) {
-      binary += String.fromCharCode(bytes[index]);
-    }
-
-    encoded += btoa(binary);
+/**
+ * IP pengunjung asli diteruskan ke Laravel (X-Forwarded-For) agar rate limit login/daftar dihitung per pengunjung,
+ * bukan per server Next.js. Laravel hanya memercayainya bila IP server ini terdaftar di TRUSTED_PROXIES.
+ * Diambil entri paling kanan = alamat yang dilihat langsung oleh server ini (tidak bisa dipalsukan klien).
+ */
+const clientIpHeaders = async (): Promise<Record<string, string>> => {
+  try {
+    const incoming = await headers();
+    const forwarded = incoming.get("x-forwarded-for")?.split(",").pop()?.trim();
+    const ip = forwarded || incoming.get("x-real-ip")?.trim() || "";
+    return /^[0-9a-fA-F:.]{3,45}$/.test(ip) ? { "X-Forwarded-For": ip } : {};
+  } catch {
+    return {};
   }
+};
 
-  return encoded;
+/** Soal keamanan pendaftaran (publik, tanpa token). */
+export const registerChallengeAction = async (): Promise<
+  { ok: true; challenge: TYPE_REGISTER_CHALLENGE } | { ok: false; message: string }
+> => {
+  try {
+    const serverApi = createServerApiClient(getLaravelApiBaseUrl());
+    const response = (await serverApi.get("/register/challenge", { headers: await clientIpHeaders() })) as {
+      data?: TYPE_REGISTER_CHALLENGE;
+    };
+    return { ok: true, challenge: response?.data ?? null };
+  } catch (error) {
+    return {
+      ok: false,
+      message:
+        error instanceof ApiError && error.status === 429
+          ? "Terlalu banyak permintaan. Tunggu sebentar."
+          : "Tidak dapat memuat soal keamanan. Pastikan server berjalan.",
+    };
+  }
 };
 
 export const loginAction = async (
@@ -72,7 +130,7 @@ export const loginAction = async (
   }
 
   try {
-    const result = await authenticateWithLaravel({ email, password });
+    const result = await authenticateWithLaravel({ email, password }, await clientIpHeaders());
 
     if (!result.ok) {
       return {
@@ -96,6 +154,48 @@ export const loginAction = async (
       status: 503,
       message:
         "Tidak dapat menghubungi API backend. Pastikan server Laravel berjalan.",
+      errors: null,
+    };
+  }
+};
+
+/** Daftar akun pengunjung lalu langsung masuk (cookie sesi diset seperti login). */
+export const registerAction = async (
+  payload: TYPE_REGISTER_REQUEST,
+): Promise<LoginActionResult> => {
+  const read = (value: unknown) => (typeof value === "string" ? value : "");
+  const clean: TYPE_REGISTER_REQUEST = {
+    full_name: read(payload?.full_name).trim(),
+    username: read(payload?.username).trim(),
+    email: read(payload?.email).trim(),
+    phone: read(payload?.phone).trim(),
+    password: read(payload?.password),
+    password_confirmation: read(payload?.password_confirmation),
+    captcha_token: read(payload?.captcha_token),
+    captcha_answer: read(payload?.captcha_answer).trim(),
+    website: read(payload?.website),
+  };
+
+  try {
+    const result = await registerWithLaravel(clean, await clientIpHeaders());
+
+    if (!result.ok) {
+      return {
+        ok: false,
+        status: result.status,
+        message: result.message,
+        errors: result.errors,
+      };
+    }
+
+    await setAuthCookies(result.user, result.token);
+
+    return { ok: true, message: "Pendaftaran berhasil. Selamat datang!", user: result.user };
+  } catch {
+    return {
+      ok: false,
+      status: 503,
+      message: "Tidak dapat menghubungi API backend. Pastikan server Laravel berjalan.",
       errors: null,
     };
   }
@@ -146,21 +246,34 @@ export const forwardBackendAction = async (
 
   if (!token) return unauthorizedResult();
 
+  const safePath = normalizePath(payload.path);
+  if (!isSafeApiPath(safePath)) {
+    return {
+      ok: false,
+      status: 400,
+      kind: resolveErrorKind(400),
+      message: "Path permintaan tidak valid.",
+      errors: null,
+    };
+  }
+
   const contentType = payload.headers?.["Content-Type"];
-  const headers: Record<string, string> =
-    typeof contentType === "string" ? { "Content-Type": contentType } : {};
+  const requestHeaders: Record<string, string> = {
+    ...(await clientIpHeaders()),
+    ...(typeof contentType === "string" ? { "Content-Type": contentType } : {}),
+  };
 
   try {
     const serverApi = createServerApiClient(getLaravelApiBaseUrl());
     const response = await serverApi.requestRaw(
       payload.method,
-      normalizePath(payload.path),
+      safePath,
       {
         params: payload.params,
         body: payload.body,
         bodyText: payload.bodyText,
         formData: payload.formData,
-        headers,
+        headers: requestHeaders,
         token,
         timeoutMs: payload.timeoutMs,
       },
@@ -176,10 +289,11 @@ export const forwardBackendAction = async (
     }
 
     const responseContentType = response.headers.get("content-type") ?? "";
+    const disposition = response.headers.get("content-disposition") ?? "";
     const isBinaryResponse =
       response.ok &&
-      (responseContentType.includes("image/") ||
-        responseContentType.includes("application/octet-stream"));
+      (BINARY_CONTENT_TYPES.some((type) => responseContentType.includes(type)) ||
+        disposition.includes("attachment"));
 
     if (isBinaryResponse) {
       const bytes = new Uint8Array(await response.arrayBuffer());
@@ -190,6 +304,7 @@ export const forwardBackendAction = async (
         body: undefined,
         base64: encodeBytesToBase64(bytes),
         contentType: responseContentType,
+        filename: /filename="?([^";]+)"?/i.exec(disposition)?.[1],
         meta: getPaginationMeta(response.headers),
       };
     }

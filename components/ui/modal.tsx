@@ -59,7 +59,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-forest-black/40 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-forest-black/40 p-2 backdrop-blur-[2px] sm:items-center sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
@@ -74,7 +74,7 @@ export function Modal({
         aria-describedby={description === undefined ? undefined : descriptionId}
         tabIndex={-1}
         className={cn(
-          "max-h-[90vh] w-full overflow-y-auto rounded-card border border-natural-muted bg-white shadow-card outline-none sm:rounded-xl",
+          "max-h-[calc(100dvh-1rem)] w-full overflow-y-auto overscroll-contain rounded-card border border-natural-muted bg-white shadow-card outline-none sm:max-h-[90dvh] sm:rounded-xl",
           SIZES[size],
         )}
       >

@@ -83,3 +83,10 @@ export const useAnimalDelete = (id: number) => {
     },
   });
 };
+
+export const useAnimalIncidents = (id: number) =>
+  useQuery({
+    queryKey: ["animals", id, "incidents"],
+    queryFn: () => ANIMAL_SERVICE.GET_INCIDENTS(id),
+    enabled: Number.isFinite(id) && id > 0,
+  });

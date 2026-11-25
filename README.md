@@ -6,6 +6,14 @@ README ini adalah dokumentasi utama repository `wildlife-tracking-frontend`. Isi
 
 ## Daftar isi
 
+- [Pembaruan 26 November 2026 (lanjutan 4): panduan pengguna interaktif (`/manual`, Normal & Peak Mode)](#pembaruan-26-november-2026-lanjutan-4-panduan-pengguna-interaktif-manual-normal--peak-mode)
+- [Pembaruan 26 November 2026 (lanjutan 3): notifikasi semua role (no-show), dark/light mode & bahasa ID/EN](#pembaruan-26-november-2026-lanjutan-3-notifikasi-semua-role-no-show-darklight-mode--bahasa-iden)
+- [Pembaruan 26 November 2026 (lanjutan 2): peta 3D kualitas tinggi & simulator pembayaran otomatis](#pembaruan-26-november-2026-lanjutan-2-peta-3d-kualitas-tinggi--simulator-pembayaran-otomatis)
+- [Pembaruan 26 November 2026 (lanjutan): perbaikan pesan error login & audit](#pembaruan-26-november-2026-lanjutan-perbaikan-pesan-error-login--audit)
+- [Pembaruan 26 November 2026: satwa 3D, perbaikan bug & risiko](#pembaruan-26-november-2026-satwa-3d-perbaikan-bug--risiko)
+- [Pembaruan 25 November 2026: POS loket & peta 3D](#pembaruan-25-november-2026-pos-loket--peta-3d)
+- [Pembaruan 24 November 2026: modul wisata & role pengunjung](#pembaruan-24-november-2026-modul-wisata--role-pengunjung)
+- [Pembaruan 24 November 2026: semua endpoint backend](#pembaruan-24-november-2026-semua-endpoint-backend)
 - [1. Ringkasan aplikasi](#1-ringkasan-aplikasi)
 - [2. Status implementasi](#2-status-implementasi)
 - [3. Tumpukan teknologi](#3-tumpukan-teknologi)
@@ -20,6 +28,319 @@ README ini adalah dokumentasi utama repository `wildlife-tracking-frontend`. Isi
 - [12. Referensi](#12-referensi)
 
 ---
+
+## Pembaruan 26 November 2026 (lanjutan 4): panduan pengguna interaktif (`/manual`, Normal & Peak Mode)
+
+- **Menu Panduan Pengguna (`/manual`, semua 6 role)**: berisi 6 bab lengkap (sistem & role, pelacakan & insiden, analisis AI, wisata & pembayaran otomatis, POS loket & check-in, ensiklopedia satwa 3D & bantuan cepat) dalam Bahasa Indonesia & Inggris serta mendukung Dark/Light mode.
+- **Normal Mode**: tata letak dokumentasi standar dengan daftar isi sticky, pencarian topik, langkah bernomor, dan tautan langsung ke fitur terkait.
+- **Peak Mode**: pengalaman interaktif 3D per bab — panggung halaman penuh 3D berlapis (Bab 01), lembaran bab 3D dua sisi yang dapat diputar 360° (Bab 02), karusel silinder 3D AI berputar (Bab 03), gunung 3D Gunung Leuser yang terus berputar dengan 4 pin POI berisi papan kanvas 3D (`CanvasTexture`) langsung di sisi gunung (Bab 04), dek kartu taktil 3D (Bab 05), dan tata surya 3D dengan 4 planet mengorbit berisi papan kanvas 3D langsung di tiap planet yang dapat di-zoom penuh (Bab 06).
+- **Drunk Mode / Mode Mabuk (`lib/drunk-mode.ts`, `lib/drunk-audio.ts`, `components/navigation/main/drunk-mode-toggle.tsx`, `components/navigation/main/drunk-effects-engine.tsx`)**: tombol pengubah di samping Night Mode pada header setelah login; menghadirkan efek optik sinematik (ayunan kamera `rAF` + inersia kursor, diplopia, *analog color grading*, header & panel 3D, judul berputar 3D, teks kabur di `#main-content` pada desktop dengan proteksi *coarse-pointer* mobile, *lagging ghost cursor*, pilihan intensitas `Tipsy`/`Drunk`/`Heavy`, serta efek guyuran air dingin + suara Web Audio API yang dapat di-mute saat klik `Sadar Sekarang`), sementara menu Sidebar tetap stabil dan seluruh modul transaksi (`/pos`, `/bookings`, `/tourism/bookings`, `/tourism/payments`, `/tourism/check-in`, `/tourism/prices`, `/tours/*/book`) otomatis menjeda Drunk Mode.
+- **Aksesibilitas & Asisten Suara AI (`lib/voice-assistant.ts`, `components/accessibility/voice-a11y-widget.tsx`)**: tombol simbol disabilitas mengambang di kiri bawah (`Alt+A` panel, `Alt+V` mikrofon) dengan pengenalan suara (*Web Speech API*) + kolom perintah teks, umpan balik bicara (*SpeechSynthesis*) dengan pilihan model suara & kecepatan bicara (`0.5×`–`2.0×`), navigasi & eksekusi perintah di halaman (buka menu, bacakan halaman, gulir, klik tombol, isi input), serta bantuan visual (*A 100%/115%/130%*, *Kontras Tinggi*, *Spasi Lega*).
+
+---
+
+## Pembaruan 26 November 2026 (lanjutan 3): notifikasi semua role (no-show), dark/light mode & bahasa ID/EN
+
+- **Notifikasi untuk seluruh 6 role (`lib/navigation.ts`, `app/(protected)/notifications/page.tsx`)**: menu Notifikasi dipindahkan ke bagian Akun agar semua role (`administrator_sistem`, `peneliti_ekologi`, `konservasionis_lapangan`, `pengambil_kebijakan`, `petugas_loket`, `pengunjung`) dapat mengaksesnya, sementara chip filter dan isi notifikasi dibatasi ketat sesuai role (pengunjung & petugas loket hanya melihat notifikasi `Sistem`; peringatan zona risiko dan perangkat tidak pernah tampil/no-show).
+- **Mode Gelap & Terang (`app/layout.tsx`, `app/globals.css`, `components/navigation/main/theme-toggle.tsx`)**: mendukung `color-scheme: light dark` dengan tombol pengubah di header yang menyimpan preferensi di `localStorage` tanpa FOUC dan otomatis kembali ke preferensi sistem bila disamakan.
+- **Pilihan Bahasa `ID` / `EN` (`lib/i18n.ts`, `lib/auto-translate.ts`, `components/providers/preferences-provider.tsx`)**: tombol pengubah bahasa di header serta halaman login/register menerjemahkan navigasi, role, breadcrumb, label status, form, tabel, notifikasi, peta 3D, dan modal secara penuh saat mode `EN` aktif, dan mengembalikan teks asli Indonesia 100% saat mode `ID` aktif.
+- **Perbaikan basemap Peta Jalan (`components/tourism/route-map-3d.tsx`)**: default tab **Peta** diganti dari CARTO Voyager (yang mewajibkan API key) ke **Esri World Street Map** (gratis tanpa watermark).
+
+---
+
+## Pembaruan 26 November 2026 (lanjutan 2): peta 3D kualitas tinggi & simulator pembayaran otomatis
+
+- **Peta & Rute 3D (`components/tourism/route-map-3d.tsx`)**:
+  - **3 mode basemap gratis tanpa API key**: **Satelit Hybrid** (Esri World Imagery + overlay batas wilayah, nama tempat & jalan yang dapat di-toggle), **Topografi** (OpenTopoMap dengan garis kontur & jalur), dan **Peta Jalan** (CARTO Voyager `@2x`). Semua tetap dapat dioverride lewat env `NEXT_PUBLIC_MAP_*`.
+  - **Kontrol & HUD 3D**: proyeksi globe pada zoom jauh, atmosfer langit, kontrol geolokasi, pilihan skala relief (`1×`, `1.8×`, `2.5×`), tombol reset kamera, penanda titik Mulai & Puncak (mdpl) saat rute dipilih, serta HUD koordinat & elevasi real-time saat kursor digerakkan.
+  - **Fly-through interaktif**: tombol jeda/lanjut, kecepatan `1×` / `2×`, jarak tempuh (`km`), dan elevasi (`mdpl`).
+- **Simulator Payment Gateway Otomatis (`components/tourism/payment-simulator-modal.tsx`, `app/(protected)/bookings/[code]/page.tsx`)**:
+  - Ketika `PAYMENT_SIMULATOR_ENABLED=true` di backend, halaman detail pemesanan menampilkan kartu **Bayar Instan & Verifikasi Otomatis** dengan modal checkout realistis (**QRIS Instan** dengan QR yang di-generate di browser, **Virtual Account** BCA/BNI/BRI/Mandiri dengan tombol salin, dan **E-Wallet** GoPay/OVO/DANA/ShopeePay).
+  - Pembayaran simulasi memanggil `POST /visitor/bookings/{code}/simulate-payment`, langsung memverifikasi status ke `paid`, dan menerbitkan e-tiket QR tanpa antrean verifikasi manual petugas.
+- **Hasil uji**: `npx tsc --noEmit` (0 error), `npm run lint` (0 error, 1 peringatan bawaan TanStack Table), `npm run build` lulus.
+
+---
+
+## Pembaruan 26 November 2026 (lanjutan): perbaikan pesan error login & audit
+
+- **Perbaikan pesan error login (`hooks/use-login.ts`)**: menghapus penggabungan `formatApiMessage` yang membuat pesan error login tertulis ganda (`"...salah. email: Email atau password salah."`). Sekarang hanya pesan utama (atau error field pertama bila pesan utama kosong) yang ditampilkan di form dan toast.
+- **Hasil uji & audit**:
+  - `npx tsc --noEmit`: 0 error.
+  - `npm run lint`: 0 error, 1 peringatan bawaan TanStack Table di `components/data-table/data-table.tsx` (React Compiler, bukan bug).
+  - `npm run build`: lulus (56 halaman statis + seluruh rute dinamis).
+  - `npm audit --omit=dev`: 3 kerentanan (1 high pada `zod`, 2 critical pada `maplibre-gl` dan `next` yang membutuhkan pembaruan versi mayor/minor terencana; tidak dilakukan upgrade otomatis agar tidak memecah kompatibilitas).
+
+---
+
+## Pembaruan 26 November 2026: satwa 3D, perbaikan bug & risiko
+
+### Penting setelah `git pull`
+
+Jalankan `npm install` setiap kali ada paket baru. Paket baru rilis ini: `@google/model-viewer` dan `three`; rilis sebelumnya: `qrcode` dan `maplibre-gl`.
+
+Mulai rilis ini, `npm run dev` dan `npm run build` otomatis menjalankan `scripts/check-deps.mjs`. Bila paket belum terpasang atau versinya tidak cocok dengan `package-lock.json`, muncul pesan "Jalankan: npm install". Sebelumnya yang muncul error "Module not found: Can't resolve 'qrcode'".
+
+### Ensiklopedia satwa 3D (`/wildlife-3d`)
+
+Menu "Satwa 3D" terlihat oleh peneliti, konservasionis, pengambil kebijakan, admin, pengunjung, dan petugas loket.
+
+- **Daftar**: kartu tiap satwa dengan pratinjau 3D, status IUCN (CR/EN/VU…), dan taksonomi. Bisa dicari berdasarkan nama, nama ilmiah, atau nama daerah, dan disaring per kelompok (mamalia/burung/…).
+- **Detail** (`/wildlife-3d/[id]`):
+  - Model 3D bisa diputar (seret), diperbesar (scroll/cubit), digeser, diputar otomatis, dan dibuka layar penuh. Ada tombol AR di ponsel yang mendukung WebXR.
+  - **Titik keterangan bernomor** di tubuh satwa; klik untuk mengarahkan kamera ke ciri tersebut.
+  - Ukuran, umur, pola aktivitas, populasi, dan status perlindungan.
+  - Bagian ciri-ciri, perilaku, makanan, habitat & sebaran, ancaman, dan fakta menarik.
+- **Kelola** (khusus `manage_master_data`: peneliti & admin):
+  - Unggah/ganti model `.glb` (hasil pemindaian atau model berlisensi) beserta kreditnya.
+  - Tambah titik keterangan dengan **mengklik langsung bagian tubuh pada model**.
+  - Ubah seluruh profil, dan sembunyikan satwa dari publik bila perlu.
+- **Model bawaan**: 8 model **ilustratif** (low-poly) yang dibuat sistem, bukan hasil pemindaian, dan diberi label begitu di halaman. Ganti dengan model asli bila ada.
+- **Keamanan**:
+  - Lokasi individu satwa tidak pernah ditampilkan (risiko perburuan).
+  - Model dimuat lewat proxy sebagai blob.
+  - Backend menolak GLB yang merujuk URL eksternal.
+- **File**: `components/wildlife/*` (viewer `<model-viewer>`, badge IUCN), `services/wildlife.service.ts`, `hooks/use-wildlife.ts`, `types/wildlife.type.ts`, `types/model-viewer.d.ts`.
+
+### Bug yang ditemukan & diperbaiki
+
+Seluruh 69 halaman di-crawl otomatis untuk keenam role.
+
+| Bug | Perbaikan |
+|---|---|
+| Halaman **Riwayat Sesi Kas** (`/pos/sessions`) crash: "Cannot read properties of undefined (reading 'transactions')" | Backend mengirim `summary` di daftar sesi |
+| Breadcrumb di halaman detail/edit menautkan ke `/species/1`, `/users/3`, dst. yang tidak ada (prefetch 404; diklik → halaman 404) | Segmen ID tidak lagi menjadi tautan |
+| Sesi habis (idle 2 jam) membuat semua halaman menampilkan error 401 tanpa jalan keluar | `QueryProvider` menangani 401 secara global: hapus sesi, lalu ke `/login?reason=expired` |
+| Error 4xx (validasi/izin/404) ikut dicoba ulang | Hanya error jaringan/5xx yang dicoba ulang |
+| Status insiden bisa diisi teks bebas | Pilihan baku: Menunggu, Diselidiki, Selesai, Ditolak (divalidasi backend) |
+| Petugas loket tidak punya menu Profil (tidak bisa ganti password) | Ditambahkan |
+| `useMemo` di halaman satwa, perangkat, insiden, dan peta live dihitung ulang setiap render | Data dibungkus `useMemo`; ref cleanup peta diperbaiki |
+
+### Risiko yang ditutup
+
+- **Pendaftaran**:
+  - Soal keamanan (CAPTCHA hitungan dari server, sekali pakai) dengan tombol "Ganti soal".
+  - Field honeypot tersembunyi.
+  - Soal baru otomatis setelah gagal.
+- **Rate limit per pengunjung**: server action meneruskan IP pengunjung (`X-Forwarded-For`). Backend hanya memercayainya bila `TRUSTED_PROXIES` diisi IP server FE.
+- **Pembayaran online Midtrans**: tombol "Bayar online sekarang" di halaman pesanan. Tombol hanya muncul bila backend mengisi `MIDTRANS_SERVER_KEY`, dan hanya mengarahkan ke domain `*.midtrans.com`.
+- **Token perangkat** di detail perangkat (`/devices/[id]/detail`, khusus `manage_master_data`):
+  - Buat, salin (sekali tampil), dan cabut token untuk kamera jebak/perekam/kalung GPS.
+  - Token tidak kedaluwarsa karena idle dan hanya bisa mengirim data perangkat itu.
+- **Tile peta 3D bisa diganti lewat env**: `NEXT_PUBLIC_MAP_SATELLITE_URL`, `NEXT_PUBLIC_MAP_SATELLITE_ATTRIBUTION`, `NEXT_PUBLIC_MAP_STREET_URL`, `NEXT_PUBLIC_MAP_TERRAIN_URL`. Isi dengan URL penyedia berlisensi (mis. MapTiler/Stadia dengan key) untuk trafik publik besar.
+
+### Hasil uji
+
+- `tsc` dan `next build` lulus.
+- `eslint`: 0 error. Sisa 1 peringatan berasal dari library TanStack Table yang tidak kompatibel dengan React Compiler (bukan bug).
+- Backend: 130/130 test.
+- Uji browser:
+  - **Daftar akun**: CAPTCHA salah ditolak, soal berganti, lalu berhasil daftar.
+  - **Ensiklopedia sebagai pengunjung**: 8 satwa tampil, ke detail, klik titik keterangan; panel kelola tidak terlihat.
+  - **Peneliti**: unggah GLB, lalu klik pada model menghasilkan titik dan tersimpan.
+  - **Konservasionis**: hanya bisa melihat.
+  - **Token dicabut**: halaman berikutnya langsung diarahkan ke login.
+
+### Masih di luar jangkauan kode
+
+- **Model 3D asli**: perlu hasil pemindaian (fotogrametri) atau model berlisensi; sumber model terbuka untuk satwa Sumatra tidak tersedia.
+- **POS offline & printer ESC/POS** butuh perangkat keras dan desain sinkronisasi kuota. Untuk saat ini cetak lewat browser; Chrome `--kiosk-printing` membuat struk tercetak dengan satu klik.
+- **Midtrans**: kode sudah siap, tetapi butuh akun merchant dan uji sandbox dengan kunci asli.
+
+---
+
+## Pembaruan 25 November 2026: POS loket & peta 3D
+
+Lanjutan "Next Plan": **POS (Point of Sales)** untuk penjualan tiket walk-in di loket dan **peta & rute 3D**. Backend: `wildlife-tracking-backend` commit `df3cbcc` (POS), `8abd0f9` (zona waktu WIB), `08818b9` (rate limit).
+
+### POS loket
+
+| Rute | Untuk | Isi | Endpoint |
+|---|---|---|---|
+| `/pos` | kasir (`sell_tickets`) | Buka sesi kas → pilih rute, tanggal (7 hari), shift (hanya yang masih bisa dijual), jumlah WNI/pelajar/WNA/drone, nama pembeli → total dari server → bayar Tunai (tombol uang pas/pecahan, kembalian otomatis), QRIS, atau EDC (no. referensi) → struk + tiket QR. Opsi "langsung check-in" untuk kunjungan hari ini. Panel samping: ringkasan sesi, kas di laci, cetak ulang, void (wajib alasan), laporan X, tutup kas | `/pos/session*`, `/pos/sales*`, `/tourism/schedule`, `/tourism/quote` |
+| `/pos/sessions`, `/pos/sessions/[id]` | kasir (miliknya) / admin (semua) | Riwayat sesi, selisih kas, daftar transaksi, cetak laporan X/Z | `/pos/sessions*` |
+| `/pos/report` | pengelola (`manage_tourism`) | Laporan harian online + loket: total, **PNBP vs jasa pemandu**, per metode, per kanal, per sesi kasir; cetak A4 | `GET /pos/report` |
+
+- **Role baru `petugas_loket`** (`sell_tickets` + `validate_tickets`). Akun contoh: `loket@wildlife.id` / `password123`. Menu "Loket" berisi Kasir, Check-in Tiket, Riwayat Sesi Kas, dan Laporan Harian (khusus admin).
+- **Struk thermal 58/80 mm.** Struk dan laporan dibuat sebagai dokumen HTML tersendiri (`components/pos/receipt-html.ts`) dan dicetak dari iframe `sandbox`, sehingga ukuran kertas tidak bentrok dengan `@page` A4 aplikasi. Semua teks di-escape dan iframe tidak menjalankan skrip. Lebar kertas dipilih di halaman kasir dan disimpan per komputer (localStorage).
+- **"Hari ini" mengikuti WIB**, bukan zona waktu komputer kasir (`app/(protected)/pos/utils.ts`), sama dengan backend (`TOURISM_TIMEZONE`). Shift masih bisa dijual sampai 30 menit setelah jam mulai.
+- Struk memuat porsi PNBP (PP 36/2024) agar mudah direkonsiliasi dengan setoran kas negara.
+
+### Peta & rute 3D
+
+| Rute | Isi |
+|---|---|
+| `/tours/map-3d` (menu "Peta 3D") | Relief 3D kawasan (data elevasi) + citra satelit/peta. Semua jalur tur berwarna, label titik kumpul, klik rute untuk detail + profil ketinggian. **Fly-through**: kamera terbang mengikuti jalur sambil menampilkan ketinggian saat itu |
+| `/tours/[slug]` | Tombol 2D/3D di bagian "Peta jalur & titik kumpul" |
+
+- **Library**: `maplibre-gl@5.19.0` (WebGL, open source). Komponen `components/tourism/route-map-3d.tsx` dimuat dengan `next/dynamic` (`ssr: false`) dan tidak masuk barrel, jadi halaman lain tidak ikut memuatnya.
+- **Data**: memakai `waypoints` rute dari backend (`[lat, lon, ketinggian]`). Admin bisa menambah titik lewat `/tourism/routes/[id]/edit` agar jalur makin detail.
+- **Sumber tile** (tanpa API key, diunduh langsung oleh browser pengguna):
+  - Elevasi: Mapzen Terrain Tiles di AWS Open Data.
+  - Citra satelit: Esri World Imagery.
+  - Peta: OpenStreetMap.
+  - Atribusi tampil di pojok peta.
+- **Mode cadangan**: jika WebGL tidak tersedia, muncul pesan dan pengguna diarahkan ke peta 2D. Jika tile gagal dimuat (offline), jalur dan titik kumpul tetap tampil dengan peringatan.
+
+### Hasil uji
+
+- `tsc`, `eslint` (tanpa error baru), dan `next build` lulus.
+- Backend: `php artisan test` 110/110 (termasuk `PosTest` 8).
+- Uji browser (Playwright) terhadap backend lokal:
+  - **Kasir**: buka sesi → jual 3 orang tunai (kembalian benar) → struk → jual QRIS → void → tutup kas dengan selisih → laporan Z.
+  - **Akses**: kasir ditolak di `/pos/report`.
+  - **Admin**: membuka laporan harian.
+  - **Pengunjung**: peta 3D, pilih rute, fly-through, dan mode 3D di detail rute.
+  - Sandbox tidak bisa mengakses server tile, jadi uji peta memakai tile elevasi/citra sintetis. Di laptop dengan internet, tile asli dimuat.
+
+### Masih dikembangkan / risiko
+
+- **Printer**: cetak lewat dialog print browser. Untuk satu klik, jadikan printer thermal default dan jalankan Chrome dengan `--kiosk-printing`. ESC/POS langsung (laci kas otomatis) belum ada.
+- **Offline**: loket butuh koneksi ke server. Belum ada mode offline.
+- **Lisensi & privasi tile**: Esri World Imagery dan tile OSM punya kebijakan penggunaan wajar. Untuk trafik publik besar, pakai penyedia berlisensi (MapTiler/Stadia dengan API key) atau tile sendiri. Browser pengunjung menghubungi server tile pihak ketiga, sehingga IP-nya terlihat oleh mereka.
+- **Akurasi jalur 3D**: elevasi global beresolusi ±30–90 m, dan waypoint contoh hanya 4–5 titik per rute. Garis peta bukan panduan navigasi.
+- **Model 3D satwa** (bagian "User: 3D model" di Next Plan) belum dikerjakan.
+
+---
+
+## Pembaruan 24 November 2026: modul wisata & role pengunjung
+
+Frontend untuk modul wisata di backend (`9ee3dd5`, tabel `tour_routes`, `tour_guides`, `guide_shifts`, `bookings`, `payments`, `tour_reviews`). Struktur dan komponen mengikuti konvensi repo ini (lihat bagian berikutnya).
+
+### Role dan izin
+
+| Role | Izin wisata | Menu yang tampil |
+|---|---|---|
+| `pengunjung` (baru) | `book_tickets` | Jelajah Tur, Jadwal Pemandu, Pesanan Saya, Profil. Tidak melihat data konservasi. |
+| `konservasionis_lapangan` | + `validate_tickets` | Check-in Tiket |
+| `administrator_sistem` | semua (`*`) | Seluruh menu "Kelola Wisata" |
+
+`types/auth.type.ts` memuat role dan izin baru; `lib/navigation.ts` kini menerima izin berupa array (cukup salah satu), sehingga menu Profil terbuka untuk pengunjung. Halaman yang bukan haknya tampil "Akses ditolak", dan backend tetap membalas 403.
+
+### Halaman
+
+| Rute | Untuk | Isi | Endpoint |
+|---|---|---|---|
+| `/register` (publik) | calon pengunjung | Daftar akun, langsung masuk. Role selalu `pengunjung` (ditentukan server). Ada link dari halaman login. | `POST /register` |
+| `/tours` | pengunjung | Katalog rute + tabel tarif PNBP | `GET /tourism/routes`, `/tourism/prices` |
+| `/tours/[slug]` | pengunjung | Itinerary, peta jalur & titik kumpul (Leaflet), profil ketinggian, satwa, paket, barang bawaan, aturan, shift terdekat, ulasan | `GET /tourism/routes/{slug}` |
+| `/tours/[slug]/book` | pengunjung | Pilih shift, jumlah WNI/pelajar/WNA/drone, nama peserta, kontak darurat, metode bayar, rincian harga langsung dari server | `POST /tourism/quote`, `POST /visitor/bookings` |
+| `/guides`, `/guides/[id]` | pengunjung | Siapa bertugas per tanggal & shift, sisa kuota, satwa favorit + alasan, fun fact, bahasa, sertifikasi, rating | `GET /tourism/schedule`, `/tourism/guides`, `/tourism/guides/{id}` |
+| `/bookings`, `/bookings/[code]` | pengunjung | Hitung mundur batas bayar, rekening tujuan, unggah bukti, batal, e-tiket QR (+cetak), checklist bawaan, ulasan setelah check-in | `/visitor/bookings*`, `/tourism/payment-info` |
+| `/tourism/check-in` | petugas loket | Ketik atau pindai QR (kamera, `BarcodeDetector`), daftar kunjungan hari ini | `POST /tourism/check-in`, `GET /tourism/check-in/today` |
+| `/tourism/bookings`, `/tourism/bookings/[code]` | admin | Filter status/tanggal/kode, pendapatan lunas, detail peserta & pembayaran, batal/refund | `/tourism/admin/bookings*` |
+| `/tourism/payments` | admin | Pratinjau bukti (gambar/PDF), terima → tiket terbit, tolak dengan alasan | `/tourism/admin/payments*` |
+| `/tourism/routes` (+ `create`, `[id]/edit`) | admin | CRUD rute, itinerary, waypoint | `/tourism/admin/routes*` |
+| `/tourism/guides` | admin | CRUD pemandu + unggah foto | `/tourism/admin/guides*` |
+| `/tourism/shifts` | admin | CRUD shift, batalkan shift | `/tourism/admin/shifts*` |
+| `/tourism/prices` | admin | Ubah tarif, kelola hari libur nasional | `/tourism/admin/prices`, `/holidays` |
+| `/tourism/reviews` | admin | Tampilkan/sembunyikan ulasan | `/tourism/admin/reviews*` |
+
+File baru: `types/tourism.type.ts`, `services/tourism.service.ts` (`TOURISM_CATALOG_SERVICE`, `VISITOR_BOOKING_SERVICE`, `TICKET_CHECK_IN_SERVICE`, `TOURISM_ADMIN_SERVICE`), `hooks/use-tourism.ts`, `hooks/use-register.ts`, `components/tourism/*` (badge status, rating, avatar pemandu, QR, hitung mundur, peta rute). Dependensi baru: `qrcode` (QR dibuat di browser, payload tidak dikirim ke layanan luar).
+
+### Tarif (PP 36/2024, TN Gunung Leuser kelas III)
+
+| Kategori | Senin–Sabtu | Minggu/libur |
+|---|---|---|
+| WNI | Rp10.000 | Rp15.000 |
+| Pelajar/mahasiswa (min. 5 orang) | Rp5.000 | Rp7.500 |
+| WNA | Rp150.000 | Rp150.000 |
+| Drone | Rp2.000.000/unit/hari | Rp2.000.000/unit/hari |
+
+Tiket masuk dikalikan jumlah hari tur, lalu ditambah jasa pemandu per orang sesuai rute. Frontend hanya menampilkan harga; total selalu dihitung backend.
+
+### Keamanan di sisi frontend
+
+- Token tetap di cookie httpOnly. Semua panggilan lewat server action proxy, termasuk registrasi.
+- Role tidak dikirim saat registrasi. Validasi zod di klien hanya untuk UX; aturan sebenarnya ada di backend.
+- Bukti bayar dibatasi JPG/PNG/WEBP/PDF maksimal 5 MB, dicek sebelum diunggah. Bukti dibuka sebagai blob privat (`no-store`).
+- Ulasan dirender sebagai teks (React escape) dan tag HTML juga dibuang di server. Nama pengulas disingkat oleh backend.
+- Profil publik pemandu tidak memuat kontak pribadi.
+- E-tiket memakai token HMAC dari backend. Uji end-to-end memastikan QR palsu ditolak dan tiket tidak bisa dipakai dua kali.
+
+### Hasil uji (lokal, backend `migrate:fresh --seed`)
+
+Alur yang diuji dengan Playwright:
+
+1. Daftar akun pengunjung, lalu lihat katalog, detail rute, dan jadwal pemandu.
+2. Pesan 1 WNI + 1 WNA. Harga dari server: Rp10.000 + Rp150.000 + 2 × Rp400.000 = Rp960.000.
+3. Unggah bukti bayar.
+4. Admin memverifikasi pembayaran, lalu e-tiket QR terbit.
+5. Petugas lapangan check-in: QR palsu ditolak, tiket dipakai ulang ditolak.
+6. Pengunjung menulis ulasan, dan tag `<script>` terbuang.
+
+Selain itu, pengunjung yang membuka `/dashboard` atau `/tourism/*` mendapat "Akses ditolak", dan backend membalas 403. `tsc`, `eslint` (tanpa error baru) dan `next build` lulus.
+
+### Masih dikembangkan
+
+- **Payment gateway otomatis**: backend sudah punya webhook HMAC, tetapi belum ada integrasi penyedia (Midtrans/Xendit). Saat ini bayar manual lewat transfer/QRIS lalu diverifikasi petugas. Rekening tujuan diisi lewat `.env` backend (`TOURISM_BANK_*`).
+- **Refund**: hanya ditandai di sistem; pengembalian dana dilakukan manual.
+- **Peta 3D, model 3D satwa, dan POS loket** sesuai "Next Plan": belum dikerjakan. Peta saat ini Leaflet 2D ditambah profil ketinggian dari waypoint.
+- **Pemindaian QR kamera** butuh browser dengan `BarcodeDetector` (Chrome/Edge/Android). Di browser lain, ketik isi QR.
+- **Data contoh**: rute, pemandu, shift, dan hari libur tanggal tetap. Hari libur bertanggal bergerak (Idul Fitri, Waisak, dsb.) ditambahkan admin di `/tourism/prices`.
+
+---
+
+## Pembaruan 24 November 2026: semua endpoint backend
+
+Seluruh fitur backend (`wildlife-tracking-backend`) kini punya halaman, ditulis mengikuti struktur dan komponen repo ini:
+
+- **Halaman**: logika di `app/(protected)/<modul>/page.tsx`. Bila izin dicek di server, `page.tsx` membaca sesi lalu merender `index.tsx`. Kolom tabel di `column.tsx`, filter di `filter.tsx`, form bersama di `form.tsx`, komponen khusus halaman di folder yang sama.
+- **Komponen**: hanya dari barrel `@/components/button`, `/form`, `/data-table`, `/filter`, `/popup-confirmation`, `/status`, `/toast`, dan `@/components/ui/*`.
+- **Data**: `services/<domain>.service.ts` → `hooks/use-<domain>.ts` → `types/<domain>.type.ts`; modul baru memakai gaya `X_SERVICE.GET_ALL / CREATE / UPDATE / DELETE` dan `TYPE_X`.
+- **Menu**: `lib/navigation.ts` menyaring menu memakai `roleHasPermission` (tabel izin backend di `types/auth.type.ts`); halaman tambah/ubah memakai izin yang lebih ketat.
+
+### Halaman baru dan yang diperluas
+
+| Halaman | Endpoint backend | Izin |
+| --- | --- | --- |
+| `/ai/vision`: zona, perangkat, waktu pengambilan; hasil diperbarui otomatis saat antre; kotak deteksi, **wajah staf vs "Tidak dikenal"** (klik detik untuk lompat di video), **suara dalam video**, individu satwa, kondisi & perilaku, ancaman, analisis ulang, hapus | `POST /ai/upload`, `GET /ai-predictions/{id}`, `POST .../retry`, `DELETE /ai-predictions/{id}` | `upload_media`; hapus `delete_data` |
+| Verifikasi: spesies opsional saat menolak/audio, pilih individu satwa | `POST /ai-predictions/{id}/verify` | `verify_ai` |
+| Riwayat & antrean verifikasi: ikon video/audio, ancaman, filter ancaman & jenis | `GET /ai-predictions`, `/pending-verification` | `view_data` |
+| `/ai/threats` Ancaman | `GET /ai/threats` | `view_data` |
+| `/ai/recap` **Rekap Data AI** + Unduh PDF (cetak A4) | `GET /ai/recap` | `view_data` |
+| `/ai/media` Media unggahan | `GET/DELETE /media-uploads`, `POST /media-uploads/{id}/predictions` | lihat semua; hapus `delete_data` |
+| `/ai/staff-faces` Galeri wajah staf | `/staff-faces` | `manage_users` |
+| Detail satwa: foto referensi re-identifikasi, observasi AI, kunjungan zona, insiden | `/animals/{id}/reference-photos`, `/ai-observations`, `/zone-visits`, `/incidents` | tambah foto `manage_master_data` |
+| Detail perangkat: status, kondisi, telemetri, pasang/lepas kalung, titik GPS manual, rekaman kamera/perekam | `PATCH /devices/{id}/...`, `/devices/{id}/captures`, `POST /gps-readings` | `manage_master_data` / `create_data` |
+| Ubah insiden: lampiran (+ analisis AI), status sinkron | `/incidents/{id}/media`, `PATCH /incidents/{id}/sync-status` | `create_data`; sinkron `delete_data` |
+| Zona: cek koordinat, isi zona (satwa, perangkat, kunjungan) | `/geo-zones/locate`, `/geo-zones/{id}/animals`, `/devices`, `/visits` | `view_data` |
+| `/zone-visits` (+ `/create`) Kunjungan zona | `/animal-geo-zone-visits` | catat `create_data` |
+| `/weather` Cuaca + sinkron Open-Meteo | `/weather-data`, `POST /weather-data/sync` | sinkron `create_data` |
+| `/reports` Laporan agregat | `/aggregate-reports` | `view_reports`; hapus `delete_data` |
+| `/exports` Ekspor CSV/GeoJSON | `GET /export/*` | `export_data` |
+| `/users` (+ `create`, `[id]/edit`, `[id]/detail`) Pengguna, sesi, aktivitas | `/users`, `/users/{id}/status`, `/tokens`, `/activity` | `manage_users` |
+| `/roles` Matriks role × izin | `/roles`, `/permissions` | `manage_roles` |
+| `/activity-logs` Log aktivitas | `/activity-logs`, `/export/activity-logs/csv` | `manage_users` |
+| `/profile` Profil & ganti password | `/me`, `/me/password` | semua |
+| Notifikasi: tandai semua dibaca, hapus yang sudah dibaca | `PATCH /notifications/read-all`, `DELETE /notifications` | semua |
+
+### Perbaikan
+
+| Masalah | Perbaikan |
+| --- | --- |
+| Foto/video di atas 32 KB tidak pernah tampil (thumbnail riwayat kosong) | `services/backend-actions.ts`: base64 dikodekan sekali dengan `Buffer` (sebelumnya padding `=` muncul di tengah string) |
+| Upload di atas 1 MB ditolak (batas default server action) | `next.config.ts`: `experimental.serverActions.bodySizeLimit = "55mb"` |
+| Unduhan CSV/GeoJSON/video/audio dibaca sebagai JSON | Proxy meneruskan tipe biner + nama file dari `Content-Disposition` |
+| Audio `.wav`/`.m4a` ditolak di beberapa browser (MIME berbeda) | Validasi upload memakai ekstensi berkas |
+| Dua menu aktif sekaligus (mis. AI Vision dan Riwayat) | Sidebar menyorot menu paling spesifik |
+
+### Menghubungkan ke backend
+
+`.env.local` (tidak di-commit):
+
+```env
+API_URL=http://127.0.0.1:8000/api
+# atau server tim lewat Cloudflare Tunnel:
+# API_URL=https://<alamat-tunnel>.trycloudflare.com/api
+```
+
+Restart `npm run dev` setelah mengubahnya.
+
+### Masih dikembangkan
+
+- Tombol tambah/ubah di daftar master data masih tampil untuk role tanpa `manage_master_data` (halaman tujuannya menolak akses).
+- Video/audio diunduh utuh lewat server action; video besar di koneksi lambat terasa berat.
+- Endpoint yang dipanggil alat (`POST /gps-readings/bulk`, `POST /weather-data/ingest`) tidak punya halaman.
 
 ## 1. Ringkasan aplikasi
 

@@ -2,6 +2,8 @@ import { api, unwrapData } from "@/services/api";
 
 import type { ApiResponse } from "@/types/api.type";
 import type {
+  GeoZoneAnimal,
+  GeoZoneDevice,
   GeoZone,
   GeoZoneCreatePayload,
   GeoZoneListParams,
@@ -41,8 +43,8 @@ export const getGeoZoneById = async (
 export const getGeoZoneAnimals = async (
   id: number,
   history = false,
-): Promise<unknown[]> => {
-  const response = await api.get<ApiResponse<unknown[]>>(
+): Promise<GeoZoneAnimal[]> => {
+  const response = await api.get<ApiResponse<GeoZoneAnimal[]>>(
     `/geo-zones/${id}/animals`,
     { params: history ? { history: 1 } : undefined },
   );
@@ -62,8 +64,8 @@ export const getGeoZoneVisits = async (
 
 export const getGeoZoneDevices = async (
   id: number,
-): Promise<unknown[]> => {
-  const response = await api.get<ApiResponse<unknown[]>>(
+): Promise<GeoZoneDevice[]> => {
+  const response = await api.get<ApiResponse<GeoZoneDevice[]>>(
     `/geo-zones/${id}/devices`,
   );
 

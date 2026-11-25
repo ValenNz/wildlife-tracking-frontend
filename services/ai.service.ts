@@ -16,6 +16,9 @@ import type {
   AiThreatListParams,
   AiUploadPayload,
   AiVocabulary,
+  AnimalReferencePhoto,
+  StaffFace,
+  StaffFaceGroup,
 } from "@/types/ai.type";
 
 const AI_TIMEOUT_MS = 120_000;
@@ -120,7 +123,7 @@ export const AI_SERVICE = {
     }),
 
   getMediaFile: async (mediaId: number): Promise<BlobResponse> =>
-    api.getBlob(`/media-uploads/${mediaId}/file`, { timeoutMs: 30_000 }),
+    api.getBlob(`/media-uploads/${mediaId}/file`, { timeoutMs: AI_TIMEOUT_MS }),
 
   getMediaPredictions: async (
     mediaId: number,
@@ -203,4 +206,75 @@ export const AI_SERVICE = {
       { formData, timeoutMs: AI_TIMEOUT_MS },
     );
   },
+
+  getStaffFaces: async (): Promise<ApiResponse<StaffFaceGroup[]>> =>
+    api.get<ApiResponse<StaffFaceGroup[]>>("/staff-faces", { timeoutMs: 30_000 }),
+
+  addStaffFace: async (file: File, name: string): Promise<ApiResponse<StaffFace>> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("name", name);
+
+    return api.post<ApiResponse<StaffFace>>("/staff-faces", {
+      formData,
+      timeoutMs: AI_TIMEOUT_MS,
+    });
+  },
+
+  deleteStaffFace: async (id: number): Promise<ApiResponse<null>> =>
+    api.delete<ApiResponse<null>>(`/staff-faces/${id}`),
+
+  deleteStaffFacesByName: async (
+    name: string,
+  ): Promise<ApiResponse<{ deleted: number }>> =>
+    api.delete<ApiResponse<{ deleted: number }>>("/staff-faces", {
+      body: { name },
+    }),
+
+  getStaffFaceFile: async (id: number): Promise<BlobResponse> =>
+    api.getBlob(`/staff-faces/${id}/file`, { timeoutMs: 30_000 }),
+
+  getReferencePhotos: async (
+    animalId: number,
+  ): Promise<ApiResponse<AnimalReferencePhoto[]>> =>
+    api.get<ApiResponse<AnimalReferencePhoto[]>>(
+      `/animals/${animalId}/reference-photos`,
+      { timeoutMs: 30_000 },
+    ),
+
+  addReferencePhoto: async (
+    animalId: number,
+    file: File,
+  ): Promise<ApiResponse<AnimalReferencePhoto>> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return api.post<ApiResponse<AnimalReferencePhoto>>(
+      `/animals/${animalId}/reference-photos`,
+      { formData, timeoutMs: AI_TIMEOUT_MS },
+    );
+  },
+
+  deleteReferencePhoto: async (
+    animalId: number,
+    embeddingId: number,
+  ): Promise<ApiResponse<null>> =>
+    api.delete<ApiResponse<null>>(
+      `/animals/${animalId}/reference-photos/${embeddingId}`,
+    ),
+
+  getReferencePhotoFile: async (
+    animalId: number,
+    embeddingId: number,
+  ): Promise<BlobResponse> =>
+    api.getBlob(`/animals/${animalId}/reference-photos/${embeddingId}/file`, {
+      timeoutMs: 30_000,
+    }),
+
+  getAnimalObservations: async (
+    animalId: number,
+  ): Promise<ApiResponse<AiPrediction[]>> =>
+    api.get<ApiResponse<AiPrediction[]>>(`/animals/${animalId}/ai-observations`, {
+      timeoutMs: 30_000,
+    }),
 } as const;

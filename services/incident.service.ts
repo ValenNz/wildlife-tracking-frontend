@@ -1,5 +1,6 @@
 import { api, unwrapData } from "@/services/api";
 
+import type { AiMediaUpload } from "@/types/ai.type";
 import type { ApiResponse } from "@/types/api.type";
 import type {
   ApiIncidentReport,
@@ -150,8 +151,8 @@ export const deleteIncidentReport = async (
 
 export const getIncidentMedia = async (
   id: number,
-): Promise<unknown[]> => {
-  const response = await api.get<ApiResponse<unknown[]>>(
+): Promise<AiMediaUpload[]> => {
+  const response = await api.get<ApiResponse<AiMediaUpload[]>>(
     `/incidents/${id}/media`,
   );
 

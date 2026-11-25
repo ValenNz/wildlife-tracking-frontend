@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { Languages } from "lucide-react";
 import { Sidebar } from "@/components/navigation/main";
+import { ThemeToggle } from "@/components/navigation/main/theme-toggle";
+import { usePreferences } from "@/components/providers/preferences-provider";
 import type { SessionUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +23,7 @@ export function MobileNav({
   onLogout,
 }: MobileNavProps) {
   const pathname = usePathname();
+  const { locale, toggleLocale, t } = usePreferences();
 
   useEffect(() => {
     onClose();
@@ -83,14 +87,33 @@ export function MobileNav({
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <Sidebar
-          variant="mobile"
-          user={user}
-          onLogout={onLogout}
-          onNavigate={onClose}
-          onClose={onClose}
-          isHidden={!open}
-        />
+        <div className="min-h-0 flex-1">
+          <Sidebar
+            variant="mobile"
+            user={user}
+            onLogout={onLogout}
+            onNavigate={onClose}
+            onClose={onClose}
+            isHidden={!open}
+          />
+        </div>
+
+        {/* Quick preference controls (hidden from the compact phone header) */}
+        <div
+          inert={!open}
+          className="flex shrink-0 items-center gap-2 border-t border-white/10 bg-forest-dark px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:hidden"
+        >
+          <button
+            type="button"
+            onClick={toggleLocale}
+            aria-label={t("switchLanguage")}
+            className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-xs font-bold uppercase tracking-wider text-ink-soft"
+          >
+            <Languages aria-hidden="true" className="size-4" />
+            <span>{locale.toUpperCase()}</span>
+          </button>
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   );

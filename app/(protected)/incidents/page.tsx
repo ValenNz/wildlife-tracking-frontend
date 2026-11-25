@@ -37,7 +37,7 @@ export default function IncidentListPage() {
     refetch,
   } = useIncidentReports();
 
-  const reports = data?.data ?? [];
+  const reports = useMemo(() => data?.data ?? [], [data]);
 
   const visibleReports = useMemo(
     () =>

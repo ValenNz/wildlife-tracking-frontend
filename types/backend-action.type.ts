@@ -22,6 +22,7 @@ export type BackendActionResult =
       body: unknown;
       base64?: string;
       contentType?: string;
+      filename?: string;
       meta?: TYPE_META_PAGGINATION | null;
     }
   | {

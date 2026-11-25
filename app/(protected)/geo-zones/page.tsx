@@ -16,6 +16,8 @@ import { DataTable } from "@/components/data-table";
 import { DataFilters } from "@/components/filter";
 import { ErrorState } from "@/components/ui/error-state";
 import { Modal } from "@/components/ui/modal";
+
+import { ZoneContents, ZoneLocator } from "./zone-contents";
 import { PageHeader } from "@/components/ui/panel";
 import { StatCard } from "@/components/ui/stat-card";
 import { formatApiError, toApiErrorState } from "@/services/api";
@@ -138,6 +140,8 @@ export default function GeoZonesPage() {
           </Button>
         }
       />
+
+      <ZoneLocator />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
@@ -282,6 +286,7 @@ export default function GeoZonesPage() {
                 {formatGeoJson(selectedZone.polygon_geojson)}
               </pre>
             </div>
+            <ZoneContents zoneId={selectedZone.zone_id} />
             <div className="flex justify-end">
               <Button variant="outline" onClick={closeDetail}>
                 Tutup

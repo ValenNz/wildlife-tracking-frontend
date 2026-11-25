@@ -1,5 +1,6 @@
 import { api, unwrapData } from "@/services/api";
 
+import type { AiMediaUpload, AiPredictionUploadResult } from "@/types/ai.type";
 import type { ApiResponse } from "@/types/api.type";
 import type {
   DeviceAlert,
@@ -276,4 +277,25 @@ export const getDeviceAlerts = async (): Promise<
     message: "OK",
     data: alerts,
   };
+};
+
+export const getDeviceCaptures = async (
+  deviceId: number,
+): Promise<ApiResponse<AiMediaUpload[]>> =>
+  api.get<ApiResponse<AiMediaUpload[]>>(`/devices/${deviceId}/captures`, {
+    timeoutMs: 30_000,
+  });
+
+/** Rekaman kamera jebak / perekam suara; langsung dianalisis AI oleh backend. */
+export const uploadDeviceCapture = async (
+  deviceId: number,
+  file: File,
+): Promise<ApiResponse<AiPredictionUploadResult>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return api.post<ApiResponse<AiPredictionUploadResult>>(
+    `/devices/${deviceId}/captures`,
+    { formData, timeoutMs: 240_000 },
+  );
 };

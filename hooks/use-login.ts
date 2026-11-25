@@ -5,7 +5,6 @@ import { useState } from "react";
 
 import { useToast } from "@/components/toast";
 import { getDefaultRouteForRole } from "@/lib/navigation";
-import { formatApiMessage } from "@/services/api";
 import { loginRequest } from "@/services/auth.service";
 import type { TYPE_LOGIN_REQUEST } from "@/types/auth.type";
 
@@ -23,11 +22,11 @@ export const useLogin = () => {
       const result = await loginRequest(payload);
 
       if (!result.ok) {
-        const message = formatApiMessage(
-          result.message,
-          result.errors,
-          "Email atau password salah",
-        );
+        const firstFieldError = Object.values(result.errors ?? {})
+          .flat()
+          .find((item) => item.trim() !== "");
+        const message =
+          result.message?.trim() || firstFieldError || "Email atau password salah.";
 
         setLoginError(message);
         showToast(message, "error", LOGIN_TOAST_OPTIONS);

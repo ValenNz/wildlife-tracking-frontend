@@ -29,11 +29,17 @@ export const useAiPendingPredictions = () =>
     queryFn: () => AI_SERVICE.getPendingPredictions(),
   });
 
+const isProcessing = (status?: string) =>
+  status === "queued" || status === "processing";
+
+/** Detail prediksi; dimuat ulang tiap 2 detik selama masih antre/diproses (AI_QUEUE=true). */
 export const useAiPrediction = (id: number) =>
   useQuery({
     queryKey: [...AI_PREDICTIONS_KEY, id],
     queryFn: () => AI_SERVICE.getPredictionById(id),
     enabled: Number.isFinite(id) && id > 0,
+    refetchInterval: (query) =>
+      isProcessing(query.state.data?.data?.processing_status) ? 2000 : false,
   });
 
 export const useAiThreats = (params?: AiThreatListParams) =>
@@ -177,4 +183,102 @@ export const useAiDetectObjects = () =>
 export const useAiSummaryReport = () =>
   useMutation<ApiResponse<AiSummaryReport>, unknown, AiSummaryReportParams>({
     mutationFn: (params) => AI_SERVICE.getSummaryReport(params),
+  });
+
+const STAFF_FACES_KEY = ["staff-faces"] as const;
+
+export const useStaffFaces = () =>
+  useQuery({
+    queryKey: STAFF_FACES_KEY,
+    queryFn: () => AI_SERVICE.getStaffFaces(),
+  });
+
+export const useStaffFaceFile = (id: number) =>
+  useQuery({
+    queryKey: [...STAFF_FACES_KEY, "file", id],
+    queryFn: () => AI_SERVICE.getStaffFaceFile(id),
+    enabled: id > 0,
+    staleTime: Infinity,
+  });
+
+export const useStaffFaceCreate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ file, name }: { file: File; name: string }) =>
+      AI_SERVICE.addStaffFace(file, name),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: STAFF_FACES_KEY });
+    },
+  });
+};
+
+export const useStaffFaceDelete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => AI_SERVICE.deleteStaffFace(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: STAFF_FACES_KEY });
+    },
+  });
+};
+
+export const useStaffFaceDeleteByName = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (name: string) => AI_SERVICE.deleteStaffFacesByName(name),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: STAFF_FACES_KEY });
+    },
+  });
+};
+
+const referencePhotosKey = (animalId: number) =>
+  ["animal-reference-photos", animalId] as const;
+
+export const useAnimalReferencePhotos = (animalId: number) =>
+  useQuery({
+    queryKey: referencePhotosKey(animalId),
+    queryFn: () => AI_SERVICE.getReferencePhotos(animalId),
+    enabled: animalId > 0,
+  });
+
+export const useAnimalReferencePhotoFile = (animalId: number, embeddingId: number) =>
+  useQuery({
+    queryKey: [...referencePhotosKey(animalId), "file", embeddingId],
+    queryFn: () => AI_SERVICE.getReferencePhotoFile(animalId, embeddingId),
+    staleTime: Infinity,
+    retry: false,
+  });
+
+export const useAnimalReferencePhotoCreate = (animalId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => AI_SERVICE.addReferencePhoto(animalId, file),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: referencePhotosKey(animalId) });
+    },
+  });
+};
+
+export const useAnimalReferencePhotoDelete = (animalId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (embeddingId: number) =>
+      AI_SERVICE.deleteReferencePhoto(animalId, embeddingId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: referencePhotosKey(animalId) });
+    },
+  });
+};
+
+export const useAnimalAiObservations = (animalId: number) =>
+  useQuery({
+    queryKey: [...AI_PREDICTIONS_KEY, "animal", animalId],
+    queryFn: () => AI_SERVICE.getAnimalObservations(animalId),
+    enabled: animalId > 0,
   });

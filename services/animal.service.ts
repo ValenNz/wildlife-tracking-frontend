@@ -4,6 +4,7 @@ import {
   unwrapData,
 } from "@/services/api";
 
+import type { ApiIncidentReport } from "@/types/incident.type";
 import type { ApiResponse } from "@/types/api.type";
 import type { QUERY_PARAMS_API_GET_ALL } from "@/types/endpoint.type";
 import type { TYPE_META_PAGGINATION } from "@/types/meta.type";
@@ -179,6 +180,11 @@ export const ANIMAL_SERVICE = {
       data: mapAnimalFromApi(unwrapData(response)),
     };
   },
+
+  GET_INCIDENTS: async (
+    id: number,
+  ): Promise<ApiResponse<ApiIncidentReport[]>> =>
+    api.get<ApiResponse<ApiIncidentReport[]>>(`/animals/${id}/incidents`),
 
   DELETE: async (id: number): Promise<ApiResponse<null>> =>
     api.delete<ApiResponse<null>>(`/animals/${id}`),

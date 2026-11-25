@@ -15,8 +15,16 @@ import {
   createTrackingDevice,
   updateTrackingDevice,
   deleteTrackingDevice,
+  assignAnimalToDevice,
+  unassignAnimalFromDevice,
+  updateDeviceCondition,
+  updateDeviceStatus,
+  updateDeviceTelemetry,
+  getDeviceCaptures,
+  uploadDeviceCapture,
 } from "@/services/device.service";
 
+import type { DeviceCondition } from "@/types/device.type";
 import type {
   DeviceAlert,
   TrackingDevice,
@@ -133,6 +141,86 @@ export const useTrackingDeviceDelete = (deviceId: number) => {
         queryClient.removeQueries({
           queryKey: ["tracking-devices", deviceId],
         }),
+      ]);
+    },
+  });
+};
+
+const invalidateDeviceQueries = async (
+  queryClient: ReturnType<typeof useQueryClient>,
+  deviceId: number,
+) => {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["tracking-devices"] }),
+    queryClient.invalidateQueries({ queryKey: ["device-captures", deviceId] }),
+    queryClient.invalidateQueries({ queryKey: ["animals"] }),
+  ]);
+};
+
+export const useDeviceAssignAnimal = (deviceId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ animalId, force = false }: { animalId: number; force?: boolean }) =>
+      assignAnimalToDevice(deviceId, animalId, force),
+    onSuccess: () => invalidateDeviceQueries(queryClient, deviceId),
+  });
+};
+
+export const useDeviceUnassignAnimal = (deviceId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => unassignAnimalFromDevice(deviceId),
+    onSuccess: () => invalidateDeviceQueries(queryClient, deviceId),
+  });
+};
+
+export const useDeviceConditionUpdate = (deviceId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (condition: DeviceCondition) => updateDeviceCondition(deviceId, condition),
+    onSuccess: () => invalidateDeviceQueries(queryClient, deviceId),
+  });
+};
+
+export const useDeviceStatusUpdate = (deviceId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (isActive: boolean) => updateDeviceStatus(deviceId, isActive),
+    onSuccess: () => invalidateDeviceQueries(queryClient, deviceId),
+  });
+};
+
+export const useDeviceTelemetryUpdate = (deviceId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: { battery_level?: number; signal_strength?: number }) =>
+      updateDeviceTelemetry(deviceId, payload),
+    onSuccess: () => invalidateDeviceQueries(queryClient, deviceId),
+  });
+};
+
+export const useDeviceCaptures = (deviceId: number) =>
+  useQuery({
+    queryKey: ["device-captures", deviceId],
+    queryFn: () => getDeviceCaptures(deviceId),
+    enabled: deviceId > 0,
+  });
+
+export const useDeviceCaptureUpload = (deviceId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => uploadDeviceCapture(deviceId, file),
+    onSuccess: async () => {
+      await Promise.all([
+        invalidateDeviceQueries(queryClient, deviceId),
+        queryClient.invalidateQueries({ queryKey: ["ai-predictions"] }),
+        queryClient.invalidateQueries({ queryKey: ["ai-media-uploads"] }),
       ]);
     },
   });

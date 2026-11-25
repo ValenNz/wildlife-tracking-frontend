@@ -13,6 +13,7 @@ import type {
   LaravelCurrentUserResult,
   TYPE_LOGIN_REQUEST,
   TYPE_LOGIN_SESSION_USER,
+  TYPE_REGISTER_REQUEST,
 } from "@/types/auth.type";
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
@@ -152,13 +153,40 @@ export const getCurrentUserFromLaravel = async (
 
 export const authenticateWithLaravel = async (
   payload: TYPE_LOGIN_REQUEST,
+  headers: Record<string, string> = {},
+): Promise<LaravelAuthResult> =>
+  requestAuthToken("/login", { email: payload.email, password: payload.password }, headers);
+
+/** Pendaftaran publik: backend selalu memberi role "pengunjung" (tidak bisa dipilih dari klien). */
+export const registerWithLaravel = async (
+  payload: TYPE_REGISTER_REQUEST,
+  headers: Record<string, string> = {},
+): Promise<LaravelAuthResult> =>
+  requestAuthToken(
+    "/register",
+    {
+    full_name: payload.full_name,
+    username: payload.username,
+    email: payload.email,
+    phone: payload.phone || null,
+    password: payload.password,
+    password_confirmation: payload.password_confirmation,
+    captcha_token: payload.captcha_token,
+    captcha_answer: payload.captcha_answer,
+    website: payload.website ?? "",
+  },
+    headers,
+  );
+
+const requestAuthToken = async (
+  path: "/login" | "/register",
+  body: Record<string, unknown>,
+  headers: Record<string, string> = {},
 ): Promise<LaravelAuthResult> => {
   const serverApi = createServerApiClient(getLaravelApiBaseUrl());
 
   try {
-    const response: unknown = await serverApi.post("/login", {
-      body: { email: payload.email, password: payload.password },
-    });
+    const response: unknown = await serverApi.post(path, { body, headers });
 
     const envelope = asRecord(response);
 

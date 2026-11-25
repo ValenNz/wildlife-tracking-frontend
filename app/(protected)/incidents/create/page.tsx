@@ -17,6 +17,7 @@ import {
   FormGrid,
   FormSection,
   TextArea,
+  SelectInput,
   TextInput,
 } from "@/components/form";
 import { useCreateIncidentReport } from "@/hooks/use-incidents";
@@ -33,7 +34,7 @@ import {
   getApiFieldErrors,
 } from "@/services/api";
 import {
-  INCIDENT_STATUSES,
+  INCIDENT_STATUSES, INCIDENT_STATUS_LABELS,
   INCIDENT_TYPES,
   INCIDENT_TYPE_LABELS,
   type CreateIncidentReportPayload,
@@ -319,24 +320,21 @@ export default function IncidentCreatePage() {
               htmlFor="incident-status"
               required
               error={fieldErrors.status}
-              hint="Pilih salah satu atau ketik status lain yang sesuai."
+              hint="Status baku: Menunggu, Diselidiki, Selesai, atau Ditolak."
             >
-              <TextInput
+              <SelectInput
                 id="incident-status"
-                required
-                list="incident-status-options"
-                maxLength={50}
                 value={form.status}
                 onChange={(event) => setField("status", event.target.value)}
-                placeholder="Contoh: pending"
                 invalid={fieldErrors.status !== undefined}
                 disabled={isPending}
-              />
-              <datalist id="incident-status-options">
+              >
                 {STATUS_OPTIONS.map((status) => (
-                  <option key={status} value={status} />
+                  <option key={status} value={status}>
+                    {INCIDENT_STATUS_LABELS[status]}
+                  </option>
                 ))}
-              </datalist>
+              </SelectInput>
             </FormField>
 
             <FormField

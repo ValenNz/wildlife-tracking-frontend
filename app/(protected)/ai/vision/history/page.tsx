@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, FileAudio, Film } from "lucide-react";
 
 import { AiPredictionImage } from "../ai-prediction-image";
 import {
   AiConfidence,
   AiProcessingBadge,
+  AiThreatBadge,
   AiVerificationBadge,
 } from "../ai-status";
 import {
@@ -53,6 +54,14 @@ export default function AiPredictionHistoryPage() {
             : (filters.verification_status as AiPredictionListParams["verification_status"]),
         predicted_species_id:
           filters.species_id === "all" ? undefined : Number(filters.species_id),
+        threat_level:
+          filters.threat_level === "all"
+            ? undefined
+            : (filters.threat_level as AiPredictionListParams["threat_level"]),
+        analysis_type:
+          filters.analysis_type === "all"
+            ? undefined
+            : (filters.analysis_type as AiPredictionListParams["analysis_type"]),
         min_confidence:
           filters.min_confidence === ""
             ? undefined
@@ -178,20 +187,47 @@ const PredictionCard = ({ prediction }: { prediction: AiPrediction }) => {
   return (
     <article className="ui-panel flex min-w-0 flex-col gap-4 p-4">
       <div className="flex items-start gap-3">
-        <AiPredictionImage
-          mediaId={prediction.media_id}
-          alt={`Gambar prediksi #${prediction.prediction_id}`}
-          className="size-20 shrink-0"
-          sizes="80px"
-        />
+        {prediction.media?.media_type === "image" || !prediction.media ? (
+          <AiPredictionImage
+            mediaId={prediction.media_id}
+            alt={`Gambar prediksi #${prediction.prediction_id}`}
+            className="size-20 shrink-0"
+            sizes="80px"
+          />
+        ) : (
+          <span className="flex size-20 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-muted text-muted">
+            {prediction.media.media_type === "video" ? (
+              <Film aria-label="Video" className="size-7" />
+            ) : (
+              <FileAudio aria-label="Audio" className="size-7" />
+            )}
+          </span>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap gap-1.5">
             <AiProcessingBadge status={prediction.processing_status} />
             <AiVerificationBadge status={prediction.verification_status} />
+            {prediction.threat_level && prediction.threat_level !== "none" ? (
+              <AiThreatBadge level={prediction.threat_level} />
+            ) : null}
           </div>
           <p className="mt-2 truncate text-sm font-semibold text-ink">
-            {speciesName}
+            {prediction.analysis_type === "audio"
+              ? (prediction.sound_label ?? "Suara tidak dikenali")
+              : speciesName}
           </p>
+          {(prediction.staff_face_count ?? 0) + (prediction.unknown_face_count ?? 0) > 0 ? (
+            <p className="truncate text-xs text-ink-soft">
+              {[
+                prediction.staff_face_count ? `${prediction.staff_face_count} staf` : null,
+                prediction.unknown_face_count
+                  ? `${prediction.unknown_face_count} tidak dikenal`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+          ) : null}
           <p className="text-xs text-muted">
             #{prediction.prediction_id} · {formatDate(prediction.processed_at)}
           </p>
@@ -201,9 +237,18 @@ const PredictionCard = ({ prediction }: { prediction: AiPrediction }) => {
       <AiConfidence value={prediction.confidence} />
 
       <div className="flex items-center justify-between gap-2 border-t border-line pt-3">
-        <StatusBadge label="Dihasilkan AI" variant="info" />
+        <StatusBadge
+          label={
+            prediction.media?.media_type === "video"
+              ? "Video"
+              : prediction.media?.media_type === "audio"
+                ? "Audio"
+                : "Foto"
+          }
+          variant="info"
+        />
         <Link
-          href={`/ai/vision/${prediction.prediction_id}`}
+          href={`/ai/vision/${prediction.prediction_id}/detail`}
           className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline-offset-2 hover:underline"
         >
           <Eye aria-hidden="true" className="size-3.5" />

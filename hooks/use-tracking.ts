@@ -3,16 +3,20 @@
 
 import {
   useInfiniteQuery,
+  useMutation,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 
 import {
   getGpsReadings,
   getGpsReadingsByAnimal,
   getGpsReadingsByDevice,
+  createGpsReading,
 } from "@/services/tracking.service";
 
 import type {
+  GpsReadingCreatePayload,
   GpsReading,
   GpsReadingListParams,
 } from "@/types/tracking.type";
@@ -21,10 +25,14 @@ import type { ApiResponse } from "@/types/api.type";
 
 type GpsReadingApiResponse = ApiResponse<GpsReading[]>;
 
-export const useGpsReadings = (params?: GpsReadingListParams) => {
+export const useGpsReadings = (
+  params?: GpsReadingListParams,
+  options?: { refetchInterval?: number | false },
+) => {
   return useQuery<GpsReadingApiResponse>({
     queryKey: ["gps-readings", params],
     queryFn: () => getGpsReadings(params),
+    refetchInterval: options?.refetchInterval,
   });
 };
 
@@ -62,5 +70,16 @@ export const useGpsReadingsByDevice = (deviceId: number) => {
     queryKey: ["gps-readings", "device", deviceId],
     queryFn: () => getGpsReadingsByDevice(deviceId),
     enabled: Number.isFinite(deviceId) && deviceId > 0,
+  });
+};
+
+export const useGpsReadingCreate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: GpsReadingCreatePayload) => createGpsReading(payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["gps-readings"] });
+    },
   });
 };

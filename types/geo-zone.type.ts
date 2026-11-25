@@ -66,3 +66,18 @@ export const GEO_ZONE_TYPE_LABELS: Record<GeoZoneType, string> = {
   hutan_lindung: "Hutan Lindung",
   zona_inti: "Zona Inti",
 };
+
+/** Satwa yang sedang (atau pernah) berada di zona: GET /geo-zones/{id}/animals. */
+export type GeoZoneAnimal = {
+  animal_id: number;
+  name_animal: string;
+  species?: { species_id: number; common_name: string } | null;
+};
+
+/** Perangkat yang dipasang di zona: GET /geo-zones/{id}/devices. */
+export type GeoZoneDevice = {
+  device_id: number;
+  device_type: string;
+  model: string;
+  animal?: { animal_id: number; name_animal: string } | null;
+};

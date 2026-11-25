@@ -11,6 +11,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Loading } from "@/components/ui/loading";
 import { PageHeader } from "@/components/ui/panel";
+import { useUserRole } from "@/components/providers/preferences-provider";
+import { roleHasPermission } from "@/types/auth.type";
 import { useToast } from "@/components/toast";
 import { Button } from "@/components/button";
 import {
@@ -20,6 +22,7 @@ import {
   FormGrid,
   FormSection,
   TextArea,
+  SelectInput,
   TextInput,
 } from "@/components/form";
 import {
@@ -41,11 +44,13 @@ import {
   toApiErrorState,
 } from "@/services/api";
 import {
-  INCIDENT_STATUSES,
+  INCIDENT_STATUSES, INCIDENT_STATUS_LABELS,
   INCIDENT_TYPES,
   INCIDENT_TYPE_LABELS,
   type UpdateIncidentReportPayload,
 } from "@/types/incident.type";
+
+import { IncidentAttachments } from "./incident-attachments";
 
 type IncidentFormState = {
   incident_type: string;
@@ -131,7 +136,10 @@ const incidentSchema = z.object({
     .max(50, "Status maksimal 50 karakter."),
 });
 
-export default function IncidentUpdatePage() {
+export default function IncidentEditPage() {
+  const userRole = useUserRole();
+  const canUpload = userRole ? roleHasPermission(userRole, "create_data") : false;
+  const canSync = userRole ? roleHasPermission(userRole, "delete_data") : false;
   const params = useParams<{ id: string }>();
   const recordId = Number(params.id);
 
@@ -367,24 +375,21 @@ export default function IncidentUpdatePage() {
               htmlFor="incident-status"
               required
               error={fieldErrors.status}
-              hint="Pilih salah satu atau ketik status lain yang sesuai."
+              hint="Status baku: Menunggu, Diselidiki, Selesai, atau Ditolak."
             >
-              <TextInput
+              <SelectInput
                 id="incident-status"
-                required
-                list="incident-status-options"
-                maxLength={50}
                 value={form.status}
                 onChange={(event) => setField("status", event.target.value)}
-                placeholder="Contoh: pending"
                 invalid={fieldErrors.status !== undefined}
                 disabled={isPending}
-              />
-              <datalist id="incident-status-options">
+              >
                 {STATUS_OPTIONS.map((status) => (
-                  <option key={status} value={status} />
+                  <option key={status} value={status}>
+                    {INCIDENT_STATUS_LABELS[status]}
+                  </option>
                 ))}
-              </datalist>
+              </SelectInput>
             </FormField>
 
             <FormField
@@ -560,6 +565,15 @@ export default function IncidentUpdatePage() {
         </FormActions>
           </form>
         )}
+      </div>
+
+      <div className="mx-auto w-full min-w-0 max-w-5xl">
+        <IncidentAttachments
+          reportId={recordId}
+          syncStatus={detailQuery.data?.data?.sync_status ?? null}
+          canUpload={canUpload}
+          canSync={canSync}
+        />
       </div>
     </div>
   );

@@ -50,6 +50,7 @@ export type ApiClientConfig = {
 export type BlobResponse = {
   blob: Blob;
   contentType: string;
+  filename?: string;
 };
 
 export type ApiClient = {

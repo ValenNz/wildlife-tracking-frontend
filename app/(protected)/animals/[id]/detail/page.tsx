@@ -13,7 +13,13 @@ import { StatusBadge } from "@/components/status";
 import { toApiErrorState } from "@/services/api";
 import { formatDate } from "@/utils/format";
 
+import { useUserRole } from "@/components/providers/preferences-provider";
+import { roleHasPermission } from "@/types/auth.type";
+import { AnimalInsights } from "./animal-insights";
+
 export default function AnimalDetailPage() {
+  const userRole = useUserRole();
+  const canManage = userRole ? roleHasPermission(userRole, "manage_master_data") : false;
   const params = useParams<{ id: string }>();
   const rawId = params.id;
   const animalId = typeof rawId === "string" ? Number(rawId) : Number.NaN;
@@ -162,6 +168,8 @@ export default function AnimalDetailPage() {
           </ul>
         )}
       </section>
+
+      <AnimalInsights animalId={animalId} canManage={canManage} />
     </div>
   );
 }

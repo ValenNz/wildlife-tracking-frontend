@@ -13,6 +13,9 @@ import {
   createGeoZone,
   updateGeoZone,
   deleteGeoZone,
+  getGeoZoneAnimals,
+  getGeoZoneDevices,
+  locateGeoZones,
 } from "@/services/geo-zone.service";
 
 import type {
@@ -87,5 +90,30 @@ export function useGeoZoneDelete(id: number) {
         }),
       ]);
     },
+  });
+}
+
+export function useGeoZoneAnimals(id: number) {
+  return useQuery({
+    queryKey: ["geo-zones", id, "animals"],
+    queryFn: () => getGeoZoneAnimals(id),
+    enabled: id > 0,
+  });
+}
+
+export function useGeoZoneDevices(id: number) {
+  return useQuery({
+    queryKey: ["geo-zones", id, "devices"],
+    queryFn: () => getGeoZoneDevices(id),
+    enabled: id > 0,
+  });
+}
+
+/** Zona yang memuat sebuah koordinat (GET /geo-zones/locate). */
+export function useLocateGeoZones(point: { lat: number; lon: number } | null) {
+  return useQuery({
+    queryKey: ["geo-zones", "locate", point],
+    queryFn: () => locateGeoZones(point!.lat, point!.lon),
+    enabled: point !== null,
   });
 }

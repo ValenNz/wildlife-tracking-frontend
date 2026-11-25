@@ -3,27 +3,31 @@
 import {
   AlertTriangle,
   Bell,
+  CheckCheck,
   CheckCircle2,
   Info,
   RadioTower,
   Shield,
+  Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { usePreferences, useUserRole } from "@/components/providers/preferences-provider";
 import { useToast } from "@/components/toast";
 import { ErrorState } from "@/components/ui/error-state";
 import { Loading } from "@/components/ui/loading";
 import { PageHeader } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/status";
 import {
+  useDeleteAllReadNotifications,
+  useMarkAllNotificationsAsRead,
   useNotifications,
   useMarkNotificationAsRead,
 } from "@/hooks/use-notifications";
-import { toApiErrorState } from "@/services/api";
+import { formatApiError, toApiErrorState } from "@/services/api";
+import { Button } from "@/components/button";
 import { formatDate } from "@/utils/format";
-import {
-  NOTIFICATION_TYPE_LABELS,
-  type NotificationType,
-} from "@/types/notification.type";
+import type { NotificationType } from "@/types/notification.type";
+import type { TYPE_USER_ROLE } from "@/types/auth.type";
 import { cn } from "@/lib/utils";
 
 type NotificationItem = {
@@ -34,53 +38,57 @@ type NotificationItem = {
   created_at: string;
 };
 
-const TYPE_OPTIONS = [
-  { label: "Semua", value: "all" },
-  { label: NOTIFICATION_TYPE_LABELS.risk_zone, value: "risk_zone" },
-  { label: NOTIFICATION_TYPE_LABELS.device_alert, value: "device_alert" },
-  { label: "Sistem", value: "system" },
-] as const;
-
-const UNREAD_OPTIONS = [
-  { label: "Semua", value: "all" },
-  { label: "Belum Dibaca", value: "unread" },
-] as const;
-
-function getNotificationConfig(type: NotificationType) {
-  switch (type) {
-    case "risk_zone":
-      return {
-        icon: AlertTriangle,
-        label: NOTIFICATION_TYPE_LABELS.risk_zone,
-        variant: "danger" as const,
-        iconBg: "bg-danger-soft",
-        iconColor: "text-danger",
-      };
-    case "device_alert":
-      return {
-        icon: RadioTower,
-        label: NOTIFICATION_TYPE_LABELS.device_alert,
-        variant: "warning" as const,
-        iconBg: "bg-warning-soft",
-        iconColor: "text-warning",
-      };
-    case "system":
-    default:
-      return {
-        icon: Info,
-        label: "Sistem",
-        variant: "info" as const,
-        iconBg: "bg-primary-soft",
-        iconColor: "text-primary",
-      };
-  }
-}
+const ALLOWED_TYPES_BY_ROLE: Record<TYPE_USER_ROLE, NotificationType[]> = {
+  administrator_sistem: ["risk_zone", "device_alert", "system"],
+  konservasionis_lapangan: ["risk_zone", "device_alert", "system"],
+  peneliti_ekologi: ["risk_zone", "device_alert", "system"],
+  pengambil_kebijakan: ["risk_zone", "system"],
+  petugas_loket: ["system"],
+  pengunjung: ["system"],
+};
 
 export default function NotificationListPage() {
+  const role = useUserRole();
+  const { locale, t } = usePreferences();
   const [filters, setFilters] = useState({
     type: "all",
     unread: "all",
   });
+
+  const allowedTypes = useMemo<NotificationType[]>(
+    () => (role ? ALLOWED_TYPES_BY_ROLE[role] : ["system"]),
+    [role],
+  );
+
+  const typeOptions = useMemo(() => {
+    const allOptions: { value: "all" | NotificationType; label: string }[] = [
+      { value: "all", label: t("notifAll") },
+      { value: "risk_zone", label: t("notifRiskZone") },
+      { value: "device_alert", label: t("notifDeviceAlert") },
+      { value: "system", label: t("notifSystem") },
+    ];
+    return allOptions.filter(
+      (option) => option.value === "all" || allowedTypes.includes(option.value),
+    );
+  }, [allowedTypes, t]);
+
+  const unreadOptions = useMemo(
+    () => [
+      { label: t("notifAll"), value: "all" },
+      { label: t("notifUnread"), value: "unread" },
+    ],
+    [t],
+  );
+
+  const description = useMemo(() => {
+    if (role === "pengunjung" || role === "petugas_loket") {
+      return t("notifDescTourism");
+    }
+    if (role === "pengambil_kebijakan") {
+      return t("notifDescPolicy");
+    }
+    return t("notifDescConservation");
+  }, [role, t]);
 
   const load = useMemo(
     () => ({
@@ -95,6 +103,8 @@ export default function NotificationListPage() {
 
   const { data, isLoading, error, refetch } = useNotifications(load);
   const markAsRead = useMarkNotificationAsRead();
+  const markAllAsRead = useMarkAllNotificationsAsRead();
+  const deleteAllRead = useDeleteAllReadNotifications();
   const { showToast } = useToast();
 
   const notifications = (data?.data as NotificationItem[]) ?? [];
@@ -103,12 +113,74 @@ export default function NotificationListPage() {
     (n) => n.is_read === false || n.is_read === 0,
   ).length;
 
+  const getNotificationConfig = (type: NotificationType) => {
+    switch (type) {
+      case "risk_zone":
+        return {
+          icon: AlertTriangle,
+          label: t("notifRiskZone"),
+          variant: "danger" as const,
+          iconBg: "bg-danger-soft",
+          iconColor: "text-danger",
+        };
+      case "device_alert":
+        return {
+          icon: RadioTower,
+          label: t("notifDeviceAlert"),
+          variant: "warning" as const,
+          iconBg: "bg-warning-soft",
+          iconColor: "text-warning",
+        };
+      case "system":
+      default:
+        return {
+          icon: Info,
+          label: t("notifSystem"),
+          variant: "info" as const,
+          iconBg: "bg-primary-soft",
+          iconColor: "text-primary",
+        };
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Pemantauan"
-        title="Notifikasi"
-        description="Pantau peringatan risiko zona dan kondisi perangkat pelacak."
+        eyebrow={t("notifEyebrow")}
+        title={t("notifTitle")}
+        description={description}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              icon={<CheckCheck className="size-4" />}
+              loading={markAllAsRead.isPending}
+              onClick={() =>
+                markAllAsRead.mutate(undefined, {
+                  onSuccess: () => showToast(t("notifMarkAllOk"), "success"),
+                  onError: (mutationError) =>
+                    showToast(formatApiError(mutationError, t("notifMarkAllErr")), "error"),
+                })
+              }
+            >
+              {t("notifMarkAll")}
+            </Button>
+            <Button
+              variant="outline"
+              icon={<Trash2 className="size-4" />}
+              loading={deleteAllRead.isPending}
+              onClick={() =>
+                deleteAllRead.mutate(undefined, {
+                  onSuccess: () => showToast(t("notifDeleteReadOk"), "success"),
+                  onError: (mutationError) =>
+                    showToast(formatApiError(mutationError, t("notifDeleteReadErr")), "error"),
+                })
+              }
+            >
+              {t("notifDeleteRead")}
+            </Button>
+          </>
+        }
       />
 
       <section className="ui-panel p-5">
@@ -116,10 +188,12 @@ export default function NotificationListPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold text-ink">
-                Filter Notifikasi
+                {locale === "en" ? "Filter Notifications" : "Filter Notifikasi"}
               </h2>
               <p className="mt-0.5 text-sm text-muted">
-                Temukan notifikasi berdasarkan jenis dan status baca.
+                {locale === "en"
+                  ? "Filter notifications by category and read status."
+                  : "Temukan notifikasi berdasarkan jenis dan status baca."}
               </p>
             </div>
 
@@ -128,7 +202,7 @@ export default function NotificationListPage() {
                 {unreadCount > 0 && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary-dark">
                     <span className="size-1.5 rounded-full bg-primary" />
-                    {unreadCount} belum dibaca
+                    {unreadCount} {t("unreadCountLabel")}
                   </span>
                 )}
                 <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-semibold text-ink-soft">
@@ -139,42 +213,45 @@ export default function NotificationListPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-              <label className="text-xs font-semibold text-ink-soft">
-                Jenis:
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {TYPE_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() =>
-                      setFilters((current) => ({
-                        ...current,
-                        type: option.value,
-                      }))
-                    }
-                    className={cn(
-                      "rounded-lg px-3 py-1.5 text-xs font-medium transition",
-                      filters.type === option.value
-                        ? "bg-primary text-white shadow-sm"
-                        : "bg-surface-muted text-ink-soft hover:bg-line hover:text-ink",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="hidden h-6 w-px bg-line sm:block" aria-hidden="true" />
+            {typeOptions.length > 2 ? (
+              <>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                  <label className="text-xs font-semibold text-ink-soft">
+                    {locale === "en" ? "Type:" : "Jenis:"}
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {typeOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() =>
+                          setFilters((current) => ({
+                            ...current,
+                            type: option.value,
+                          }))
+                        }
+                        className={cn(
+                          "rounded-lg px-3 py-1.5 text-xs font-medium transition",
+                          filters.type === option.value
+                            ? "bg-primary text-white shadow-sm"
+                            : "bg-surface-muted text-ink-soft hover:bg-line hover:text-ink",
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="hidden h-6 w-px bg-line sm:block" aria-hidden="true" />
+              </>
+            ) : null}
 
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <label className="text-xs font-semibold text-ink-soft">
                 Status:
               </label>
               <div className="flex gap-1.5">
-                {UNREAD_OPTIONS.map((option) => (
+                {unreadOptions.map((option) => (
                   <button
                     key={option.value}
                     type="button"
@@ -210,7 +287,7 @@ export default function NotificationListPage() {
         />
       ) : isLoading ? (
         <div className="ui-panel py-16">
-          <Loading label="Memuat notifikasi..." />
+          <Loading label={locale === "en" ? "Loading notifications..." : "Memuat notifikasi..."} />
         </div>
       ) : notifications.length === 0 ? (
         <div className="ui-panel px-6 py-20 text-center">
@@ -219,17 +296,16 @@ export default function NotificationListPage() {
           </div>
 
           <h3 className="mt-6 text-lg font-bold text-ink">
-            Tidak ada notifikasi
+            {locale === "en" ? "No notifications" : "Tidak ada notifikasi"}
           </h3>
 
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-            Belum ada peringatan yang sesuai dengan filter saat ini. Notifikasi
-            risiko zona dan kondisi perangkat akan muncul di sini ketika tersedia.
+            {t("notifEmpty")}
           </p>
 
           <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted">
             <Shield className="size-4" />
-            <span>Sistem pemantauan aktif 24/7</span>
+            <span>{locale === "en" ? "Active monitoring 24/7" : "Sistem pemantauan aktif 24/7"}</span>
           </div>
         </div>
       ) : (
@@ -301,15 +377,20 @@ export default function NotificationListPage() {
                               markAsRead.mutate(Number(notification.notif_id), {
                                 onSuccess: () => {
                                   showToast(
-                                    "Notifikasi berhasil ditandai sudah dibaca.",
+                                    locale === "en"
+                                      ? "Notification marked as read."
+                                      : "Notifikasi berhasil ditandai sudah dibaca.",
                                     "success",
                                   );
                                 },
-                                onError: (error: unknown) => {
+                                onError: (mutationError: unknown) => {
                                   showToast(
-                                    error instanceof Error
-                                      ? error.message
-                                      : "Gagal menandai notifikasi sudah dibaca.",
+                                    formatApiError(
+                                      mutationError,
+                                      locale === "en"
+                                        ? "Failed to mark notification as read."
+                                        : "Gagal menandai notifikasi sudah dibaca.",
+                                    ),
                                     "error",
                                   );
                                 },
@@ -318,12 +399,16 @@ export default function NotificationListPage() {
                             disabled={markAsRead.isPending}
                             className="shrink-0 rounded-lg border border-primary/30 bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary-dark transition hover:border-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            {markAsRead.isPending ? "Memproses..." : "Tandai Dibaca"}
+                            {markAsRead.isPending
+                              ? locale === "en"
+                                ? "Processing..."
+                                : "Memproses..."
+                              : t("notifMarkOne")}
                           </button>
                         ) : (
                           <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-surface-muted px-2.5 py-1 text-xs font-medium text-muted">
                             <CheckCircle2 className="size-3.5" />
-                            Dibaca
+                            {t("notifReadBadge")}
                           </span>
                         )}
                       </div>

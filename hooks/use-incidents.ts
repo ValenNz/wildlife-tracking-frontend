@@ -12,8 +12,12 @@ import {
   getIncidentReports,
   getPendingSyncReports,
   updateIncidentReport,
+  getIncidentMedia,
+  uploadIncidentMedia,
+  updateIncidentSyncStatus,
 } from "@/services/incident.service";
 import type {
+  IncidentSyncStatus,
   CreateIncidentReportPayload,
   IncidentReport,
   IncidentReportListParams,
@@ -92,5 +96,36 @@ export const useIncidentReportUpdate = (id: number) => {
         queryClient.invalidateQueries({ queryKey: ["incident-reports", id] }),
       ]);
     },
+  });
+};
+
+export const useIncidentMedia = (id: number) =>
+  useQuery({
+    queryKey: ["incident-reports", id, "media"],
+    queryFn: () => getIncidentMedia(id),
+    enabled: Number.isFinite(id) && id > 0,
+  });
+
+export const useIncidentMediaUpload = (id: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ file, analyze }: { file: File; analyze: boolean }) =>
+      uploadIncidentMedia(id, file, analyze),
+    onSuccess: async () => {
+      await Promise.all([
+        invalidateIncidentQueries(queryClient),
+        queryClient.invalidateQueries({ queryKey: ["ai-media-uploads"] }),
+      ]);
+    },
+  });
+};
+
+export const useIncidentSyncStatusUpdate = (id: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (status: IncidentSyncStatus) => updateIncidentSyncStatus(id, status),
+    onSuccess: () => invalidateIncidentQueries(queryClient),
   });
 };

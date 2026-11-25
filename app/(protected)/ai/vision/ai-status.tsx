@@ -1,5 +1,7 @@
 import { StatusBadge, type BadgeVariant } from "@/components/status";
 import {
+  AI_THREAT_LEVEL_LABELS,
+  type AiThreatLevel,
   AI_PROCESSING_STATUS_LABELS,
   AI_VERIFICATION_STATUS_LABELS,
   type AiProcessingStatus,
@@ -88,5 +90,24 @@ export function AiConfidence({
         />
       </div>
     </div>
+  );
+}
+
+const THREAT_VARIANTS: Record<AiThreatLevel, BadgeVariant> = {
+  none: "neutral",
+  low: "info",
+  medium: "warning",
+  high: "danger",
+  critical: "danger",
+};
+
+export function AiThreatBadge({ level }: { level?: AiThreatLevel | null }) {
+  const value = level ?? "none";
+
+  return (
+    <StatusBadge
+      label={`Ancaman: ${AI_THREAT_LEVEL_LABELS[value] ?? value}`}
+      variant={THREAT_VARIANTS[value] ?? "neutral"}
+    />
   );
 }

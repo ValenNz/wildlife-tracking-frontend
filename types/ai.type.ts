@@ -261,19 +261,94 @@ export type AiSummaryReport = {
 };
 
 export type AiRecap = {
-  period?: { start: string; end: string };
-  totals?: Record<string, number | Record<string, number>>;
-  species?: Array<Record<string, number | string | null>>;
-  other_labels?: Record<string, number>;
-  individuals?: Array<Record<string, number | string | string[] | null>>;
-  faces?: Record<string, unknown>;
-  sounds?: Array<Record<string, number | string>>;
-  threats?: Record<string, unknown>;
-  physical_conditions?: Record<string, number>;
-  behaviors?: Record<string, number>;
-  by_zone?: Array<Record<string, number | string>>;
-  daily?: Array<Record<string, number | string>>;
-  models?: string[];
+  period: { start: string; end: string };
+  totals: {
+    media_uploaded: number;
+    media_by_type: Record<string, number>;
+    predictions: number;
+    by_status: Record<string, number>;
+    by_verification: Record<string, number>;
+    animals_detected: number;
+    threat_detections: number;
+    staff_appearances: number;
+    unknown_faces: number;
+  };
+  species: {
+    species_id: number;
+    common_name: string | null;
+    scientific_name: string | null;
+    detections: number;
+    individuals_counted: number;
+    average_confidence: number;
+    last_seen: string | null;
+  }[];
+  other_labels: Record<string, number>;
+  individuals: {
+    animal_id: number;
+    name_animal: string | null;
+    sightings: number;
+    methods: Record<string, number>;
+    last_seen: string | null;
+  }[];
+  faces: {
+    staff: { name: string; appearances: number; last_seen: string | null }[];
+    unknown_faces: number;
+    media_with_unknown_faces: number;
+    possible_staff_needing_verification: number;
+  };
+  sounds: { category: string; label: string; count: number; from_video: number }[];
+  threats: {
+    by_level: Record<string, number>;
+    recent: {
+      prediction_id: number;
+      time: string | null;
+      zone: string | null;
+      media_type: string | null;
+      threat_level: AiThreatLevel;
+      label: string | null;
+      verification_status: AiVerificationStatus;
+    }[];
+  };
+  physical_conditions: Record<string, number>;
+  behaviors: Record<string, number>;
+  by_zone: { zone: string; detections: number; animals: number; threats: number; unknown_faces: number }[];
+  daily: {
+    date: string;
+    analyzed: number;
+    animals: number;
+    threats: number;
+    unknown_faces: number;
+    staff_appearances: number;
+  }[];
+  models: string[];
+};
+
+export type StaffFace = {
+  staff_face_id: number;
+  name: string;
+  user_id: number | null;
+  model?: string;
+  detection_confidence?: number | null;
+  created_at?: string;
+};
+
+export type StaffFaceGroup = {
+  name: string;
+  user_id: number | null;
+  user?: { user_id: number; full_name?: string; username?: string } | null;
+  photo_count: number;
+  faces: StaffFace[];
+};
+
+export type AnimalReferencePhoto = {
+  embedding_id: number;
+  animal_id: number;
+  species_id?: number | null;
+  media_id?: number | null;
+  prediction_id?: number | null;
+  source: "reference" | "verified" | string;
+  model?: string;
+  created_at?: string;
 };
 
 export type AiHealth = {
@@ -292,7 +367,7 @@ export type AiHealth = {
 export type AiVocabulary = {
   physical_conditions: Record<string, string>;
   behaviors: Record<string, string>;
-  sound_categories: string[];
+  sound_categories: Record<string, string>;
   threat_levels: Record<string, string>;
   device_types: Record<string, string>;
 };
@@ -399,4 +474,35 @@ export const AI_ACCEPTED_FILE_TYPES = [
 ] as const;
 
 export const AI_MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+
+/** Ekstensi yang diterima backend (/ai/upload). Browser sering memberi MIME audio berbeda (audio/x-wav, audio/x-m4a). */
+export const AI_ACCEPTED_EXTENSIONS = [
+  "jpg", "jpeg", "png", "webp",
+  "mp4", "mov", "webm",
+  "wav", "mp3", "m4a", "ogg", "flac",
+] as const;
+
+export const getAiMediaKind = (file: { name: string; type: string }): AiMediaType | null => {
+  const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+
+  if (!(AI_ACCEPTED_EXTENSIONS as readonly string[]).includes(extension)) return null;
+  if (["jpg", "jpeg", "png", "webp"].includes(extension)) return "image";
+  if (["mp4", "mov", "webm"].includes(extension)) return "video";
+
+  return "audio";
+};
+
+export const AI_FACE_STATUS_LABELS: Record<string, string> = {
+  staff: "Staf terdaftar",
+  possible_staff: "Perlu verifikasi",
+  unknown: "Tidak dikenal",
+};
+
+export const AI_MATCH_METHOD_LABELS: Record<string, string> = {
+  appearance_reid: "Kemiripan penampilan",
+  gps_proximity: "Kedekatan kalung GPS",
+  zone_presence: "Berada di zona yang sama",
+  distinctive_marks: "Ciri fisik",
+  single_candidate: "Kandidat tunggal",
+};
 export const AI_DETECT_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;

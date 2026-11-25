@@ -10,6 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import type {
+  Column,
   ColumnDef,
   PaginationState,
   RowSelectionState,
@@ -20,6 +21,14 @@ import { Button } from "@/components/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loading } from "@/components/ui/loading";
 import { cn } from "@/lib/utils";
+
+/** Plain-text column label used by the stacked (card) table layout on narrow screens. */
+function columnLabel<TData>(column: Column<TData, unknown>): string {
+  const header = column.columnDef.header;
+  if (typeof header === "string") return header;
+  const meta = column.columnDef.meta as { label?: string } | undefined;
+  return meta?.label ?? "";
+}
 
 type DataTableProps<TData> = {
   data: TData[];
@@ -90,10 +99,15 @@ export function DataTable<TData>({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-card border border-line bg-surface shadow-sm">
-        <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label={label}
+        className="responsive-table max-w-full overflow-x-auto overscroll-x-contain rounded-card border border-line bg-surface"
+      >
+        <table className="w-full min-w-[40rem] border-collapse text-left text-[13.5px]">
           <caption className="sr-only">{label}</caption>
-          <thead className="border-b border-line bg-surface-muted">
+          <thead className="border-b border-line bg-surface-muted/60">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -166,7 +180,11 @@ export function DataTable<TData>({
                 )}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3 align-middle text-ink-soft">
+                  <td
+                    key={cell.id}
+                    data-label={columnLabel(cell.column)}
+                    className="px-4 py-3 align-middle text-ink-soft"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

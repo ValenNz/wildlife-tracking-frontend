@@ -8,31 +8,137 @@
   --natural-muted: #c7cbb8;
   --olive-dark: #3d4337;
 
+  /* Token warna adaptif terang/gelap — palet Gunung Leuser dengan kontras editorial */
   --background: #ffffff;
   --surface: #ffffff;
-  --surface-muted: color-mix(in srgb, var(--natural-muted) 45%, white);
-  --foreground: var(--olive-dark);
-  --border: var(--natural-muted);
-  --line: var(--natural-muted);
-  --line-strong: var(--sage);
-  --ink: var(--forest-black);
-  --ink-soft: var(--olive-dark);
-  --ink-muted: var(--sage);
-  --primary: var(--forest-deep);
-  --primary-dark: var(--forest-black);
-  --primary-soft: color-mix(in srgb, var(--forest-primary) 10%, white);
-  --accent: var(--forest-primary);
-  --accent-soft: color-mix(in srgb, var(--natural-muted) 55%, white);
-  --success: var(--forest-primary);
-  --success-soft: color-mix(in srgb, var(--forest-primary) 12%, white);
-  --warning: var(--olive-dark);
-  --warning-soft: color-mix(in srgb, var(--natural-muted) 45%, white);
-  --info: var(--forest-deep);
-  --info-soft: color-mix(in srgb, var(--sage) 16%, white);
-  --danger: var(--forest-black);
-  --danger-soft: color-mix(in srgb, var(--forest-black) 8%, white);
-  --radius-card: 0.75rem;
-  --shadow-card: 0 8px 20px -16px color-mix(in srgb, var(--forest-black) 38%, transparent);
+  --surface-muted: #f6f7f3;
+  --foreground: #3d4337;
+  --border: #dcdfd4;
+  --line: #e4e7dd;
+  --line-strong: #6b7f67;
+  --ink: #0f1f17;
+  --ink-soft: #3d4337;
+  --ink-muted: #6b7f67;
+  --primary: #1e3a2e;
+  --primary-dark: #0f1f17;
+  --primary-soft: #eff3ef;
+  --accent: #3e5a3f;
+  --accent-soft: #f0f3ed;
+  --success: #2f6b3d;
+  --success-soft: #ecf4ee;
+  --warning: #8a5a19;
+  --warning-soft: #f8f1e5;
+  --info: #1e3a2e;
+  --info-soft: #edf2f0;
+  --danger: #9f2d2d;
+  --danger-soft: #fbeded;
+  --radius-card: 0.5rem;
+  --shadow-card: 0 1px 2px rgba(15, 31, 23, 0.04);
+  --scrollbar-track: #f6f7f3;
+  --scrollbar-thumb: #c7cbb8;
+
+  /* MANDATORY: ikuti preferensi sistem secara default, lalu sinkronkan dengan <meta name="color-scheme"> */
+  color-scheme: light dark;
+  accent-color: var(--primary);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  color-scheme: dark;
+}
+
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) {
+    --background: #0b1410;
+    --surface: #12201a;
+    --surface-muted: #182921;
+    --foreground: #d8e1d9;
+    --border: #294034;
+    --line: #294034;
+    --line-strong: #496b59;
+    --ink: #f0f5f1;
+    --ink-soft: #cbd6cd;
+    --ink-muted: #93a799;
+    --primary: #5ea878;
+    --primary-dark: #7ec296;
+    --primary-soft: #1a3125;
+    --accent: #6eb787;
+    --accent-soft: #1a2d23;
+    --success: #5ebe7a;
+    --success-soft: #152e1e;
+    --warning: #e0a94f;
+    --warning-soft: #2e2414;
+    --info: #7ab8d9;
+    --info-soft: #162833;
+    --danger: #e57373;
+    --danger-soft: #331919;
+    --shadow-card: 0 10px 24px -14px rgba(0, 0, 0, 0.7);
+    --scrollbar-track: #0b1410;
+    --scrollbar-thumb: #2f493c;
+  }
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  --background: #0b1410;
+  --surface: #12201a;
+  --surface-muted: #182921;
+  --foreground: #d8e1d9;
+  --border: #294034;
+  --line: #294034;
+  --line-strong: #496b59;
+  --ink: #f0f5f1;
+  --ink-soft: #cbd6cd;
+  --ink-muted: #93a799;
+  --primary: #5ea878;
+  --primary-dark: #7ec296;
+  --primary-soft: #1a3125;
+  --accent: #6eb787;
+  --accent-soft: #1a2d23;
+  --success: #5ebe7a;
+  --success-soft: #152e1e;
+  --warning: #e0a94f;
+  --warning-soft: #2e2414;
+  --info: #7ab8d9;
+  --info-soft: #162833;
+  --danger: #e57373;
+  --danger-soft: #331919;
+  --shadow-card: 0 10px 24px -14px rgba(0, 0, 0, 0.7);
+  --scrollbar-track: #0b1410;
+  --scrollbar-thumb: #2f493c;
+}
+
+@supports (color: light-dark(white, black)) {
+  :root {
+    --background: light-dark(#ffffff, #0b1410);
+    --surface: light-dark(#ffffff, #12201a);
+    --surface-muted: light-dark(#f3f5f1, #182921);
+    --foreground: light-dark(#3d4337, #d8e1d9);
+    --border: light-dark(#c7cbb8, #294034);
+    --line: light-dark(#c7cbb8, #294034);
+    --line-strong: light-dark(#6b7f67, #496b59);
+    --ink: light-dark(#0f1f17, #f0f5f1);
+    --ink-soft: light-dark(#3d4337, #cbd6cd);
+    --ink-muted: light-dark(#6b7f67, #93a799);
+    --primary: light-dark(#1e3a2e, #5ea878);
+    --primary-dark: light-dark(#0f1f17, #7ec296);
+    --primary-soft: light-dark(#ecf1ec, #1a3125);
+    --accent: light-dark(#3e5a3f, #6eb787);
+    --accent-soft: light-dark(#edf0ea, #1a2d23);
+    --success: light-dark(#2f6b3d, #5ebe7a);
+    --success-soft: light-dark(#eaf3ec, #152e1e);
+    --warning: light-dark(#8a5a19, #e0a94f);
+    --warning-soft: light-dark(#f7efe2, #2e2414);
+    --info: light-dark(#1e3a2e, #7ab8d9);
+    --info-soft: light-dark(#e9eff1, #162833);
+    --danger: light-dark(#9f2d2d, #e57373);
+    --danger-soft: light-dark(#fbecec, #331919);
+    --scrollbar-track: light-dark(#f3f5f1, #0b1410);
+    --scrollbar-thumb: light-dark(#c7cbb8, #2f493c);
+  }
 }
 
 @theme inline {
@@ -74,27 +180,62 @@
   --color-danger-soft: var(--danger-soft);
   --radius-card: var(--radius-card);
   --shadow-card: var(--shadow-card);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", monospace;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 @layer base {
   html {
-    color-scheme: light;
+    /* Keep focused elements clear of the sticky 4rem app header */
+    scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
-  html,
   body {
     max-width: 100%;
-    overflow-x: clip;
-  }
-
-  body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
+    overflow-wrap: break-word;
+  }
+
+  /* Media never overflows its column on any device */
+  img,
+  video,
+  canvas,
+  svg {
+    max-inline-size: 100%;
+  }
+
+  img,
+  video {
+    block-size: auto;
+  }
+
+  /* Long URLs / codes wrap instead of widening the page */
+  :where(a, code) {
+    overflow-wrap: anywhere;
+  }
+
+  :where(h1, h2, h3) {
+    text-wrap: balance;
+  }
+
+  :where(p, li) {
+    text-wrap: pretty;
+  }
+
+  /* Touch screens: fingertip-sized targets (WCAG 2.5.5) */
+  @media (pointer: coarse) {
+    :where(button, select, [role="button"], input:not([type="checkbox"], [type="radio"], [type="range"])) {
+      min-block-size: 44px;
+    }
+
+    :where(button, [role="button"]) {
+      min-inline-size: 44px;
+    }
   }
 
   input,
@@ -105,38 +246,39 @@
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--forest-primary) 20%, white);
-    color: var(--forest-black);
+    background: color-mix(in srgb, var(--primary) 26%, transparent);
+    color: var(--ink);
   }
 
   :focus-visible {
-    outline: 2px solid var(--forest-primary);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
 
-  * {
-    scrollbar-color: var(--natural-muted) white;
-    scrollbar-width: thin;
-  }
+  @supports not (scrollbar-color: auto) {
+    * {
+      scrollbar-width: auto;
+    }
 
-  ::-webkit-scrollbar {
-    height: 0.5rem;
-    width: 0.5rem;
-  }
+    ::-webkit-scrollbar {
+      height: 0.5rem;
+      width: 0.5rem;
+    }
 
-  ::-webkit-scrollbar-track {
-    background: white;
-  }
+    ::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+    }
 
-  ::-webkit-scrollbar-thumb {
-    background: var(--natural-muted);
-    border-radius: 999px;
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 999px;
+    }
   }
 }
 
 @layer components {
   .ui-panel {
-    border: 1px solid var(--border);
+    border: 1px solid var(--line);
     border-radius: var(--radius-card);
     background: var(--surface);
     box-shadow: var(--shadow-card);
@@ -144,56 +286,63 @@
 
   .ui-input {
     width: 100%;
-    border: 1px solid var(--line);
-    border-radius: 0.5rem;
-    background: white;
-    padding: 0.625rem 0.875rem;
-    color: var(--olive-dark);
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    background: var(--surface);
+    padding: 0.5rem 0.75rem;
+    color: var(--ink);
     font-size: 0.875rem;
-    line-height: 1.5rem;
+    line-height: 1.45rem;
     outline: none;
     transition:
-      border-color 150ms ease,
-      box-shadow 150ms ease,
-      background-color 150ms ease;
+      border-color 140ms ease,
+      box-shadow 140ms ease,
+      background-color 140ms ease;
+  }
+
+  /* iOS Safari zooms into inputs with font-size < 16px; prevent that on touch devices */
+  @media (pointer: coarse) {
+    .ui-input {
+      font-size: 1rem;
+    }
   }
 
   .ui-input::placeholder {
-    color: var(--sage);
-    opacity: 0.8;
+    color: var(--ink-muted);
+    opacity: 0.85;
   }
 
   .ui-input:hover:not(:disabled) {
-    border-color: var(--sage);
+    border-color: var(--line-strong);
   }
 
   .ui-input:focus {
-    border-color: var(--forest-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--forest-primary) 18%, transparent);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
   }
 
   .ui-input:disabled {
     cursor: not-allowed;
-    background: var(--natural-muted);
-    color: var(--olive-dark);
+    background: var(--surface-muted);
+    color: var(--ink-muted);
   }
 
   .ui-input-invalid {
     border-color: var(--danger);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 14%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
   }
 
   .ui-label {
     display: block;
     margin-bottom: 0.375rem;
-    color: var(--olive-dark);
+    color: var(--ink-soft);
     font-size: 0.8125rem;
     font-weight: 600;
   }
 
   .ui-hint {
     margin-top: 0.375rem;
-    color: var(--sage);
+    color: var(--ink-muted);
     font-size: 0.75rem;
     line-height: 1.25rem;
   }
@@ -210,7 +359,7 @@
     display: flex;
     align-items: flex-start;
     gap: 0.5rem;
-    border: 1px solid color-mix(in srgb, var(--danger) 28%, white);
+    border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border));
     border-left-width: 3px;
     border-radius: 0.5rem;
     background: var(--danger-soft);
@@ -221,35 +370,186 @@
   }
 
   .leaflet-container {
-    background: var(--natural-muted);
-    color: var(--olive-dark);
+    background: var(--surface-muted);
+    color: var(--ink);
     font-family: var(--font-sans);
   }
 
   .leaflet-control-zoom a,
   .leaflet-control-attribution {
-    border-color: var(--natural-muted) !important;
-    background: white !important;
-    color: var(--forest-black) !important;
+    border-color: var(--border) !important;
+    background: var(--surface) !important;
+    color: var(--ink) !important;
   }
 
   .leaflet-control-zoom a:hover {
-    background: var(--natural-muted) !important;
-    color: var(--forest-black) !important;
+    background: var(--surface-muted) !important;
+    color: var(--ink) !important;
   }
 
   .leaflet-popup-content-wrapper,
   .leaflet-popup-tip {
-    border: 1px solid var(--natural-muted);
-    background: white;
-    color: var(--olive-dark);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
   }
 
   .leaflet-popup-content {
-    color: var(--olive-dark);
+    color: var(--ink);
   }
 
   .leaflet-popup-close-button {
-    color: var(--olive-dark) !important;
+    color: var(--ink-soft) !important;
   }
+}
+
+/* ==========================================================================
+   Responsive data table: stacks into labelled cards when its own container
+   is narrow (phones, split-screen, narrow dashboard columns).
+   ========================================================================== */
+.responsive-table {
+  container-type: inline-size;
+}
+
+@container (width < 40rem) {
+  .responsive-table table {
+    display: block;
+    min-width: 0;
+  }
+
+  .responsive-table thead {
+    display: none;
+  }
+
+  .responsive-table tbody,
+  .responsive-table tr,
+  .responsive-table td {
+    display: block;
+  }
+
+  .responsive-table tbody {
+    padding: 0.5rem;
+  }
+
+  .responsive-table tbody > tr {
+    margin-block-end: 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--surface);
+    padding-block: 0.375rem;
+  }
+
+  .responsive-table tbody > tr:last-child {
+    margin-block-end: 0;
+  }
+
+  .responsive-table td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    text-align: end;
+  }
+
+  .responsive-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    max-inline-size: 45%;
+    color: var(--ink-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-align: start;
+    text-transform: uppercase;
+  }
+
+  .responsive-table td[data-label=""] {
+    justify-content: flex-end;
+  }
+
+  .responsive-table td[data-label=""]::before {
+    content: none;
+  }
+}
+
+/* Adaptasi warna teks & permukaan komponen lama ketika mode gelap aktif */
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .bg-white:not([data-keep-white="true"]) {
+  background-color: var(--surface);
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .text-forest-black,
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .text-forest-deep,
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .text-olive-dark {
+  color: var(--ink);
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .border-natural-muted {
+  border-color: var(--border);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .bg-white:not([data-keep-white="true"]) {
+    background-color: var(--surface);
+  }
+
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .text-forest-black,
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .text-forest-deep,
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .text-olive-dark {
+    color: var(--ink);
+  }
+
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .border-natural-muted {
+    border-color: var(--border);
+  }
+}
+
+/* Rekap Data AI: tombol "Unduh PDF" memakai cetak browser (A4). */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+
+  body {
+    background: white;
+    color: black;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .recap {
+    font-size: 11pt;
+  }
+}
+
+/* ==========================================================================
+   Accessibility Visual Aids (jatimbissa.id-inspired): font scaling,
+   high-contrast mode, and readable letter/line spacing.
+   ========================================================================== */
+html[data-a11y-font="lg"] {
+  font-size: 112%;
+}
+
+html[data-a11y-font="xl"] {
+  font-size: 124%;
+}
+
+html[data-a11y-contrast="high"] {
+  --border: #0f1f17;
+  --line: #0f1f17;
+  --line-strong: #000000;
+  --ink: #000000;
+  --ink-soft: #0f1f17;
+}
+
+html[data-a11y-contrast="high"] :focus-visible {
+  outline: 3px solid #f59e0b !important;
+  outline-offset: 2px;
+}
+
+html[data-a11y-readable="true"] body {
+  letter-spacing: 0.04em;
+  word-spacing: 0.12em;
+  line-height: 1.75;
 }

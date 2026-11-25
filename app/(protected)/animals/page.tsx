@@ -57,9 +57,10 @@ export default function AnimalListPage() {
     selectedDeleteAnimal?.animal_id ?? 0,
   );
 
-  const animals = animalQuery.data?.data?.items ?? [];
-  const speciesList = speciesQuery.data?.data?.items ?? [];
-  const gpsReadings = gpsQuery.data?.data ?? [];
+  // Array stabil antar render agar useMemo di bawah tidak menghitung ulang setiap render.
+  const animals = useMemo(() => animalQuery.data?.data?.items ?? [], [animalQuery.data]);
+  const speciesList = useMemo(() => speciesQuery.data?.data?.items ?? [], [speciesQuery.data]);
+  const gpsReadings = useMemo(() => gpsQuery.data?.data ?? [], [gpsQuery.data]);
 
   const isLoading =
     animalQuery.isLoading ||

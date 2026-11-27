@@ -20,8 +20,8 @@ export type Map3DRoute = {
 
 export type RouteMap3DHandle = { flyThrough: (id: number) => void; stop: () => void; focus: (id: number | null) => void };
 
-type Basemap = "hybrid" | "topo" | "street";
-type ReliefScale = 1 | 1.8 | 2.5;
+export type Basemap = "hybrid" | "topo" | "street";
+export type ReliefScale = 1 | 1.8 | 2.5;
 
 /*
  * Sumber tile publik gratis tanpa API key, tetap dapat diganti via NEXT_PUBLIC_MAP_* bila memakai penyedia berbayar.
@@ -48,9 +48,9 @@ const SATELLITE_ATTRIBUTION =
   process.env.NEXT_PUBLIC_MAP_SATELLITE_ATTRIBUTION || "Citra © Esri, Maxar, Earthstar Geographics";
 const DEFAULT_EXAGGERATION: ReliefScale = 1.8;
 /** Pusat TN Gunung Leuser bila belum ada rute. */
-const LEUSER: [number, number] = [97.6, 3.75];
+export const LEUSER: [number, number] = [97.6, 3.75];
 
-const buildStyle = (basemap: Basemap, showLabels: boolean, exaggeration: ReliefScale): StyleSpecification => ({
+export const buildStyle = (basemap: Basemap, showLabels: boolean, exaggeration: ReliefScale): StyleSpecification => ({
   version: 8,
   sources: {
     satellite: { type: "raster", tiles: [SATELLITE], tileSize: 256, maxzoom: 18, attribution: SATELLITE_ATTRIBUTION },

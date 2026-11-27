@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { useLogout } from "@/hooks/use-logout";
 import { Header, MobileNav, Sidebar } from "@/components/navigation/main";
+import { LiveNotificationPopup } from "@/components/notifications/live-notification-popup";
 import { UserRoleProvider, usePreferences } from "@/components/providers/preferences-provider";
 import { Panel, SectionHeader } from "@/components/ui/panel";
 import { getNavLabel } from "@/lib/i18n";
@@ -84,6 +85,7 @@ export function AppShell({ user, children }: AppShellProps) {
             onLogout={logout}
             onMenuOpen={() => setIsMobileNavOpen(true)}
           />
+          <LiveNotificationPopup />
           <main
             id="main-content"
             className="min-w-0 flex-1 px-3 py-4 sm:px-6 sm:py-6 lg:px-8 print:p-0"

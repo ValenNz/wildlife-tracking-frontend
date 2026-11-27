@@ -1,551 +1,163 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { FeatureGroup, Map as LeafletMap, Marker, Polyline } from "leaflet";
-import { Globe2, Layers, Map as MapIcon, Mountain, Pause, Play, Radio } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Pause, Play } from "lucide-react";
 
-import { useTrackingDevices } from "@/hooks/use-devices";
-import { useGpsReadings } from "@/hooks/use-tracking";
-import { useGeoZones } from "@/hooks/use-geo-zones";
-import type { GeoZone } from "@/types/geo-zone.type";
-
-import { Animal3DDetailPanel } from "@/components/tracking/animal-3d-detail-panel";
-import type { LiveMapAnimal3D } from "@/components/tracking/leuser-mountain-3d";
-import { EmptyState } from "@/components/ui/empty-state";
+import { AnimalDetail, relativeTime } from "@/components/tracking/animal-detail";
+import type { TrackedAnimal } from "@/components/tracking/live-terrain-map";
 import { ErrorState } from "@/components/ui/error-state";
 import { Loading } from "@/components/ui/loading";
 import { PageHeader } from "@/components/ui/panel";
+import { useTrackingDevices } from "@/hooks/use-devices";
+import { useGeoZones } from "@/hooks/use-geo-zones";
+import { useGpsReadings } from "@/hooks/use-tracking";
 import { cn } from "@/lib/utils";
 import { toApiErrorState } from "@/services/api";
+import type { GpsReading } from "@/types/tracking.type";
 
-const LeuserMountain3D = dynamic(
-  () => import("@/components/tracking/leuser-mountain-3d").then((mod) => mod.LeuserMountain3D),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[min(540px,70dvh)] min-h-[340px] w-full animate-pulse rounded-xl bg-surface-muted" />
-    ),
-  },
+const LiveTerrainMap = dynamic(
+  () => import("@/components/tracking/live-terrain-map").then((mod) => mod.LiveTerrainMap),
+  { ssr: false, loading: () => <div className="h-full w-full animate-pulse bg-surface-muted" /> },
 );
 
-type ViewMode = "mountain3d" | "map2d" | "split";
+const REFRESH_MS = 10_000;
+/** Titik yang lebih tua dari ini tidak lagi dianggap "live". */
+const LIVE_WINDOW_MS = 60_000;
+const TRAIL_WINDOW_MS = 15 * 60_000;
+const TRAIL_MAX_POINTS = 90;
 
-type MotionState = {
-  lat: number;
-  lon: number;
-  bearingRad: number;
-  speedKmh: number;
-  updatedAt: string;
-  trail: [number, number][];
+/** Warna per spesies — cukup kontras di atas citra satelit hijau tua. */
+const SPECIES_COLORS = ["#f97316", "#facc15", "#38bdf8", "#f472b6", "#a78bfa", "#fb7185", "#2dd4bf", "#fde68a"];
+
+const toNumber = (value: number | string | null | undefined) => {
+  const n = Number(value);
+  return value === null || value === undefined || !Number.isFinite(n) ? null : n;
 };
 
-const ZONE_COLORS: Record<string, string> = {
-  jalan_raya: "#3d4337",
-  koridor_ekologis: "#3e5a3f",
-  perkebunan: "#6b7f67",
-  permukiman: "#1e3a2e",
+const distanceM = (a: [number, number], b: [number, number]) => {
+  const rad = Math.PI / 180;
+  const dLat = (b[1] - a[1]) * rad;
+  const dLon = (b[0] - a[0]) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * rad) * Math.cos(b[1] * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
 };
 
-const TICK_INTERVAL_SEC = 10;
-
-function bearingToCompass(rad: number): string {
-  const deg = ((rad * 180) / Math.PI + 360) % 360;
-  const dirs = ["Utara (N)", "Timur Laut (NE)", "Timur (E)", "Tenggara (SE)", "Selatan (S)", "Barat Daya (SW)", "Barat (W)", "Barat Laut (NW)"];
-  return dirs[Math.round(deg / 45) % 8];
-}
-
-function hashSeed(str: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h);
-}
-
-type RealMapProps = {
-  animals: LiveMapAnimal3D[];
-  zones: GeoZone[];
-  selectedAnimalId: string | null;
-  onSelect: (id: string) => void;
+const bearingDeg = (a: [number, number], b: [number, number]) => {
+  const rad = Math.PI / 180;
+  const y = Math.sin((b[0] - a[0]) * rad) * Math.cos(b[1] * rad);
+  const x = Math.cos(a[1] * rad) * Math.sin(b[1] * rad) - Math.sin(a[1] * rad) * Math.cos(b[1] * rad) * Math.cos((b[0] - a[0]) * rad);
+  return (Math.atan2(y, x) / rad + 360) % 360;
 };
-
-function RealMap({ animals, zones, selectedAnimalId, onSelect }: RealMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<LeafletMap | null>(null);
-  const markersRef = useRef<Map<string, Marker>>(new Map());
-  const trailsRef = useRef<Map<string, Polyline>>(new Map());
-  const zoneLayersRef = useRef<FeatureGroup | null>(null);
-  const hasFittedBoundsRef = useRef(false);
-
-  const [mapReady, setMapReady] = useState(false);
-  const [satelliteLayer, setSatelliteLayer] = useState(true);
-
-  const handleZoomAllZones = useCallback(() => {
-    const currentMap = mapRef.current;
-    const zoneLayer = zoneLayersRef.current;
-    if (!currentMap || !zoneLayer) return;
-    const bounds = zoneLayer.getBounds();
-    if (!bounds.isValid()) return;
-    currentMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 12, animate: true });
-  }, []);
-
-  useEffect(() => {
-    const markerStore = markersRef.current;
-    const trailStore = trailsRef.current;
-    let cancelled = false;
-
-    async function initializeMap() {
-      const L = await import("leaflet");
-      if (cancelled || !containerRef.current) return;
-      if (mapRef.current !== null) return;
-
-      const currentMap = L.map(containerRef.current, { zoomControl: false }).setView([3.55, 97.35], 10);
-      mapRef.current = currentMap;
-      L.control.zoom({ position: "topright" }).addTo(currentMap);
-      setMapReady(true);
-    }
-
-    void initializeMap();
-
-    return () => {
-      cancelled = true;
-      zoneLayersRef.current?.remove();
-      zoneLayersRef.current = null;
-      markerStore.forEach((m) => m.remove());
-      markerStore.clear();
-      trailStore.forEach((p) => p.remove());
-      trailStore.clear();
-      mapRef.current?.remove();
-      mapRef.current = null;
-      hasFittedBoundsRef.current = false;
-      setMapReady(false);
-    };
-  }, []);
-
-  // Switch between Satellite & OpenStreetMap base tiles
-  useEffect(() => {
-    const currentMap = mapRef.current;
-    if (!currentMap || !mapReady) return;
-    let cancelled = false;
-    let tileLayer: import("leaflet").TileLayer | null = null;
-
-    async function applyBaseLayer() {
-      const L = await import("leaflet");
-      if (cancelled) return;
-      tileLayer = satelliteLayer
-        ? L.tileLayer(
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            { maxZoom: 18, attribution: "Tiles &copy; Esri" },
-          )
-        : L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-          });
-      tileLayer.addTo(currentMap!);
-      tileLayer.bringToBack();
-    }
-
-    void applyBaseLayer();
-    return () => {
-      cancelled = true;
-      tileLayer?.remove();
-    };
-  }, [satelliteLayer, mapReady]);
-
-  // Render GeoZones
-  useEffect(() => {
-    const currentMap = mapRef.current;
-    if (!currentMap || !mapReady) return;
-    let cancelled = false;
-
-    async function renderZones() {
-      const L = await import("leaflet");
-      if (cancelled) return;
-
-      zoneLayersRef.current?.remove();
-      const zoneLayer = L.featureGroup().addTo(currentMap!);
-      zoneLayersRef.current = zoneLayer;
-
-      zones.forEach((zone) => {
-        const color = ZONE_COLORS[zone.zone_type] ?? "#c7cbb8";
-        const popupContent = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = zone.zone_name;
-        const type = document.createElement("p");
-        type.textContent = `Jenis zona: ${zone.zone_type}`;
-        const radiusInfo = document.createElement("p");
-        radiusInfo.textContent =
-          zone.radius_km !== null ? `Radius: ${zone.radius_km} km` : "Radius: Tidak tersedia";
-        popupContent.append(title, type, radiusInfo);
-
-        if (zone.polygon_geojson !== null) {
-          try {
-            const geoJson =
-              typeof zone.polygon_geojson === "string"
-                ? JSON.parse(zone.polygon_geojson)
-                : zone.polygon_geojson;
-            if (typeof geoJson === "object" && geoJson !== null) {
-              L.geoJSON(geoJson as never, {
-                style: { color, weight: 2, fillColor: color, fillOpacity: 0.22 },
-              })
-                .bindPopup(popupContent)
-                .addTo(zoneLayer);
-              return;
-            }
-          } catch {
-            // Skip invalid GeoJSON
-          }
-        }
-
-        if (zone.center_lat === null || zone.center_lon === null || zone.radius_km === null) return;
-        const lat = Number(zone.center_lat);
-        const lon = Number(zone.center_lon);
-        const radius = Number(zone.radius_km);
-        if (!Number.isFinite(lat) || !Number.isFinite(lon) || !Number.isFinite(radius) || radius <= 0) return;
-
-        L.circle([lat, lon], {
-          radius: radius * 1000,
-          color,
-          weight: 2,
-          fillColor: color,
-          fillOpacity: 0.16,
-        })
-          .bindPopup(popupContent)
-          .addTo(zoneLayer);
-      });
-    }
-
-    void renderZones();
-    return () => {
-      cancelled = true;
-      zoneLayersRef.current?.removeFrom(currentMap);
-      zoneLayersRef.current = null;
-    };
-  }, [zones, mapReady]);
-
-  // Update markers & movement trail polylines smoothly every 10 seconds
-  useEffect(() => {
-    const currentMap = mapRef.current;
-    if (!currentMap || !mapReady) return;
-    let cancelled = false;
-
-    async function syncMarkers() {
-      const L = await import("leaflet");
-      if (cancelled) return;
-
-      const activeIds = new Set(animals.map((a) => a.id));
-
-      markersRef.current.forEach((marker, id) => {
-        if (!activeIds.has(id)) {
-          marker.remove();
-          markersRef.current.delete(id);
-        }
-      });
-      trailsRef.current.forEach((line, id) => {
-        if (!activeIds.has(id)) {
-          line.remove();
-          trailsRef.current.delete(id);
-        }
-      });
-
-      animals.forEach((animal) => {
-        const species = animal.speciesName.toLowerCase();
-        const emoji = species.includes("orangutan")
-          ? "🐒"
-          : species.includes("harimau")
-            ? "🐅"
-            : species.includes("gajah")
-              ? "🐘"
-              : species.includes("badak")
-                ? "🦏"
-                : "🐾";
-
-        const existingMarker = markersRef.current.get(animal.id);
-        if (existingMarker) {
-          existingMarker.setLatLng([animal.latitude, animal.longitude]);
-        } else {
-          const markerIcon = L.divIcon({
-            className: "",
-            html: `<div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:3px solid white;border-radius:50%;background:#1e3a2e;color:white;font-size:18px;box-shadow:0 3px 10px rgba(0,0,0,0.45);">${emoji}</div>`,
-            iconSize: [36, 36],
-            iconAnchor: [18, 18],
-          });
-
-          const marker = L.marker([animal.latitude, animal.longitude], { icon: markerIcon }).addTo(currentMap!);
-          marker.on("click", () => onSelect(animal.id));
-          markersRef.current.set(animal.id, marker);
-        }
-
-        const marker = markersRef.current.get(animal.id)!;
-        marker.bindPopup(
-          `<strong>${animal.name}</strong><br/>Kode: ${animal.id}<br/>Kecepatan: ${animal.speedKmh.toFixed(1)} km/jam<br/>Arah: ${animal.heading}`,
-        );
-
-        // Render movement trail polyline
-        const existingTrail = trailsRef.current.get(animal.id);
-        if (animal.trail.length > 1) {
-          if (existingTrail) {
-            existingTrail.setLatLngs(animal.trail);
-          } else {
-            const line = L.polyline(animal.trail, {
-              color: "#34d399",
-              weight: 3,
-              opacity: 0.85,
-              dashArray: "6 6",
-            }).addTo(currentMap!);
-            trailsRef.current.set(animal.id, line);
-          }
-        }
-      });
-
-      if (!hasFittedBoundsRef.current && animals.length > 0) {
-        hasFittedBoundsRef.current = true;
-        if (animals.length > 1) {
-          currentMap!.fitBounds(
-            animals.map((a) => [a.latitude, a.longitude] as [number, number]),
-            { padding: [50, 50], maxZoom: 11 },
-          );
-        } else {
-          currentMap!.setView([animals[0].latitude, animals[0].longitude], 12);
-        }
-      }
-    }
-
-    void syncMarkers();
-    return () => {
-      cancelled = true;
-    };
-  }, [animals, mapReady, onSelect]);
-
-  // Fly to selected animal
-  useEffect(() => {
-    const currentMap = mapRef.current;
-    if (!currentMap || !mapReady || !selectedAnimalId) return;
-    const animal = animals.find((a) => a.id === selectedAnimalId);
-    const marker = markersRef.current.get(selectedAnimalId);
-    if (!animal || !marker) return;
-    currentMap.flyTo([animal.latitude, animal.longitude], 12, { duration: 0.7 });
-    marker.openPopup();
-  }, [selectedAnimalId, animals, mapReady]);
-
-  return (
-    <div className="relative h-[min(540px,70dvh)] min-h-[340px] w-full overflow-hidden rounded-xl">
-      <div
-        ref={containerRef}
-        className="h-full w-full"
-        aria-label="Peta satelit dan geografis lokasi satwa"
-      />
-
-      <div className="absolute left-3 top-3 z-[1000] flex flex-wrap items-center gap-1.5">
-        <button
-          type="button"
-          onClick={handleZoomAllZones}
-          className="rounded-lg border border-natural-muted bg-white/95 px-2.5 py-1.5 text-xs font-semibold text-forest-black shadow-card backdrop-blur transition hover:bg-white"
-        >
-          Zoom Semua Zona
-        </button>
-        <button
-          type="button"
-          onClick={() => setSatelliteLayer((prev) => !prev)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-natural-muted bg-white/95 px-2.5 py-1.5 text-xs font-semibold text-forest-black shadow-card backdrop-blur transition hover:bg-white"
-        >
-          <Globe2 className="size-3.5 text-primary" />
-          <span>{satelliteLayer ? "Mode Jalan (OSM)" : "Mode Satelit"}</span>
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default function LiveMapPage() {
-  const [selectedAnimalId, setSelectedAnimalId] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [speciesId, setSpeciesId] = useState("all");
   const [onlyActive, setOnlyActive] = useState(true);
-  const [viewMode, setViewMode] = useState<ViewMode>("mountain3d");
-  const [liveTracking, setLiveTracking] = useState(true);
-  const [countdown, setCountdown] = useState(TICK_INTERVAL_SEC);
-  const [motionMap, setMotionMap] = useState<Record<string, MotionState>>({});
+  const [paused, setPaused] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
 
-  const {
-    data: devicesData,
-    isLoading: devicesLoading,
-    error: devicesError,
-    refetch: refetchDevices,
-  } = useTrackingDevices();
+  const devicesQuery = useTrackingDevices();
+  const readingsQuery = useGpsReadings(undefined, { refetchInterval: paused ? false : REFRESH_MS });
+  const zonesQuery = useGeoZones();
 
-  const {
-    data: readingsData,
-    isLoading: readingsLoading,
-    error: readingsError,
-    refetch: refetchReadings,
-  } = useGpsReadings(undefined, { refetchInterval: liveTracking ? TICK_INTERVAL_SEC * 1000 : false });
+  // Jam 1 detik untuk teks "x dtk lalu".
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
-  const {
-    data: geoZones = [],
-    error: geoZonesError,
-    refetch: refetchGeoZones,
-  } = useGeoZones();
+  const devices = useMemo(() => devicesQuery.data?.data ?? [], [devicesQuery.data]);
 
-  const devices = useMemo(() => devicesData?.data ?? [], [devicesData]);
-  const readings = useMemo(() => readingsData?.data ?? [], [readingsData]);
+  const animals = useMemo<TrackedAnimal[]>(() => {
+    const byDevice = new Map<number, GpsReading[]>();
+    for (const reading of readingsQuery.data?.data ?? []) {
+      const list = byDevice.get(reading.device_id);
+      if (list) list.push(reading);
+      else byDevice.set(reading.device_id, [reading]);
+    }
 
-  // Base animals from backend GPS readings
-  const baseAnimals = useMemo(() => {
+    const speciesOrder = [...new Set(devices.map((d) => d.animal?.species_id).filter((id): id is number => id != null))].sort((a, b) => a - b);
+
     return devices.flatMap((device) => {
       const animal = device.animal;
       if (!animal || device.animal_id === null) return [];
 
-      const latestReading = readings.find((r) => r.device_id === device.device_id);
-      if (!latestReading) return [];
+      const readings = (byDevice.get(device.device_id) ?? [])
+        .map((r) => ({ lat: toNumber(r.latitude), lon: toNumber(r.longitude), at: new Date(r.recorded_at).getTime(), iso: r.recorded_at }))
+        .filter((r): r is { lat: number; lon: number; at: number; iso: string } => r.lat !== null && r.lon !== null && Number.isFinite(r.at))
+        .sort((a, b) => b.at - a.at);
+      const latest = readings[0];
+      if (!latest) return [];
 
-      const latitude = Number(latestReading.latitude);
-      const longitude = Number(latestReading.longitude);
-      if (
-        !Number.isFinite(latitude) ||
-        !Number.isFinite(longitude) ||
-        latitude < -90 ||
-        latitude > 90 ||
-        longitude < -180 ||
-        longitude > 180
-      ) {
-        return [];
+      const recent = readings.filter((r) => latest.at - r.at <= TRAIL_WINDOW_MS).slice(0, TRAIL_MAX_POINTS);
+      const trail = recent.map((r) => [r.lon, r.lat] as [number, number]).reverse();
+
+      let speedKmh: number | null = null;
+      let headingDeg: number | null = null;
+      const previous = readings[1];
+      if (previous && latest.at - previous.at <= LIVE_WINDOW_MS && latest.at > previous.at) {
+        const a: [number, number] = [previous.lon, previous.lat];
+        const b: [number, number] = [latest.lon, latest.lat];
+        const meters = distanceM(a, b);
+        speedKmh = (meters / ((latest.at - previous.at) / 1000)) * 3.6;
+        headingDeg = meters > 0.5 ? bearingDeg(a, b) : null;
       }
 
-      const isActive = device.is_active === true && animal.is_active === true;
+      const speciesIndex = speciesOrder.indexOf(animal.species_id);
       return [
         {
-          id: animal.animal_code ?? String(animal.animal_id),
-          deviceId: device.device_id,
+          key: animal.animal_code ?? `SAT-${animal.animal_id}`,
           animalId: animal.animal_id,
-          name: animal.species?.common_name ?? animal.animal_code ?? String(animal.animal_id),
+          deviceId: device.device_id,
           speciesId: animal.species_id,
-          speciesName: animal.species?.common_name ?? "Tidak diketahui",
-          latitude,
-          longitude,
-          recordedAt: latestReading.recorded_at,
-          isActive,
-          status: isActive ? "Terpantau" : "Tidak Aktif",
+          name: animal.name_animal || animal.name || animal.animal_code || `Satwa #${animal.animal_id}`,
+          speciesName: animal.species?.common_name ?? "Spesies tidak diketahui",
+          latitude: latest.lat,
+          longitude: latest.lon,
+          recordedAt: latest.iso,
+          isActive: device.is_active === true && Boolean(animal.is_active),
+          trail,
+          speedKmh,
+          headingDeg,
+          batteryLevel: device.battery_level,
+          color: SPECIES_COLORS[(speciesIndex < 0 ? 0 : speciesIndex) % SPECIES_COLORS.length],
         },
       ];
     });
-  }, [devices, readings]);
-
-  const baseAnimalsRef = useRef(baseAnimals);
-  useEffect(() => {
-    baseAnimalsRef.current = baseAnimals;
-  }, [baseAnimals]);
-
-  // 10-second live movement engine + 1-second countdown ticker
-  useEffect(() => {
-    if (!liveTracking) return;
-
-    const timer = window.setInterval(() => {
-      setCountdown((prev) => {
-        if (prev > 1) return prev - 1;
-
-        // Every 10 seconds: advance active animals smoothly along realistic habitat vectors
-        const nowIso = new Date().toISOString();
-        setMotionMap((current) => {
-          const next: Record<string, MotionState> = { ...current };
-          for (const animal of baseAnimalsRef.current) {
-            if (!animal.isActive) continue;
-            const existing = current[animal.id];
-            const seed = hashSeed(animal.id);
-
-            const startLat = existing?.lat ?? animal.latitude;
-            const startLon = existing?.lon ?? animal.longitude;
-            const prevBearing = existing?.bearingRad ?? ((seed % 360) * Math.PI) / 180;
-
-            // Gentle curving wildlife roaming step (~55m - 125m per 10 seconds)
-            const turn = (Math.random() - 0.5) * 0.65;
-            let nextBearing = prevBearing + turn;
-
-            // Pull gently back toward base habitat if drifting > 0.012 deg (~1.3 km)
-            const dLatFromHome = animal.latitude - startLat;
-            const dLonFromHome = animal.longitude - startLon;
-            if (Math.hypot(dLatFromHome, dLonFromHome) > 0.012) {
-              nextBearing = Math.atan2(dLonFromHome, dLatFromHome);
-            }
-
-            const stepDeg = 0.00045 + Math.random() * 0.00055;
-            const nextLat = startLat + Math.cos(nextBearing) * stepDeg;
-            const nextLon = startLon + Math.sin(nextBearing) * stepDeg;
-            const metersMoved = stepDeg * 111_000;
-            const speedKmh = (metersMoved / TICK_INTERVAL_SEC) * 3.6;
-
-            const prevTrail: [number, number][] = existing?.trail ?? [[animal.latitude, animal.longitude]];
-            const nextTrail: [number, number][] = [...prevTrail, [nextLat, nextLon] as [number, number]].slice(-12);
-
-            next[animal.id] = {
-              lat: nextLat,
-              lon: nextLon,
-              bearingRad: nextBearing,
-              speedKmh,
-              updatedAt: nowIso,
-              trail: nextTrail,
-            };
-          }
-          return next;
-        });
-
-        return TICK_INTERVAL_SEC;
-      });
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [liveTracking]);
-
-  // Merge backend readings with live 10-second movement coordinates
-  const animalItems = useMemo<LiveMapAnimal3D[]>(() => {
-    return baseAnimals.map((animal) => {
-      const m = motionMap[animal.id];
-      const lat = m?.lat ?? animal.latitude;
-      const lon = m?.lon ?? animal.longitude;
-      return {
-        ...animal,
-        latitude: lat,
-        longitude: lon,
-        recordedAt: m?.updatedAt ?? animal.recordedAt,
-        speedKmh: m?.speedKmh ?? (animal.isActive ? 2.4 : 0),
-        heading: m ? bearingToCompass(m.bearingRad) : "Utara (N)",
-        trail: m?.trail ?? [[lat, lon]],
-      };
-    });
-  }, [baseAnimals, motionMap]);
+  }, [devices, readingsQuery.data]);
 
   const speciesOptions = useMemo(() => {
-    const speciesMap = new Map<number, string>();
-    devices.forEach((device) => {
-      const animal = device.animal;
-      if (animal) {
-        speciesMap.set(animal.species_id, animal.species?.common_name ?? `Spesies #${animal.species_id}`);
-      }
-    });
-    return Array.from(speciesMap.entries()).map(([id, name]) => ({ id, name }));
-  }, [devices]);
+    const map = new Map<number, { name: string; color: string }>();
+    animals
+      .filter((a) => !onlyActive || a.isActive)
+      .forEach((a) => map.set(a.speciesId, { name: a.speciesName, color: a.color }));
+    return [...map.entries()].map(([id, v]) => ({ id, ...v })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [animals, onlyActive]);
 
-  const filteredAnimals = useMemo(() => {
-    return animalItems.filter((animal) => {
-      const matchesSpecies = speciesId === "all" || animal.speciesId === Number(speciesId);
-      const matchesStatus = !onlyActive || animal.isActive;
-      return matchesSpecies && matchesStatus;
-    });
-  }, [animalItems, speciesId, onlyActive]);
+  const visible = useMemo(
+    () =>
+      animals
+        .filter((a) => (speciesId === "all" || a.speciesId === Number(speciesId)) && (!onlyActive || a.isActive))
+        .sort((a, b) => a.speciesName.localeCompare(b.speciesName) || a.key.localeCompare(b.key)),
+    [animals, speciesId, onlyActive],
+  );
 
-  const selectedAnimal = filteredAnimals.find((a) => a.id === selectedAnimalId) ?? null;
-
-  const handleSelect = useCallback((id: string | null) => {
-    setSelectedAnimalId(id);
+  const selected = visible.find((a) => a.key === selectedKey) ?? null;
+  const handleSelect = useCallback((key: string) => {
+    setSelectedKey(key);
+    // Di ponsel panel detail berada di bawah peta; bawa ke layar.
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      requestAnimationFrame(() => document.getElementById("live-map-panel")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }
   }, []);
 
-  if (devicesLoading || readingsLoading) {
-    return <Loading label="Memuat data pelacakan satwa & Gunung Leuser 3D..." />;
+  if (devicesQuery.isLoading || readingsQuery.isLoading) {
+    return <Loading label="Memuat posisi satwa…" />;
   }
 
-  if (devicesError || readingsError) {
-    const apiError = toApiErrorState(devicesError ?? readingsError);
+  if (devicesQuery.error || readingsQuery.error) {
+    const apiError = toApiErrorState(devicesQuery.error ?? readingsQuery.error);
     return (
       <ErrorState
         kind={apiError.kind}
@@ -553,260 +165,159 @@ export default function LiveMapPage() {
         status={apiError.status}
         errors={apiError.errors}
         onRetry={() => {
-          void refetchDevices();
-          void refetchReadings();
+          void devicesQuery.refetch();
+          void readingsQuery.refetch();
         }}
       />
     );
   }
 
+  const liveCount = visible.filter((a) => now - new Date(a.recordedAt).getTime() <= LIVE_WINDOW_MS).length;
+  const fetchedAt = readingsQuery.dataUpdatedAt;
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       <PageHeader
-        eyebrow="Pelacakan & Eksplorasi 3D"
-        title="Live Map & Gunung Leuser 3D"
-        description="Pantau pergerakan satwa secara langsung setiap 10 detik di Gunung Leuser 3D dan peta satelit. Klik satwa untuk melihat informasi lengkap beserta model 3D-nya."
+        eyebrow="Pelacakan"
+        title="Live Map"
+        description="Posisi kalung GPS satwa di TN Gunung Leuser. Pilih satwa untuk melihat profil spesies dan model 3D-nya."
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Live 10s indicator & pause/resume */}
+          <div className="flex items-center gap-3 text-[13px] text-muted">
+            <span aria-live="polite">
+              {paused ? "Pembaruan dijeda" : "Diperbarui tiap 10 detik"}
+              {fetchedAt ? ` · terakhir ${new Date(fetchedAt).toLocaleTimeString("id-ID")}` : ""}
+            </span>
             <button
               type="button"
-              onClick={() => setLiveTracking((v) => !v)}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition",
-                liveTracking
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                  : "border-line bg-surface-muted text-muted",
-              )}
+              onClick={() => setPaused((v) => !v)}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-line bg-surface px-3 font-medium text-ink hover:bg-surface-muted"
             >
-              <Radio className={cn("size-3.5", liveTracking && "animate-pulse")} />
-              <span>
-                {liveTracking ? `Live 10d · ${countdown}d` : "Pelacakan Dijeda"}
-              </span>
-              {liveTracking ? <Pause className="size-3" /> : <Play className="size-3" />}
+              {paused ? <Play className="size-3.5" aria-hidden="true" /> : <Pause className="size-3.5" aria-hidden="true" />}
+              {paused ? "Lanjutkan" : "Jeda"}
             </button>
-
-            {/* View mode switcher */}
-            <div
-              role="group"
-              aria-label="Mode tampilan peta"
-              className="inline-flex rounded-xl border border-line bg-surface p-1 shadow-sm"
-            >
-              <button
-                type="button"
-                onClick={() => setViewMode("mountain3d")}
-                aria-pressed={viewMode === "mountain3d"}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition",
-                  viewMode === "mountain3d"
-                    ? "bg-primary text-white"
-                    : "text-ink-soft hover:bg-surface-muted",
-                )}
-              >
-                <Mountain className="size-3.5" />
-                <span>Gunung 3D</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("map2d")}
-                aria-pressed={viewMode === "map2d"}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition",
-                  viewMode === "map2d"
-                    ? "bg-primary text-white"
-                    : "text-ink-soft hover:bg-surface-muted",
-                )}
-              >
-                <MapIcon className="size-3.5" />
-                <span>Peta Satelit</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("split")}
-                aria-pressed={viewMode === "split"}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition",
-                  viewMode === "split"
-                    ? "bg-primary text-white"
-                    : "text-ink-soft hover:bg-surface-muted",
-                )}
-              >
-                <Layers className="size-3.5" />
-                <span>Gabungan</span>
-              </button>
-            </div>
           </div>
         }
+        className="mb-4"
       />
 
-      <div className="grid items-start gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
-        {/* Left sidebar: Filters, live animals list, legend */}
-        <aside className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary-soft p-3">
-            <div className="flex flex-col gap-1">
-              <label htmlFor="map-species" className="text-xs font-medium text-ink-soft">
-                Spesies
-              </label>
-              <select
-                id="map-species"
-                value={speciesId}
-                onChange={(event) => {
-                  setSpeciesId(event.target.value);
-                  setSelectedAnimalId(null);
-                }}
-                className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink"
-              >
-                <option value="all">Semua spesies</option>
-                {speciesOptions.map((species) => (
-                  <option key={species.id} value={species.id}>
-                    {species.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+      <div className="grid overflow-hidden rounded-lg border border-line bg-surface lg:h-[calc(100dvh-13rem)] lg:min-h-[560px] lg:grid-cols-[22rem_minmax(0,1fr)]">
+        <div className="order-1 h-[60dvh] min-h-[360px] lg:order-2 lg:h-full">
+          <LiveTerrainMap animals={visible} zones={zonesQuery.data ?? []} selectedKey={selected?.key ?? null} onSelect={handleSelect} />
+        </div>
 
-            <label className="flex items-center gap-2 text-sm text-ink-soft">
-              <input
-                type="checkbox"
-                checked={onlyActive}
-                onChange={(event) => {
-                  setOnlyActive(event.target.checked);
-                  setSelectedAnimalId(null);
-                }}
-                className="size-4 rounded border-line"
-              />
-              Hanya satwa aktif
-            </label>
-          </div>
+        <aside id="live-map-panel" className="order-2 scroll-mt-16 min-h-0 overflow-y-auto border-t border-line lg:order-1 lg:border-r lg:border-t-0">
+          {selected ? (
+            <AnimalDetail key={selected.key} animal={selected} now={now} onBack={() => setSelectedKey(null)} />
+          ) : (
+            <>
+              <div className="flex flex-col gap-3 border-b border-line p-4">
+                <div className="flex items-end gap-3">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <label htmlFor="map-species" className="text-[13px] text-muted">
+                      Spesies
+                    </label>
+                    <select
+                      id="map-species"
+                      value={speciesId}
+                      onChange={(event) => setSpeciesId(event.target.value)}
+                      className="ui-input h-9 py-0 text-[13px]"
+                    >
+                      <option value="all">Semua spesies</option>
+                      {speciesOptions.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <label className="flex h-9 items-center gap-2 text-[13px] text-ink-soft">
+                    <input
+                      type="checkbox"
+                      checked={onlyActive}
+                      onChange={(event) => setOnlyActive(event.target.checked)}
+                      className="size-4"
+                    />
+                    Aktif saja
+                  </label>
+                </div>
+                <p className="text-[13px] text-muted">
+                  {visible.length} satwa · {liveCount} mengirim data dalam 1 menit terakhir
+                </p>
+              </div>
 
-          <ul className="max-h-[420px] overflow-y-auto rounded-xl border border-primary/25 bg-surface">
-            {filteredAnimals.map((animal) => {
-              const active = selectedAnimalId === animal.id;
-              return (
-                <li key={animal.id} className="border-b border-line/60 last:border-b-0">
-                  <button
-                    type="button"
-                    onClick={() => handleSelect(animal.id)}
-                    aria-pressed={active}
-                    className={cn(
-                      "flex w-full flex-col gap-1 border-l-2 px-3 py-3 text-left transition",
-                      active
-                        ? "border-primary bg-primary-soft"
-                        : "border-transparent hover:bg-surface-muted",
-                    )}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-semibold text-ink">{animal.name}</span>
-                      <span className="font-mono text-[11px] font-bold text-primary">
-                        {animal.id}
-                      </span>
-                    </div>
-                    <span className="font-mono text-[11px] text-muted">
-                      {animal.latitude.toFixed(4)}, {animal.longitude.toFixed(4)}
-                    </span>
-                    <span className="text-xs text-primary">
-                      {animal.status} · {animal.speedKmh.toFixed(1)} km/jam
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
+              {visible.length === 0 ? (
+                <p className="p-4 text-[13px] text-muted">
+                  {animals.length === 0
+                    ? "Belum ada kalung GPS yang terpasang pada satwa dan mengirim titik lokasi."
+                    : "Tidak ada satwa yang cocok dengan filter ini."}
+                </p>
+              ) : (
+                <ul>
+                  {visible.map((animal) => {
+                    const live = now - new Date(animal.recordedAt).getTime() <= LIVE_WINDOW_MS;
+                    return (
+                      <li key={animal.key} className="border-b border-line last:border-b-0">
+                        <button
+                          type="button"
+                          onClick={() => handleSelect(animal.key)}
+                          className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-muted focus-visible:bg-surface-muted"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="size-2.5 shrink-0 rounded-full ring-1 ring-black/20"
+                            style={{ background: animal.isActive ? animal.color : "#9ca3af" }}
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-baseline justify-between gap-2">
+                              <span className="truncate text-sm font-medium text-ink">
+                                {animal.name === animal.key ? animal.speciesName : animal.name}
+                              </span>
+                              <span className="shrink-0 font-mono text-xs text-muted">{animal.key}</span>
+                            </span>
+                            <span className="flex items-baseline justify-between gap-2 text-xs text-muted">
+                              <span className="truncate">{animal.name === animal.key ? `Kalung #${animal.deviceId}` : animal.speciesName}</span>
+                              <span className={cn("shrink-0 tabular-nums", live && "text-success")}>
+                                {relativeTime(animal.recordedAt, now)}
+                              </span>
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
 
-            {filteredAnimals.length === 0 ? (
-              <li className="p-3 text-sm text-muted">
-                Tidak ada data lokasi GPS yang cocok dengan filter.
-              </li>
-            ) : null}
-          </ul>
-
-          <div className="rounded-xl border border-line bg-surface p-3">
-            <h3 className="mb-2.5 text-sm font-semibold text-ink">Legenda Zona & Satwa</h3>
-            <div className="space-y-1.5 text-xs text-ink-soft">
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-full bg-warning" /> Jalan Raya
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-full bg-forest-primary" /> Koridor Ekologis
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-full bg-sage" /> Perkebunan
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-full bg-info" /> Permukiman
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-full bg-emerald-500" /> Jejak Gerak (10 detik)
-              </div>
-            </div>
-
-            <p className="mt-2.5 text-xs text-muted">{geoZones.length} zona geografis aktif</p>
-            {geoZonesError ? (
-              <div className="mt-2 text-xs text-danger">
-                Gagal memuat zona geografis.
-                <button
-                  type="button"
-                  onClick={() => void refetchGeoZones()}
-                  className="ml-1 font-medium underline"
-                >
-                  Coba lagi
-                </button>
-              </div>
-            ) : null}
-          </div>
+              {speciesOptions.length > 0 ? (
+                <div className="border-t border-line p-4 text-xs text-muted">
+                  <p className="mb-2 font-medium text-ink-soft">Keterangan</p>
+                  <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                    {speciesOptions.map((s) => (
+                      <li key={s.id} className="flex items-center gap-2">
+                        <span className="size-2.5 rounded-full ring-1 ring-black/20" style={{ background: s.color }} />
+                        <span className="truncate">{s.name}</span>
+                      </li>
+                    ))}
+                    <li className="flex items-center gap-2">
+                      <span className="h-0 w-3 border-t-2 border-dashed border-[#f59e0b]" /> Zona rawan
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="h-0 w-3 border-t-2 border-dashed border-[#22c55e]" /> Zona lindung
+                    </li>
+                  </ul>
+                  {zonesQuery.error ? (
+                    <p className="mt-2 text-danger">
+                      Zona gagal dimuat.{" "}
+                      <button type="button" onClick={() => void zonesQuery.refetch()} className="underline">
+                        Coba lagi
+                      </button>
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </>
+          )}
         </aside>
-
-        {/* Right main stage: Realistic 3D Mountain + 2D Map + Selected Animal 3D Model & Info */}
-        <section className="min-w-0 space-y-4">
-          {viewMode === "mountain3d" ? (
-            <div className="overflow-hidden rounded-xl border border-primary/25 bg-primary-soft p-1 shadow-sm">
-              <LeuserMountain3D
-                animals={filteredAnimals}
-                selectedAnimalId={selectedAnimalId}
-                onSelect={handleSelect}
-              />
-            </div>
-          ) : viewMode === "map2d" ? (
-            <div className="overflow-hidden rounded-xl border border-primary/25 bg-primary-soft p-1 shadow-sm">
-              <RealMap
-                animals={filteredAnimals}
-                zones={geoZones}
-                selectedAnimalId={selectedAnimalId}
-                onSelect={(id) => handleSelect(id)}
-              />
-            </div>
-          ) : (
-            <div className="grid gap-3 xl:grid-cols-2">
-              <div className="overflow-hidden rounded-xl border border-primary/25 bg-primary-soft p-1 shadow-sm">
-                <LeuserMountain3D
-                  animals={filteredAnimals}
-                  selectedAnimalId={selectedAnimalId}
-                  onSelect={handleSelect}
-                />
-              </div>
-              <div className="overflow-hidden rounded-xl border border-primary/25 bg-primary-soft p-1 shadow-sm">
-                <RealMap
-                  animals={filteredAnimals}
-                  zones={geoZones}
-                  selectedAnimalId={selectedAnimalId}
-                  onSelect={(id) => handleSelect(id)}
-                />
-              </div>
-            </div>
-          )}
-
-          {selectedAnimal ? (
-            <Animal3DDetailPanel
-              key={selectedAnimal.id}
-              animal={selectedAnimal}
-              onClose={() => setSelectedAnimalId(null)}
-            />
-          ) : (
-            <EmptyState
-              title="Klik satwa untuk melihat info & model 3D"
-              description="Pilih pin satwa pada Gunung Leuser 3D, marker di peta satelit, atau daftar di samping untuk melihat informasi ekologi dan model 3D interaktifnya."
-            />
-          )}
-        </section>
       </div>
     </div>
   );

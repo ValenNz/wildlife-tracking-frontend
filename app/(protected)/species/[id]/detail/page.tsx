@@ -97,10 +97,18 @@ export default function SpeciesDetailPage() {
           <p className="text-sm italic text-ink-soft">{record.scientific_name}</p>
         </div>
 
-        <StatusBadge
-          label={TYPE_CONSERVATION_STATUS_LABELS[record.conservation_status]}
-          variant={CONSERVATION_VARIANT[record.conservation_status]}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <StatusBadge
+            label={TYPE_CONSERVATION_STATUS_LABELS[record.conservation_status]}
+            variant={CONSERVATION_VARIANT[record.conservation_status]}
+          />
+          <Link
+            href={`/species/${speciesId}/model`}
+            className="text-sm font-medium text-primary underline-offset-2 hover:underline"
+          >
+            Profil &amp; model 3D
+          </Link>
+        </div>
       </div>
 
       <section className="ui-panel p-5">

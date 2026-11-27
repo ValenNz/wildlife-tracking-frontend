@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { PhoneCall } from "lucide-react";
 
 import { TrailSafetyPanel } from "@/components/tourism/trail-safety-panel";
 import { ErrorState, Loading, PageHeader } from "@/components/ui";
 import { useTourRoutes } from "@/hooks/use-tourism";
+import { cn } from "@/lib/utils";
 import { toApiErrorState } from "@/services/api";
 
 export default function EmergencyContactsPage() {
@@ -37,45 +37,43 @@ export default function EmergencyContactsPage() {
       <PageHeader
         eyebrow="Keselamatan & Tanggap Darurat TNGL"
         title="Kontak Darurat, Detail Pos & Alert AI"
-        description="Akses langsung untuk seluruh role: nomor posko BBTNGL, frekuensi radio VHF, detail pos jalur, pantauan ancaman AI, dan tombol sinyal SOS instan."
+        description="Nomor posko BBTNGL, frekuensi radio VHF, detail pos jalur, pantauan ancaman AI, dan tombol sinyal SOS instan."
         className="mb-0"
       />
 
       {routes.length > 0 ? (
-        <section className="ui-panel p-4">
-          <div className="mb-2.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted">
-            <PhoneCall className="size-3.5 text-primary" />
-            <span>Pilih Rute / Koridor Jalur</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {routes.map((route) => {
-              const selected = route.slug === activeSlug;
-              return (
-                <button
-                  key={route.route_id}
-                  type="button"
-                  onClick={() => setSelectedSlug(route.slug)}
-                  aria-pressed={selected}
-                  className={
-                    selected
-                      ? "rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow-sm"
-                      : "rounded-xl border border-line bg-surface-muted px-3.5 py-2 text-xs font-semibold text-ink-soft hover:border-primary hover:text-ink"
-                  }
-                >
-                  {route.code} · {route.name}
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <nav
+          aria-label="Pilih koridor jalur"
+          className="flex items-center gap-5 overflow-x-auto border-b border-line"
+        >
+          {routes.map((route) => {
+            const selected = route.slug === activeSlug;
+            return (
+              <button
+                key={route.route_id}
+                type="button"
+                onClick={() => setSelectedSlug(route.slug)}
+                aria-pressed={selected}
+                className={cn(
+                  "-mb-px shrink-0 border-b-2 pb-2.5 pt-1 text-sm font-medium transition-colors",
+                  selected
+                    ? "border-primary font-semibold text-ink"
+                    : "border-transparent text-muted hover:border-line-strong/40 hover:text-ink",
+                )}
+              >
+                {route.name}
+              </button>
+            );
+          })}
+        </nav>
       ) : null}
 
       {activeSlug ? (
         <TrailSafetyPanel slug={activeSlug} />
       ) : (
-        <section className="ui-panel p-5">
-          <p className="text-sm text-muted">Belum ada rute wisata aktif untuk menampilkan kontak darurat.</p>
-        </section>
+        <p className="py-8 text-sm text-muted">
+          Belum ada rute wisata aktif untuk menampilkan kontak darurat.
+        </p>
       )}
     </div>
   );

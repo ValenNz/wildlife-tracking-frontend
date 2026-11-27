@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { RotateCcw, Search } from "lucide-react";
+import { Filter, RotateCcw, Search } from "lucide-react";
 import { Button } from "@/components/button";
 import { SelectInput, TextInput, fieldDescribedBy } from "@/components/form";
 
@@ -41,7 +41,11 @@ export function DataFilters({
   };
 
   return (
-    <div className="ui-panel mb-5 flex w-full min-w-0 flex-wrap items-end gap-3 p-4">
+    <div className="mb-5 flex w-full min-w-0 flex-wrap items-end gap-3 rounded-[10px] border border-border/80 bg-surface px-4 py-3 shadow-card">
+      <div className="hidden items-center gap-2 self-center border-r border-line pr-3 text-xs font-bold text-ink sm:flex">
+        <Filter aria-hidden="true" className="size-4 text-ink-soft" />
+        <span>Filter</span>
+      </div>
       {fields.map((field) => {
         const value = values[field.key] ?? "";
         const inputId = `filter-${field.key}`;
@@ -126,13 +130,13 @@ export function DataFilters({
       })}
 
       <Button
-        variant="outline"
+        variant="ghost"
         onClick={onReset}
         disabled={!hasActiveFilter}
         icon={<RotateCcw className="size-3.5" />}
-        className="w-full sm:w-auto"
+        className="w-full text-[#ea0234] hover:bg-danger-soft hover:text-[#ea0234] sm:w-auto"
       >
-        Reset
+        Reset Filter
       </Button>
     </div>
   );

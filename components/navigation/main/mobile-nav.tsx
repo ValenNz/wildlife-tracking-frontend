@@ -101,7 +101,7 @@ export function MobileNav({
         {/* Quick preference controls (hidden from the compact phone header) */}
         <div
           inert={!open}
-          className="flex shrink-0 items-center gap-2 border-t border-white/10 bg-forest-dark px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:hidden"
+          className="flex shrink-0 items-center gap-2 border-t border-line bg-surface px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:hidden"
         >
           <button
             type="button"

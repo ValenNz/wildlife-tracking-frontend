@@ -66,7 +66,7 @@ export type NavSection = {
 
 const PRIMARY_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "grid", permission: "view_data" },
-  { label: "Live Map & 3D", href: "/tracking/live-map", icon: "map", permission: "view_data" },
+  { label: "Live Map", href: "/tracking/live-map", icon: "map", permission: "view_data" },
 ];
 
 const CONSERVATION_ITEMS: NavItem[] = [

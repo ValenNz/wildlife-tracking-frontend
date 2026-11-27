@@ -100,6 +100,15 @@ export default function AiVisionUploadPage() {
     [file],
   );
 
+  // Hasil muncul di bawah formulir; bawa ke layar agar tidak terlihat seperti "tidak terjadi apa-apa".
+  const resultId = result?.prediction_id ?? 0;
+  useEffect(() => {
+    if (!resultId) return;
+    requestAnimationFrame(() =>
+      document.getElementById("ai-vision-result")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  }, [resultId]);
+
   useEffect(() => {
     if (!previewUrl) return;
 
@@ -383,6 +392,7 @@ export default function AiVisionUploadPage() {
       </FormSection>
 
       {result ? (
+        <div id="ai-vision-result" className="scroll-mt-20">
         <AiPredictionResult
           prediction={result}
           canVerify={canVerify}
@@ -391,6 +401,7 @@ export default function AiVisionUploadPage() {
           onDeleted={() => setPredictionId(0)}
           detailHref={`/ai/vision/${result.prediction_id}/detail`}
         />
+        </div>
       ) : null}
     </div>
   );

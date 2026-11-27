@@ -9,14 +9,13 @@ export default function UserManualPage() {
   const { locale } = usePreferences();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <PageHeader
-        eyebrow={locale === "en" ? "Documentation" : "Dokumentasi"}
         title={locale === "en" ? "User Manual" : "Panduan Pengguna"}
         description={
           locale === "en"
-            ? "Complete guide for operating the Gunung Leuser Wildlife Monitoring & Ecotourism platform."
-            : "Panduan lengkap pengoperasian platform Pemantauan Satwa & Ekowisata Gunung Leuser."
+            ? "Practical guide for operating the Gunung Leuser Wildlife Monitoring & Ecotourism system."
+            : "Panduan praktis penggunaan sistem Pemantauan Satwa & Ekowisata Gunung Leuser."
         }
         className="mb-0"
       />

@@ -103,11 +103,11 @@ export function DataTable<TData>({
         tabIndex={0}
         role="region"
         aria-label={label}
-        className="responsive-table max-w-full overflow-x-auto overscroll-x-contain rounded-card border border-line bg-surface"
+        className="responsive-table max-w-full overflow-x-auto overscroll-x-contain rounded-[14px] border border-border/80 bg-surface shadow-card"
       >
         <table className="w-full min-w-[40rem] border-collapse text-left text-[13.5px]">
           <caption className="sr-only">{label}</caption>
-          <thead className="border-b border-line bg-surface-muted/60">
+          <thead className="border-b border-border/80 bg-surface">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

@@ -23,10 +23,16 @@ import {
   clickMatchingElement,
   extractPageSummary,
   fillMatchingInput,
+  getAllowedVoiceRoutes,
   interpretConfirmation,
   interpretVoiceCommand,
   summarizeAllowedRoutesForRole,
 } from "@/lib/voice-assistant";
+import {
+  sendVoiceChat,
+  type VoiceChatAction,
+  type VoiceChatHistoryItem,
+} from "@/services/voice-assistant.service";
 import { cn } from "@/lib/utils";
 import type { TYPE_EMERGENCY_CONTACT } from "@/types/tourism.type";
 
@@ -168,6 +174,8 @@ export function VoiceA11yWidget() {
   const [feedback, setFeedback] = useState("");
   const [textCommand, setTextCommand] = useState("");
   const [speechSupported, setSpeechSupported] = useState(true);
+  const [thinking, setThinking] = useState(false);
+  const [chatHistory, setChatHistory] = useState<VoiceChatHistoryItem[]>([]);
 
   const [activeEmergencyCall, setActiveEmergencyCall] = useState<TYPE_EMERGENCY_CONTACT | null>(null);
 
@@ -178,6 +186,8 @@ export function VoiceA11yWidget() {
   const wantListeningRef = useRef(false);
   const conversationActiveRef = useRef(false);
   const pendingEmergencyRef = useRef<{ emergencyType: string; transcript: string } | null>(null);
+  const chatHistoryRef = useRef<VoiceChatHistoryItem[]>([]);
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const startListeningRef = useRef<() => void>(() => undefined);
   const activeEmergencyCallRef = useRef<TYPE_EMERGENCY_CONTACT | null>(null);
   const fatalErrorRef = useRef(false);
@@ -188,6 +198,13 @@ export function VoiceA11yWidget() {
   useEffect(() => {
     activeEmergencyCallRef.current = activeEmergencyCall;
   }, [activeEmergencyCall]);
+
+  useEffect(() => {
+    chatHistoryRef.current = chatHistory;
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
 
   useEffect(() => {
     return () => {
@@ -431,40 +448,18 @@ export function VoiceA11yWidget() {
     updateReadable(false);
   }, [updateContrast, updateFontScale, updateReadable]);
 
-  const executeCommand = useCallback(
-    (rawText: string) => {
-      if (pendingEmergencyRef.current) {
-        const confirmation = interpretConfirmation(rawText);
-        if (confirmation === "yes") {
-          pendingEmergencyRef.current = null;
-          conversationActiveRef.current = false;
-          setActiveEmergencyCall(PRIMARY_EMERGENCY_CONTACT);
-          speak(
-            locale === "en"
-              ? "Calling BBTNGL Emergency Command Post now. Help is being connected."
-              : "Menghubungkan panggilan darurat ke Posko Komando BBTNGL sekarang.",
-            undefined,
-            { resumeAfter: false },
-          );
-          return;
-        }
-        if (confirmation === "no") {
-          pendingEmergencyRef.current = null;
-          speak(
-            locale === "en"
-              ? "Emergency call cancelled. I am still listening if you need anything else."
-              : "Panggilan darurat dibatalkan. Saya masih mendengarkan jika Anda membutuhkan hal lain.",
-          );
-          return;
-        }
-        speak(
-          locale === "en"
-            ? "Please say yes to call emergency services now, or say cancel to abort."
-            : "Mohon ucapkan ya untuk menghubungi posko darurat sekarang, atau ucapkan batal untuk membatalkan.",
-        );
-        return;
-      }
+  const appendChatTurn = useCallback((userText: string, assistantText: string) => {
+    setChatHistory((prev) =>
+      [
+        ...prev,
+        { role: "user" as const, content: userText },
+        { role: "assistant" as const, content: assistantText },
+      ].slice(-12),
+    );
+  }, []);
 
+  const executeLocalCommand = useCallback(
+    (rawText: string) => {
       const action = interpretVoiceCommand(rawText, locale, userRole);
       switch (action.type) {
         case "stop_speech":
@@ -479,33 +474,46 @@ export function VoiceA11yWidget() {
             emergencyType: action.emergencyType,
             transcript: action.transcript,
           };
-          speak(
+          const reply =
             locale === "en"
               ? "Emergency detected! Do you want me to call the BBTNGL Emergency Command Post right now? Please say yes or cancel."
-              : "Keadaan darurat terdeteksi! Apakah Anda ingin saya langsung menelepon Posko Komando Darurat BBTNGL sekarang? Ucapkan ya atau batal.",
-          );
+              : "Keadaan darurat terdeteksi! Apakah Anda ingin saya langsung menelepon Posko Komando Darurat BBTNGL sekarang? Ucapkan ya atau batal.";
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
         }
-        case "list_commands":
-          speak(summarizeAllowedRoutesForRole(userRole, locale));
+        case "list_commands": {
+          const reply = summarizeAllowedRoutesForRole(userRole, locale);
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
-        case "auth_required":
-          speak(
+        }
+        case "auth_required": {
+          const reply =
             locale === "en"
               ? `Please sign in first before opening ${action.label}.`
-              : `Silakan login terlebih dahulu untuk membuka halaman ${action.label}.`,
-          );
+              : `Silakan login terlebih dahulu untuk membuka halaman ${action.label}.`;
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
-        case "access_denied":
-          speak(
+        }
+        case "access_denied": {
+          const reply =
             locale === "en"
               ? `Sorry, your role${userRole ? ` (${getRoleLabel("en", userRole)})` : ""} does not have access to ${action.label}.`
-              : `Maaf, role Anda${userRole ? ` (${getRoleLabel("id", userRole)})` : ""} tidak memiliki izin untuk membuka halaman ${action.label}.`,
-          );
+              : `Maaf, role Anda${userRole ? ` (${getRoleLabel("id", userRole)})` : ""} tidak memiliki izin untuk membuka halaman ${action.label}.`;
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
+        }
         case "logout":
           if (!userRole) {
-            speak(locale === "en" ? "You are not signed in yet." : "Anda belum masuk ke akun mana pun.");
+            const reply =
+              locale === "en"
+                ? "You are not signed in yet."
+                : "Anda belum masuk ke akun mana pun.";
+            appendChatTurn(rawText, reply);
+            speak(reply);
             return;
           }
           conversationActiveRef.current = false;
@@ -517,29 +525,35 @@ export function VoiceA11yWidget() {
           void logout();
           return;
         case "read_page": {
-          const summary = extractPageSummary(locale);
-          speak(
-            summary ||
-              (locale === "en"
-                ? "Unable to read page content."
-                : "Konten halaman tidak ditemukan."),
-          );
+          const summary =
+            extractPageSummary(locale) ||
+            (locale === "en"
+              ? "Unable to read page content."
+              : "Konten halaman tidak ditemukan.");
+          appendChatTurn(rawText, summary);
+          speak(summary);
           return;
         }
-        case "navigate":
-          speak(
+        case "navigate": {
+          const reply =
             locale === "en"
               ? `Navigating to ${action.label}.`
-              : `Mengarahkan ke ${action.label}.`,
-          );
+              : `Mengarahkan ke ${action.label}.`;
+          appendChatTurn(rawText, reply);
+          speak(reply);
           router.push(action.href);
           return;
+        }
         case "history":
           if (action.direction === "back") {
-            speak(locale === "en" ? "Going back." : "Kembali ke halaman sebelumnya.");
+            const reply = locale === "en" ? "Going back." : "Kembali ke halaman sebelumnya.";
+            appendChatTurn(rawText, reply);
+            speak(reply);
             router.back();
           } else {
-            speak(locale === "en" ? "Going forward." : "Maju ke halaman berikutnya.");
+            const reply = locale === "en" ? "Going forward." : "Maju ke halaman berikutnya.";
+            appendChatTurn(rawText, reply);
+            speak(reply);
             router.forward();
           }
           return;
@@ -574,99 +588,110 @@ export function VoiceA11yWidget() {
           }
           const meta = document.querySelector('meta[name="color-scheme"]');
           if (meta) meta.setAttribute("content", action.scheme);
-          speak(
+          const reply =
             action.scheme === "dark"
               ? locale === "en"
                 ? "Dark mode enabled."
                 : "Mode gelap diaktifkan."
               : locale === "en"
                 ? "Light mode enabled."
-                : "Mode terang diaktifkan.",
-          );
+                : "Mode terang diaktifkan.";
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
         }
-        case "set_locale":
+        case "set_locale": {
           setLocale(action.locale);
-          speak(
+          const reply =
             action.locale === "en"
               ? "Language switched to English."
-              : "Bahasa diganti ke Bahasa Indonesia.",
-          );
+              : "Bahasa diganti ke Bahasa Indonesia.";
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
+        }
         case "set_rate": {
           const next = action.exact ?? rateRef.current + (action.delta ?? 0);
           const applied = updateRate(next);
-          speak(
+          const reply =
             locale === "en"
               ? `Speech speed set to ${applied} times.`
-              : `Kecepatan bicara diatur ke ${applied} kali.`,
-            applied,
-          );
+              : `Kecepatan bicara diatur ke ${applied} kali.`;
+          appendChatTurn(rawText, reply);
+          speak(reply, applied);
           return;
         }
-        case "set_contrast":
+        case "set_contrast": {
           updateContrast(action.high);
-          speak(
-            action.high
-              ? locale === "en"
-                ? "High contrast enabled."
-                : "Kontras tinggi diaktifkan."
-              : locale === "en"
-                ? "Normal contrast restored."
-                : "Kontras normal dikembalikan.",
-          );
+          const reply = action.high
+            ? locale === "en"
+              ? "High contrast enabled."
+              : "Kontras tinggi diaktifkan."
+            : locale === "en"
+              ? "Normal contrast restored."
+              : "Kontras normal dikembalikan.";
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
-        case "set_font_scale":
+        }
+        case "set_font_scale": {
           updateFontScale(action.scale);
-          speak(
+          const reply =
             locale === "en"
               ? `Text size set to ${action.scale === "xl" ? "extra large" : action.scale === "lg" ? "large" : "normal"}.`
-              : `Ukuran tulisan diatur ke ${action.scale === "xl" ? "ekstra besar" : action.scale === "lg" ? "besar" : "normal"}.`,
-          );
+              : `Ukuran tulisan diatur ke ${action.scale === "xl" ? "ekstra besar" : action.scale === "lg" ? "besar" : "normal"}.`;
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
-        case "reset_a11y":
+        }
+        case "reset_a11y": {
           resetAllA11y();
-          speak(
+          const reply =
             locale === "en"
               ? "Visual accessibility settings reset."
-              : "Pengaturan tampilan aksesibilitas direset.",
-          );
+              : "Pengaturan tampilan aksesibilitas direset.";
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
+        }
         case "click_element": {
           const clicked = clickMatchingElement(action.query);
-          speak(
-            clicked
-              ? locale === "en"
-                ? `Clicked ${clicked}.`
-                : `Menekan ${clicked}.`
-              : locale === "en"
-                ? `Could not find button or link matching ${action.query}.`
-                : `Tidak menemukan tombol atau tautan bernama ${action.query}.`,
-          );
+          const reply = clicked
+            ? locale === "en"
+              ? `Clicked ${clicked}.`
+              : `Menekan ${clicked}.`
+            : locale === "en"
+              ? `Could not find button or link matching ${action.query}.`
+              : `Tidak menemukan tombol atau tautan bernama ${action.query}.`;
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
         }
         case "fill_input": {
           const filled = fillMatchingInput(action.field, action.value);
-          speak(
-            filled
-              ? locale === "en"
-                ? `Filled ${filled}.`
-                : `Mengisi kolom ${filled}.`
-              : locale === "en"
-                ? `Could not find field ${action.field}.`
-                : `Kolom ${action.field} tidak ditemukan.`,
-          );
+          const reply = filled
+            ? locale === "en"
+              ? `Filled ${filled}.`
+              : `Mengisi kolom ${filled}.`
+            : locale === "en"
+              ? `Could not find field ${action.field}.`
+              : `Kolom ${action.field} tidak ditemukan.`;
+          appendChatTurn(rawText, reply);
+          speak(reply);
           return;
         }
-        case "unknown":
-          speak(
+        case "unknown": {
+          const reply =
             locale === "en"
               ? `I heard "${action.transcript}", but did not recognize that command. Say help for available commands.`
-              : `Saya mendengar "${action.transcript}", namun perintah belum dikenali. Ucapkan bantuan untuk daftar perintah.`,
-          );
+              : `Saya mendengar "${action.transcript}", namun perintah belum dikenali. Ucapkan bantuan untuk daftar perintah.`;
+          appendChatTurn(rawText, reply);
+          speak(reply);
+        }
       }
     },
     [
+      appendChatTurn,
       locale,
       logout,
       resetAllA11y,
@@ -677,6 +702,225 @@ export function VoiceA11yWidget() {
       updateContrast,
       updateFontScale,
       updateRate,
+      userRole,
+    ],
+  );
+
+  const applyAiAction = useCallback(
+    (action: VoiceChatAction, reply: string, rawText: string) => {
+      switch (action.type) {
+        case "navigate":
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          router.push(action.href);
+          return;
+        case "set_theme": {
+          try {
+            window.localStorage.setItem("color-scheme", action.scheme);
+          } catch {
+            // Ignore
+          }
+          const meta = document.querySelector('meta[name="color-scheme"]');
+          if (meta) meta.setAttribute("content", action.scheme);
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          return;
+        }
+        case "set_locale":
+          setLocale(action.locale);
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          return;
+        case "set_font_scale":
+          updateFontScale(action.scale);
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          return;
+        case "set_contrast":
+          updateContrast(action.high);
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          return;
+        case "reset_a11y":
+          resetAllA11y();
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          return;
+        case "scroll":
+          if (action.direction === "top") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else if (action.direction === "bottom") {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+          } else {
+            window.scrollBy({
+              top: action.direction === "down" ? 420 : -420,
+              behavior: "smooth",
+            });
+          }
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          return;
+        case "history":
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          if (action.direction === "back") {
+            router.back();
+          } else {
+            router.forward();
+          }
+          return;
+        case "read_page": {
+          const summary = extractPageSummary(locale) || reply;
+          appendChatTurn(rawText, summary);
+          speak(summary);
+          return;
+        }
+        case "click_element": {
+          const clicked = clickMatchingElement(action.query);
+          const finalReply = clicked
+            ? reply
+            : locale === "en"
+              ? `Could not find button or link matching ${action.query}.`
+              : `Tidak menemukan tombol atau tautan bernama ${action.query}.`;
+          appendChatTurn(rawText, finalReply);
+          speak(finalReply);
+          return;
+        }
+        case "fill_input": {
+          const filled = fillMatchingInput(action.field, action.value);
+          const finalReply = filled
+            ? reply
+            : locale === "en"
+              ? `Could not find field ${action.field}.`
+              : `Kolom ${action.field} tidak ditemukan.`;
+          appendChatTurn(rawText, finalReply);
+          speak(finalReply);
+          return;
+        }
+        case "trigger_sos":
+          conversationActiveRef.current = true;
+          pendingEmergencyRef.current = {
+            emergencyType: action.emergency_type ?? "general",
+            transcript: rawText,
+          };
+          appendChatTurn(rawText, reply);
+          speak(reply);
+          return;
+        case "logout":
+          if (!userRole) {
+            appendChatTurn(rawText, reply);
+            speak(reply);
+            return;
+          }
+          conversationActiveRef.current = false;
+          appendChatTurn(rawText, reply);
+          speak(reply, undefined, { resumeAfter: false });
+          void logout();
+          return;
+        case "none":
+        default:
+          appendChatTurn(rawText, reply);
+          speak(reply);
+      }
+    },
+    [
+      appendChatTurn,
+      locale,
+      logout,
+      resetAllA11y,
+      router,
+      setLocale,
+      speak,
+      updateContrast,
+      updateFontScale,
+      userRole,
+    ],
+  );
+
+  const executeCommand = useCallback(
+    (rawText: string) => {
+      const cleaned = rawText.trim();
+      if (!cleaned) return;
+
+      // 1. Instant local confirmation for pending SOS emergency
+      if (pendingEmergencyRef.current) {
+        const confirmation = interpretConfirmation(cleaned);
+        if (confirmation === "yes") {
+          pendingEmergencyRef.current = null;
+          conversationActiveRef.current = false;
+          setActiveEmergencyCall(PRIMARY_EMERGENCY_CONTACT);
+          const reply =
+            locale === "en"
+              ? "Calling BBTNGL Emergency Command Post now. Help is being connected."
+              : "Menghubungkan panggilan darurat ke Posko Komando BBTNGL sekarang.";
+          appendChatTurn(cleaned, reply);
+          speak(reply, undefined, { resumeAfter: false });
+          return;
+        }
+        if (confirmation === "no") {
+          pendingEmergencyRef.current = null;
+          const reply =
+            locale === "en"
+              ? "Emergency call cancelled. I am still listening if you need anything else."
+              : "Panggilan darurat dibatalkan. Saya masih mendengarkan jika Anda membutuhkan hal lain.";
+          appendChatTurn(cleaned, reply);
+          speak(reply);
+          return;
+        }
+        const reply =
+          locale === "en"
+            ? "Please say yes to call emergency services now, or say cancel to abort."
+            : "Mohon ucapkan ya untuk menghubungi posko darurat sekarang, atau ucapkan batal untuk membatalkan.";
+        appendChatTurn(cleaned, reply);
+        speak(reply);
+        return;
+      }
+
+      // 2. Instant local handling for critical safety & speech stop (zero latency)
+      const quickLocal = interpretVoiceCommand(cleaned, locale, userRole);
+      if (
+        quickLocal.type === "stop_speech" ||
+        quickLocal.type === "emergency_distress"
+      ) {
+        executeLocalCommand(cleaned);
+        return;
+      }
+
+      // 3. Full AI Chatbot via backend Groq LLM (with automatic local fallback)
+      setThinking(true);
+      setFeedback(locale === "en" ? "Thinking..." : "Sedang memproses...");
+
+      const allowedRoutes = getAllowedVoiceRoutes(userRole, locale);
+      const pageContext = extractPageSummary(locale).slice(0, 1000);
+
+      void sendVoiceChat({
+        message: cleaned,
+        locale,
+        current_path: pathname,
+        page_context: pageContext,
+        allowed_routes: allowedRoutes,
+        history: chatHistoryRef.current.slice(-8),
+      })
+        .then((res) => {
+          setThinking(false);
+          if (res && !res.fallback && res.reply) {
+            applyAiAction(res.action, res.reply, cleaned);
+            return;
+          }
+          executeLocalCommand(cleaned);
+        })
+        .catch(() => {
+          setThinking(false);
+          executeLocalCommand(cleaned);
+        });
+    },
+    [
+      appendChatTurn,
+      applyAiAction,
+      executeLocalCommand,
+      locale,
+      pathname,
+      speak,
       userRole,
     ],
   );
@@ -1025,29 +1269,73 @@ export function VoiceA11yWidget() {
               </p>
             ) : null}
 
-            {/* Live Transcript & Spoken Feedback */}
-            <div
-              aria-live="polite"
-              className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs leading-relaxed text-ink-soft"
-            >
-              {transcript ? (
-                <p className="mb-1 font-medium text-ink">
-                  &ldquo;{transcript}&rdquo;
-                </p>
+            {/* Chatbot Conversation History & Live Transcript */}
+            <div className="flex flex-col gap-1.5">
+              {chatHistory.length > 0 ? (
+                <div className="flex items-center justify-between px-0.5">
+                  <span className="text-[11px] font-semibold text-muted">
+                    {locale === "en" ? "AI Conversation" : "Percakapan AI"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChatHistory([]);
+                      setTranscript("");
+                      setFeedback("");
+                    }}
+                    className="text-[11px] font-medium text-muted hover:text-ink"
+                  >
+                    {locale === "en" ? "Clear" : "Hapus"}
+                  </button>
+                </div>
               ) : null}
-              <p>
-                {feedback ||
-                  (locale === "en"
-                    ? 'Press Start Speaking and say e.g. "open user manual", "read this page", or "help".'
-                    : 'Tekan Mulai Bicara lalu ucapkan mis. "buka panduan pengguna", "bacakan halaman", atau "bantuan".')}
-              </p>
+
+              <div
+                ref={chatScrollRef}
+                aria-live="polite"
+                className="flex max-h-44 flex-col gap-2 overflow-y-auto rounded-lg border border-line bg-surface px-2.5 py-2 text-xs leading-relaxed text-ink-soft"
+              >
+                {chatHistory.length > 0 ? (
+                  chatHistory.map((item, idx) => (
+                    <div
+                      key={`${item.role}-${idx}`}
+                      className={cn(
+                        "max-w-[92%] rounded-lg px-2.5 py-1.5",
+                        item.role === "user"
+                          ? "self-end bg-primary text-white"
+                          : "self-start bg-surface-muted text-ink",
+                      )}
+                    >
+                      {item.content}
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    {transcript ? (
+                      <p className="font-medium text-ink">&ldquo;{transcript}&rdquo;</p>
+                    ) : null}
+                    <p>
+                      {feedback ||
+                        (locale === "en"
+                          ? 'Ask anything or give any command naturally, e.g. "show me the live map" or "any critical alerts today?".'
+                          : 'Tanya apa saja atau beri perintah bebas, mis. "tunjukin peta satwa", "ada ancaman hari ini?", atau "ganti mode terang".')}
+                    </p>
+                  </>
+                )}
+
+                {thinking ? (
+                  <p className="self-start rounded-lg bg-surface-muted px-2.5 py-1.5 text-[11px] italic text-muted">
+                    {locale === "en" ? "Thinking..." : "Sedang memproses..."}
+                  </p>
+                ) : null}
+              </div>
             </div>
 
             {/* Text command fallback */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (!textCommand.trim()) return;
+                if (!textCommand.trim() || thinking) return;
                 const cmd = textCommand.trim();
                 setTranscript(cmd);
                 setTextCommand("");
@@ -1059,18 +1347,20 @@ export function VoiceA11yWidget() {
                 type="text"
                 value={textCommand}
                 onChange={(e) => setTextCommand(e.target.value)}
+                disabled={thinking}
                 placeholder={
                   locale === "en"
-                    ? 'Type command (e.g. "read page")...'
-                    : 'Ketik perintah (mis. "bacakan halaman")...'
+                    ? "Ask anything or type a command..."
+                    : "Tanya apa saja atau ketik perintah..."
                 }
                 aria-label={locale === "en" ? "Text voice command" : "Perintah teks asisten"}
                 className="ui-input h-9 text-xs"
               />
               <button
                 type="submit"
+                disabled={thinking}
                 aria-label={locale === "en" ? "Run command" : "Jalankan perintah"}
-                className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white hover:bg-primary-dark"
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white hover:bg-primary-dark disabled:opacity-50"
               >
                 <Send aria-hidden="true" className="size-3.5" />
               </button>

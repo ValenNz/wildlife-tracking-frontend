@@ -68,21 +68,21 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "mb-6 flex flex-col gap-4 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between",
+        "mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
         className,
       )}
     >
       <div className="min-w-0">
         {eyebrow !== undefined ? (
-          <p className="mb-1 text-xs font-medium text-muted">
+          <p className="mb-1 text-xs font-semibold text-primary">
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="font-serif text-2xl font-medium tracking-[-0.02em] text-ink sm:text-[1.9rem] sm:leading-tight">
+        <h2 className="text-2xl font-extrabold tracking-tight text-ink sm:text-[1.85rem] sm:leading-tight">
           {title}
         </h2>
         {description !== undefined ? (
-          <p className="mt-1.5 max-w-2xl text-[13.5px] leading-6 text-muted">
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
             {description}
           </p>
         ) : null}

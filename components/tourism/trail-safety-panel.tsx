@@ -226,34 +226,31 @@ export function TrailSafetyPanel({ slug }: { slug: string }) {
           </form>
         ) : null}
 
-        <div className="mt-4">
+        <div className="mt-5">
           {safety.ai_emergencies.length === 0 ? (
-            <p className="rounded-xl border border-line bg-surface-muted px-4 py-3 text-xs text-ink-soft">
+            <p className="border-t border-line pt-4 text-sm text-muted">
               Belum ada anomali berbahaya yang terdeteksi AI pada koridor jalur saat ini.
             </p>
           ) : (
-            <ul className="grid gap-3 md:grid-cols-2">
+            <ul className="divide-y divide-line border-t border-line">
               {safety.ai_emergencies.map((alert) => (
-                <li
-                  key={alert.prediction_id}
-                  className="rounded-xl border border-warning/35 bg-warning-soft/40 p-3.5"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-ink">
-                      <AlertTriangle className="size-3.5 text-warning" />
-                      {alert.label}
-                    </span>
-                    <span className="rounded-full bg-surface px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-danger">
-                      {alert.threat_level}
-                      {alert.confidence !== null ? ` · ${alert.confidence}%` : ""}
-                    </span>
+                <li key={alert.prediction_id} className="flex flex-col gap-1.5 py-3.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <AlertTriangle className="size-4 shrink-0 text-warning" />
+                      <span className="text-sm font-semibold text-ink">{alert.label}</span>
+                      {alert.detected_at ? (
+                        <span className="text-xs text-muted">
+                          · {formatDateTime(alert.detected_at)}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 text-sm leading-6 text-ink-soft">{alert.summary}</p>
                   </div>
-                  <p className="mt-1.5 text-xs leading-5 text-ink-soft">{alert.summary}</p>
-                  {alert.detected_at ? (
-                    <p className="mt-1 text-[11px] text-muted">
-                      Terdeteksi AI: {formatDateTime(alert.detected_at)}
-                    </p>
-                  ) : null}
+                  <span className="shrink-0 self-start rounded-md bg-danger-soft px-2.5 py-1 text-xs font-semibold text-danger">
+                    {alert.threat_level}
+                    {alert.confidence !== null ? ` (${alert.confidence}%)` : ""}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -262,8 +259,8 @@ export function TrailSafetyPanel({ slug }: { slug: string }) {
       </section>
 
       {/* 2. Detail Informasi Setiap Pos */}
-      <section className="ui-panel p-5">
-        <div className="mb-4 flex items-center gap-2">
+      <section className="ui-panel p-5 sm:p-6">
+        <div className="mb-4 flex items-center gap-2.5">
           <Compass className="size-5 text-primary" />
           <div>
             <h2 className="text-base font-bold text-ink">Detail Informasi Setiap Pos Jalur</h2>
@@ -273,54 +270,47 @@ export function TrailSafetyPanel({ slug }: { slug: string }) {
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
+        <ol className="divide-y divide-line border-t border-line">
           {safety.post_details.map((post) => (
-            <article key={post.code} className="flex flex-col justify-between rounded-xl border border-line bg-surface-muted/50 p-4">
+            <li key={post.code} className="grid gap-3 py-4 md:grid-cols-[200px_1fr]">
               <div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-md bg-primary px-2 py-0.5 font-mono text-[11px] font-bold text-white">
-                    {post.code}
-                  </span>
-                  <span className="font-mono text-xs font-semibold text-primary">
-                    {post.elevation_m} mdpl · {post.distance_km} km
-                  </span>
-                </div>
-                <h3 className="mt-2 text-sm font-bold text-ink">{post.name}</h3>
-                <dl className="mt-2.5 flex flex-col gap-1.5 text-xs text-ink-soft">
-                  <div className="flex items-start gap-1.5">
-                    <Droplets className="mt-0.5 size-3.5 shrink-0 text-sky-600" />
+                <p className="text-xs font-semibold text-primary">
+                  {post.code} · {post.elevation_m} mdpl · {post.distance_km} km
+                </p>
+                <h3 className="mt-0.5 text-sm font-bold text-ink">{post.name}</h3>
+              </div>
+
+              <div className="space-y-2">
+                <dl className="grid gap-2 text-sm text-ink-soft sm:grid-cols-3">
+                  <div className="flex items-start gap-2">
+                    <Droplets className="mt-0.5 size-4 shrink-0 text-sky-600" />
                     <span>{post.water_source}</span>
                   </div>
-                  <div className="flex items-start gap-1.5">
-                    <Wifi className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />
+                  <div className="flex items-start gap-2">
+                    <Wifi className="mt-0.5 size-4 shrink-0 text-emerald-600" />
                     <span>{post.signal}</span>
                   </div>
-                  <div className="flex items-start gap-1.5">
-                    <Users className="mt-0.5 size-3.5 shrink-0 text-amber-600" />
+                  <div className="flex items-start gap-2">
+                    <Users className="mt-0.5 size-4 shrink-0 text-amber-600" />
                     <span>Kapasitas: {post.capacity}</span>
                   </div>
                 </dl>
-                {post.notes ? <p className="mt-2 text-xs leading-5 text-muted">{post.notes}</p> : null}
+                {post.notes ? <p className="text-xs leading-5 text-muted">{post.notes}</p> : null}
+                {post.facilities.length > 0 ? (
+                  <p className="text-xs text-muted">
+                    <span className="font-semibold text-ink-soft">Fasilitas:</span>{" "}
+                    {post.facilities.join(" · ")}
+                  </p>
+                ) : null}
               </div>
-
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {post.facilities.map((fac) => (
-                  <span
-                    key={fac}
-                    className="rounded-full border border-line bg-surface px-2 py-0.5 text-[10px] font-semibold text-ink-soft"
-                  >
-                    {fac}
-                  </span>
-                ))}
-              </div>
-            </article>
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
 
       {/* 3. Kontak Darurat beserta Detailnya */}
-      <section className="ui-panel p-5">
-        <div className="mb-4 flex items-center gap-2">
+      <section className="ui-panel p-5 sm:p-6">
+        <div className="mb-4 flex items-center gap-2.5">
           <PhoneCall className="size-5 text-primary" />
           <div>
             <h2 className="text-base font-bold text-ink">Kontak Darurat &amp; Evakuasi Jalur</h2>
@@ -330,45 +320,41 @@ export function TrailSafetyPanel({ slug }: { slug: string }) {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <ul className="divide-y divide-line border-t border-line">
           {safety.emergency_contacts.map((contact) => (
-            <article
+            <li
               key={`${contact.name}-${contact.phone}`}
-              className="flex flex-col justify-between rounded-xl border border-line bg-surface p-4"
+              className="flex flex-col justify-between gap-3 py-4 sm:flex-row sm:items-center"
             >
-              <div>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h3 className="text-sm font-bold text-ink">{contact.name}</h3>
-                    <p className="text-xs font-medium text-primary">{contact.role}</p>
-                  </div>
-                  <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[10px] font-bold text-primary-dark">
-                    {contact.available}
-                  </span>
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-sm font-bold text-ink">{contact.name}</h3>
+                  <span className="text-xs text-muted">· {contact.available}</span>
                 </div>
-                <p className="mt-2 text-xs text-ink-soft">
-                  <strong>Lokasi:</strong> {contact.location}
+                <p className="text-xs font-medium text-primary">{contact.role}</p>
+                <p className="text-xs text-ink-soft">
+                  {contact.location}
+                  {contact.radio_channel ? (
+                    <span className="ml-2 inline-flex items-center gap-1 text-muted">
+                      <Radio className="size-3 text-primary" />
+                      {contact.radio_channel}
+                    </span>
+                  ) : null}
                 </p>
-                {contact.radio_channel ? (
-                  <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-soft">
-                    <Radio className="size-3.5 text-primary" />
-                    <span>{contact.radio_channel}</span>
-                  </p>
-                ) : null}
-                {contact.notes ? <p className="mt-1.5 text-xs text-muted">{contact.notes}</p> : null}
+                {contact.notes ? <p className="text-xs text-muted">{contact.notes}</p> : null}
               </div>
 
               <button
                 type="button"
                 onClick={() => setActiveCall(contact)}
-                className="mt-3 inline-flex h-9 w-fit items-center gap-1.5 rounded-lg border border-primary/40 bg-primary-soft px-3 text-xs font-bold text-primary-dark transition hover:bg-primary hover:text-white"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-dark"
               >
                 <PhoneCall className="size-3.5" />
                 <span>Hubungi {contact.phone}</span>
               </button>
-            </article>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
       <EmergencyCallModal

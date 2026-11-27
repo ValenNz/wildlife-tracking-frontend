@@ -1,29 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import { VoiceA11yWidget } from "@/components/accessibility/voice-a11y-widget";
 import { PreferencesProvider } from "@/components/providers/preferences-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastProvider } from "@/components/toast";
 import "./globals.css";
-
-const fontSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-  display: "swap",
-});
-
-const fontSerif = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-newsreader",
-  display: "swap",
-});
-
-const fontMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Wildlife Monitoring System - BTNGL",
@@ -51,7 +32,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html
       lang="id"
-      className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} h-full antialiased`}
+      className="h-full"
       suppressHydrationWarning
     >
       <head>

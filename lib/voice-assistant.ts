@@ -17,7 +17,7 @@ export const VOICE_ROUTES: VoiceRouteEntry[] = [
   },
   {
     href: "/tracking/live-map",
-    label: { id: "Live Map & Gunung 3D", en: "Live Map & 3D Mountain" },
+    label: { id: "Live Map", en: "Live Map" },
     keywords: [
       "live map",
       "peta langsung",
@@ -894,4 +894,26 @@ export function fillMatchingInput(fieldQuery: string, value: string): string | n
     }
   }
   return null;
+}
+
+export function getAllowedVoiceRoutes(
+  role: TYPE_USER_ROLE | null,
+  locale: AppLocale,
+): Array<{ href: string; label: string }> {
+  const seen = new Set<string>();
+  const routes: Array<{ href: string; label: string }> = [];
+
+  for (const entry of VOICE_ROUTES) {
+    if (seen.has(entry.href)) continue;
+    const allowed = entry.isPublic || (role !== null && canAccessRoute(role, entry.href));
+    if (!allowed) continue;
+
+    seen.add(entry.href);
+    routes.push({
+      href: entry.href,
+      label: getNavLabel(locale, entry.href, entry.label[locale]),
+    });
+  }
+
+  return routes;
 }

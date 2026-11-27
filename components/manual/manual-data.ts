@@ -1,13 +1,5 @@
 import type { AppLocale } from "@/lib/i18n";
 
-export type PeakKind =
-  | "typography3d"
-  | "rotatablePage"
-  | "neuralConsole"
-  | "livingWorld"
-  | "tactileDeck"
-  | "orbitalAtlas";
-
 export type LocalizedText = Record<AppLocale, string>;
 
 export type ManualStep = {
@@ -26,8 +18,6 @@ export type ManualLink = {
 export type ManualChapter = {
   id: string;
   number: string;
-  peakKind: PeakKind;
-  peakBadge: LocalizedText;
   title: LocalizedText;
   subtitle: LocalizedText;
   summary: LocalizedText;
@@ -42,8 +32,6 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
   {
     id: "overview-roles",
     number: "01",
-    peakKind: "typography3d",
-    peakBadge: { id: "Halaman 3D Penuh", en: "Full-Page 3D Stage" },
     title: {
       id: "Pengenalan Sistem & 6 Role Pengguna",
       en: "System Overview & 6 User Roles",
@@ -189,8 +177,6 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
   {
     id: "tracking-incidents",
     number: "02",
-    peakKind: "rotatablePage",
-    peakBadge: { id: "Halaman 3D Dapat Diputar 360°", en: "360° Rotatable 3D Page" },
     title: {
       id: "Pelacakan Satwa, Perangkat & Laporan Insiden",
       en: "Wildlife Tracking, Devices & Incident Reports",
@@ -214,12 +200,12 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
         id: "live-map",
         badge: { id: "Peta", en: "Map" },
         heading: {
-          id: "Pantau posisi terbaru di Live Map & Wildlife Explorer",
-          en: "Monitor latest positions on Live Map & Wildlife Explorer",
+          id: "Pantau posisi satwa di Live Map",
+          en: "Monitor animal positions on Live Map",
         },
         body: {
-          id: "Buka Live Map untuk melihat titik GPS terbaru tiap satwa di atas poligon zona geografis, lalu telusuri jejak historis di Wildlife Explorer.",
-          en: "Open Live Map to view latest GPS points over geo-zone polygons, then inspect historical tracks in Wildlife Explorer.",
+          id: "Live Map menampilkan posisi tiap satwa di atas citra satelit dan relief Leuser, diperbarui tiap 10 detik. Klik satwa untuk membuka profil spesies dan model 3D-nya.",
+          en: "Live Map shows each animal over satellite imagery and Leuser terrain, refreshed every 10 seconds. Click an animal to open its species profile and 3D model.",
         },
         details: [
           {
@@ -313,8 +299,6 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
   {
     id: "ai-pipeline",
     number: "03",
-    peakKind: "neuralConsole",
-    peakBadge: { id: "Karusel Silinder 3D AI", en: "3D Cylindrical AI Carousel" },
     title: {
       id: "Analisis AI Kamera Jebak, Audio & Wajah Staf",
       en: "AI Camera Trap, Audio & Staff Face Analysis",
@@ -442,15 +426,13 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
   {
     id: "tourism-3d-world",
     number: "04",
-    peakKind: "livingWorld",
-    peakBadge: { id: "Gunung Leuser 3D + POI", en: "3D Leuser Mountain + POIs" },
     title: {
       id: "Wisata TNGL, Peta 3D & Pembayaran Otomatis",
       en: "TNGL Tourism, 3D Map & Automated Payment",
     },
     subtitle: {
-      id: "Putar gunung 3D atau pilih titik POI untuk zoom ke sisi gunung: jelajah rute, tarif PNBP, bayar instan, & e-tiket.",
-      en: "Orbit the 3D mountain or select a POI to zoom into that mountain side: trails, PNBP tariffs, instant pay & e-tickets.",
+      id: "Jelajah rute di peta 3D, tarif PNBP, pembayaran instan, dan e-tiket.",
+      en: "Trails on the 3D map, PNBP tariffs, instant payment, and e-tickets.",
     },
     summary: {
       id: "Pengunjung dapat menjelajahi rute wisata dalam 3D, melihat profil ketinggian dan jadwal pemandu, memesan tiket dengan tarif PP 36/2024 yang dihitung server, dan membayar otomatis via Simulator Gateway atau Midtrans.",
@@ -574,8 +556,6 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
   {
     id: "pos-checkin",
     number: "05",
-    peakKind: "tactileDeck",
-    peakBadge: { id: "Dek Kartu Taktil 3D", en: "3D Tactile Card Deck" },
     title: {
       id: "POS Loket (Walk-In) & Check-In Tiket",
       en: "Ticket Counter POS (Walk-In) & Check-In",
@@ -694,19 +674,17 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
   {
     id: "wildlife-3d-help",
     number: "06",
-    peakKind: "orbitalAtlas",
-    peakBadge: { id: "Tata Surya 3D Satwa & Bantuan", en: "3D Wildlife Solar System" },
     title: {
-      id: "Ensiklopedia Satwa 3D & Bantuan Cepat",
-      en: "3D Wildlife Encyclopedia & Quick Help",
+      id: "Model 3D Satwa & Bantuan Cepat",
+      en: "3D Wildlife Models & Quick Help",
     },
     subtitle: {
-      id: "Pilih salah satu planet untuk zoom ke sub-bab: 8 satwa 3D, unggah GLB, privasi anti-perburuan & troubleshooting.",
-      en: "Click any planet to zoom into its sub-chapter: 8 3D species, GLB upload, anti-poaching privacy & troubleshooting.",
+      id: "Model 3D di Live Map, unggah GLB, keamanan lokasi, dan solusi kendala umum.",
+      en: "3D models on Live Map, GLB upload, location security, and common fixes.",
     },
     summary: {
-      id: "Ensiklopedia Satwa 3D menyajikan profil ekologi dan model 3D/AR interaktif dengan titik keterangan bernomor tanpa membocorkan lokasi individu satwa demi mencegah perburuan liar.",
-      en: "The 3D Wildlife Encyclopedia presents ecological profiles and interactive 3D/AR models with numbered annotations while hiding individual animal locations to prevent poaching.",
+      id: "Profil ekologi dan model 3D/AR tiap spesies kini dibuka langsung dari Live Map, di samping posisi satwanya.",
+      en: "Each species' ecological profile and 3D/AR model now opens directly from Live Map, next to the animal's position.",
     },
     readMinutes: 5,
     roles: [
@@ -743,8 +721,8 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
           en: "Upload .glb models & place new hotspots (Ecologist / Admin)",
         },
         body: {
-          id: "Pemilik izin manage_master_data dapat memperbarui profil ekologi, menyembunyikan spesies, dan mengganti model 3D bawaan.",
-          en: "Users with manage_master_data can edit ecological profiles, hide species from public view, and replace built-in 3D models.",
+          id: "Pemilik izin manage_master_data membuka Master Data › Spesies › Profil & model 3D untuk memperbarui profil ekologi dan mengganti model 3D.",
+          en: "Users with manage_master_data open Master Data › Species › Profile & 3D model to edit ecological profiles and replace 3D models.",
         },
         details: [
           {
@@ -765,8 +743,8 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
           en: "Individual wildlife location security & anti-poaching",
         },
         body: {
-          id: "Katalog publik /wildlife-3d memisahkan data edukasi spesies dari koordinat GPS lapangan.",
-          en: "The public /wildlife-3d catalog strictly separates species education from live field GPS coordinates.",
+          id: "Live Map hanya terbuka untuk role dengan izin view_data; pengunjung dan petugas loket tidak melihat koordinat satwa.",
+          en: "Live Map is limited to roles with view_data; visitors and counter staff never see animal coordinates.",
         },
         details: [
           {
@@ -817,7 +795,7 @@ export const MANUAL_CHAPTERS: ManualChapter[] = [
       },
     ],
     links: [
-      { href: "/tracking/live-map", label: { id: "Buka Live Map & Gunung 3D", en: "Open Live Map & 3D Mountain" } },
+      { href: "/tracking/live-map", label: { id: "Buka Live Map", en: "Open Live Map" } },
       { href: "/dashboard", label: { id: "Kembali ke Dashboard", en: "Back to Dashboard" } },
     ],
   },

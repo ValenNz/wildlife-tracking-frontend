@@ -70,8 +70,8 @@ export default function SpeciesDetailPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/wildlife-3d" className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary hover:underline">
-        <ArrowLeft className="size-4" /> Semua satwa
+      <Link href={`/species/${id}/detail`} className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary hover:underline">
+        <ArrowLeft className="size-4" /> Kembali ke data spesies
       </Link>
 
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">

@@ -132,26 +132,19 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8 pb-8">
-      <header className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
-          <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-primary">
-              BTNGL · Gunung Leuser
-            </span>
-            <span aria-hidden="true">·</span>
-            <span>{ROLE_LABELS[role]}</span>
-          </div>
-          <h2 className="font-serif text-3xl font-medium tracking-[-0.025em] text-ink sm:text-[2.15rem] sm:leading-tight">
-            Pemantauan Satwa &amp; Lapangan
+          <h2 className="text-2xl font-extrabold tracking-tight text-ink sm:text-[1.9rem] sm:leading-tight">
+            {ROLE_LABELS[role]} Dashboard
           </h2>
-          <p className="mt-2 max-w-xl text-[13.5px] leading-6 text-muted">
+          <p className="mt-1 max-w-xl text-sm leading-6 text-muted">
             Ringkasan pergerakan satwa liar, status perangkat pelacak GPS, serta laporan aktivitas lapangan terkini.
           </p>
         </div>
 
         <Link
           href="/tracking/live-map"
-          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary px-4 text-[13.5px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors hover:bg-primary-dark"
+          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-bold text-white shadow-sm transition-colors hover:bg-primary-dark"
         >
           <span>Buka Live Map &amp; 3D</span>
           <ArrowRight aria-hidden="true" className="size-4" />

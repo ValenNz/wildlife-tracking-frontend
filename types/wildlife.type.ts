@@ -1,6 +1,5 @@
 import type { TYPE_CONSERVATION_STATUS } from "@/types/species.type";
 
-/** Titik keterangan pada permukaan model (format atribut model-viewer: "Xm Ym Zm"). */
 export type TYPE_MODEL_HOTSPOT = {
   label: string;
   description?: string | null;
@@ -10,7 +9,6 @@ export type TYPE_MODEL_HOTSPOT = {
 
 export type TYPE_MODEL_SOURCE = "illustrative" | "scan" | "licensed";
 
-/** Profil ensiklopedia satwa (tanpa data individu/lokasi). */
 export type TYPE_SPECIES_PROFILE = {
   species_id: number;
   common_name: string;

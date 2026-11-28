@@ -47,7 +47,7 @@ export function NormalManualView({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Top search bar spanning full centered width */}
+
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
         <input
@@ -59,7 +59,7 @@ export function NormalManualView({
         />
       </div>
 
-      {/* Main content on LEFT, compact TOC card on RIGHT (no double-left-sidebar!) */}
+
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
         <div className="min-w-0 space-y-6">
           {displayedChapters.length === 0 ? (
@@ -138,7 +138,7 @@ export function NormalManualView({
             ))
           )}
 
-          {/* Previous / Next chapter navigation (like standard docs) */}
+
           {!trimmedQuery ? (
             <div className="flex items-center justify-between gap-4">
               {prevChapter ? (
@@ -174,7 +174,7 @@ export function NormalManualView({
           ) : null}
         </div>
 
-        {/* Right navigation rail: normal clean card */}
+
         <aside className="rounded-lg border border-line bg-surface p-4 lg:sticky lg:top-20">
           <p className="mb-3 text-sm font-semibold text-ink">
             {locale === "en" ? "Topics" : "Daftar Topik"}

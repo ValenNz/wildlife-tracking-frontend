@@ -7,7 +7,6 @@ export type TYPE_POS_SUMMARY = {
   voided: number;
   visitors: { wni: number; wna: number; pelajar: number; drone: number; total: number };
   gross: number;
-  /** Tiket masuk & kegiatan: disetor ke kas negara. */
   pnbp: number;
   guide_fee: number;
   by_method: Partial<Record<string, number>>;

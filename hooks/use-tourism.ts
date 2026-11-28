@@ -30,8 +30,6 @@ const useInvalidateTourism = () => {
   return () => queryClient.invalidateQueries({ queryKey: TOURISM_KEY });
 };
 
-// ------------------------------------------------------------------ Katalog
-
 export const useTourRoutes = () =>
   useQuery({
     queryKey: [...TOURISM_KEY, "routes"],
@@ -81,7 +79,6 @@ export const useTourGuide = (id: number) =>
     enabled: id > 0,
   });
 
-/** Foto pemandu sebagai object URL (null bila tidak ada foto). */
 export const useGuidePhoto = (id: number, hasPhoto: boolean) =>
   useQuery({
     queryKey: [...TOURISM_KEY, "guide-photo", id],
@@ -112,7 +109,6 @@ export const usePaymentInfo = () =>
     staleTime: 10 * 60 * 1000,
   });
 
-/** Harga dihitung server; klien hanya menampilkan. */
 export const useTourQuote = (payload: TYPE_QUOTE_PAYLOAD | null) =>
   useQuery({
     queryKey: [...TOURISM_KEY, "quote", payload],
@@ -121,8 +117,6 @@ export const useTourQuote = (payload: TYPE_QUOTE_PAYLOAD | null) =>
     enabled: payload !== null,
     retry: false,
   });
-
-// ------------------------------------------------------------------ Pengunjung
 
 export const useMyBookings = () =>
   useQuery({
@@ -137,7 +131,6 @@ export const useMyBooking = (code: string) =>
     queryFn: () => VISITOR_BOOKING_SERVICE.GET_BY_CODE(code),
     select: (response) => response.data,
     enabled: code !== "",
-    // Pantau perubahan status (mis. setelah petugas memverifikasi pembayaran).
     refetchInterval: 30_000,
   });
 
@@ -194,8 +187,6 @@ export const useBookingReview = () => {
   });
 };
 
-// ------------------------------------------------------------------ Loket
-
 export const useTodayVisits = () =>
   useQuery({
     queryKey: [...BOOKINGS_KEY, "today"],
@@ -211,8 +202,6 @@ export const useTicketCheckIn = () => {
     onSuccess: invalidate,
   });
 };
-
-// ------------------------------------------------------------------ Admin
 
 export const useAdminTourRoutes = () =>
   useQuery({

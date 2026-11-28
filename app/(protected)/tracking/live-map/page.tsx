@@ -22,12 +22,12 @@ const LiveTerrainMap = dynamic(
 );
 
 const REFRESH_MS = 10_000;
-/** Titik yang lebih tua dari ini tidak lagi dianggap "live". */
+
 const LIVE_WINDOW_MS = 60_000;
 const TRAIL_WINDOW_MS = 15 * 60_000;
 const TRAIL_MAX_POINTS = 90;
 
-/** Warna per spesies — cukup kontras di atas citra satelit hijau tua. */
+
 const SPECIES_COLORS = ["#f97316", "#facc15", "#38bdf8", "#f472b6", "#a78bfa", "#fb7185", "#2dd4bf", "#fde68a"];
 
 const toNumber = (value: number | string | null | undefined) => {
@@ -61,7 +61,7 @@ export default function LiveMapPage() {
   const readingsQuery = useGpsReadings(undefined, { refetchInterval: paused ? false : REFRESH_MS });
   const zonesQuery = useGeoZones();
 
-  // Jam 1 detik untuk teks "x dtk lalu".
+
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
@@ -146,7 +146,7 @@ export default function LiveMapPage() {
   const selected = visible.find((a) => a.key === selectedKey) ?? null;
   const handleSelect = useCallback((key: string) => {
     setSelectedKey(key);
-    // Di ponsel panel detail berada di bawah peta; bawa ke layar.
+
     if (window.matchMedia("(max-width: 1023px)").matches) {
       requestAnimationFrame(() => document.getElementById("live-map-panel")?.scrollIntoView({ behavior: "smooth", block: "start" }));
     }

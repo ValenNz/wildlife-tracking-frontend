@@ -157,7 +157,6 @@ export const authenticateWithLaravel = async (
 ): Promise<LaravelAuthResult> =>
   requestAuthToken("/login", { email: payload.email, password: payload.password }, headers);
 
-/** Pendaftaran publik: backend selalu memberi role "pengunjung" (tidak bisa dipilih dari klien). */
 export const registerWithLaravel = async (
   payload: TYPE_REGISTER_REQUEST,
   headers: Record<string, string> = {},

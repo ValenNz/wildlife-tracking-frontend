@@ -81,7 +81,7 @@ export default function RegisterForm() {
     },
   });
 
-  // Soal keamanan sekali pakai; dimuat ulang setelah setiap percobaan yang gagal.
+
   const loadChallenge = useCallback(async () => {
     setChallengeError(null);
     const result = await registerChallengeAction();
@@ -94,7 +94,7 @@ export default function RegisterForm() {
     queueMicrotask(() => void loadChallenge());
   }, [loadChallenge]);
 
-  // Galat validasi dari backend (mis. email sudah terdaftar) ditempel ke field terkait.
+
   useEffect(() => {
     for (const [field, message] of Object.entries(fieldErrors)) {
       setError(field as FieldKey, { type: "server", message });
@@ -242,7 +242,7 @@ export default function RegisterForm() {
                 <FormAlert message={challengeError} />
               ) : null}
 
-              {/* Honeypot anti-bot: tidak terlihat & tidak bisa difokus oleh manusia. */}
+
               <div aria-hidden="true" className="absolute -left-[10000px] h-px w-px overflow-hidden">
                 <label htmlFor="website">Website</label>
                 <input id="website" type="text" tabIndex={-1} autoComplete="off" {...register("website")} />

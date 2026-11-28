@@ -28,7 +28,7 @@ const PRESETS = [
   { label: "90 hari", days: 89 },
 ];
 
-/** Rekap Data (AI -> BE): tampilan layar dan cetak/PDF dari GET /ai/recap. */
+
 export default function AiRecapPage() {
   const [range, setRange] = useState({ start_date: daysAgo(6), end_date: isoDay(new Date()) });
   const recapQuery = useAiRecap(range);

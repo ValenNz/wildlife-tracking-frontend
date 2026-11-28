@@ -17,7 +17,7 @@ type AiMediaViewerProps = {
   mediaType?: AiMediaType | null;
   objects?: AiDetectedObject[] | null;
   faces?: AiFace[] | null;
-  /** detik video yang sedang disorot (klik wajah di daftar) */
+
   seekTo?: number | null;
   className?: string;
   alt: string;
@@ -29,7 +29,7 @@ const FACE_TONE: Record<string, string> = {
   unknown: "border-forest-black bg-forest-black text-white",
 };
 
-/** Foto, video, atau audio dari storage privat backend, dengan kotak deteksi AI di atas foto. */
+
 export function AiMediaViewer({
   mediaId,
   mediaType,

@@ -9,7 +9,6 @@ const POS_KEY = ["pos"] as const;
 
 const useInvalidatePos = () => {
   const queryClient = useQueryClient();
-  // Penjualan loket juga mengubah sisa kuota di jadwal wisata.
   return () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: POS_KEY }),

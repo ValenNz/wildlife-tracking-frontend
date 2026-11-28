@@ -116,7 +116,7 @@ export function SessionPanel({
   session: TYPE_POS_SESSION;
   paper: PaperWidth;
   onReprint: (sale: TYPE_POS_SALE) => void;
-  /** Setelah tutup kas panel ini hilang (tidak ada sesi), jadi laporan Z ditampilkan oleh halaman induk. */
+
   onClosed: (session: TYPE_POS_SESSION) => void;
 }) {
   const salesQuery = usePosSales(true);

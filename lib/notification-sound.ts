@@ -22,10 +22,6 @@ function getAudioContext(): AudioContext | null {
   return sharedAudioContext;
 }
 
-/**
- * Attaches a one-time user-gesture listener so browsers unlock Web Audio
- * before the first incoming notification arrives.
- */
 export function initNotificationAudioUnlock(): void {
   if (typeof window === "undefined" || unlockAttached) return;
   unlockAttached = true;
@@ -57,7 +53,6 @@ export function setNotificationSoundMuted(muted: boolean): void {
   try {
     window.localStorage.setItem(SOUND_MUTED_KEY, muted ? "1" : "0");
   } catch {
-    // ignore storage errors
   }
 }
 
@@ -90,9 +85,6 @@ function scheduleTone(
   osc.stop(endTime + 0.01);
 }
 
-/**
- * Short urgent double-beep alarm ("diddd didd ... diddd didd") for critical notifications.
- */
 export function playCriticalAlarm(): void {
   if (isNotificationSoundMuted()) return;
 
@@ -100,14 +92,12 @@ export function playCriticalAlarm(): void {
   if (!ctx) return;
 
   const play = () => {
-    // First pair: "diddd" (240ms) + gap (110ms) + "didd" (170ms)
     scheduleTone(ctx, 0.0, 0.24, 920, 0.16, "triangle");
     scheduleTone(ctx, 0.0, 0.24, 1380, 0.06, "sine");
 
     scheduleTone(ctx, 0.35, 0.17, 920, 0.16, "triangle");
     scheduleTone(ctx, 0.35, 0.17, 1380, 0.06, "sine");
 
-    // Second pair after short pause: "diddd" (240ms) + "didd" (170ms)
     scheduleTone(ctx, 0.74, 0.24, 960, 0.16, "triangle");
     scheduleTone(ctx, 0.74, 0.24, 1440, 0.06, "sine");
 
@@ -125,14 +115,10 @@ export function playCriticalAlarm(): void {
     try {
       navigator.vibrate([220, 100, 160, 200, 220, 100, 160]);
     } catch {
-      // ignore vibration errors
     }
   }
 }
 
-/**
- * Subtle single chime for regular (non-critical) incoming notifications.
- */
 export function playNotificationChime(): void {
   if (isNotificationSoundMuted()) return;
 

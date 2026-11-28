@@ -286,7 +286,6 @@ export const getDeviceCaptures = async (
     timeoutMs: 30_000,
   });
 
-/** Rekaman kamera jebak / perekam suara; langsung dianalisis AI oleh backend. */
 export const uploadDeviceCapture = async (
   deviceId: number,
   file: File,

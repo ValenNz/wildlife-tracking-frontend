@@ -81,7 +81,7 @@ export default function BookingDetailPage() {
     }
   };
 
-  // Hanya halaman pembayaran resmi Midtrans yang boleh dibuka (cegah redirect ke situs lain).
+
   const onPayOnline = async () => {
     try {
       const response = await payOnlineMutation.mutateAsync(code);

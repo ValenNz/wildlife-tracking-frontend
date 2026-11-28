@@ -32,16 +32,16 @@ import { formatDateTime } from "@/utils/format";
 
 type DeviceOperationsProps = {
   device: TrackingDevice;
-  /** manage_master_data: status, kondisi, pasang/lepas kalung */
+
   canManage: boolean;
-  /** create_data: telemetri, titik GPS manual, rekaman kamera/audio */
+
   canWrite: boolean;
 };
 
 const nowLocal = () =>
   new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 
-/** Operasi perangkat dari endpoint /devices/{id}/... sesuai jenis perangkat. */
+
 export function DeviceOperations({ device, canManage, canWrite }: DeviceOperationsProps) {
   return (
     <div className="flex flex-col gap-6">
@@ -181,7 +181,7 @@ function CollarPanel({ device, canManage }: Pick<DeviceOperationsProps, "device"
           showToast("Kalung dipasang ke satwa.", "success");
         },
         onError: (error) => {
-          // 409: satwa sudah memakai kalung lain, minta konfirmasi untuk memindahkan.
+
           if (error instanceof ApiError && error.status === 409) {
             setConflict(error.message);
             return;

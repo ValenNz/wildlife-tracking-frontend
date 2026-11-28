@@ -11,7 +11,6 @@ const legacyEditRoutes = [
 ];
 
 const nextConfig: NextConfig = {
-  // Upload media AI (foto, video, audio) sampai 50 MB lewat server action.
   experimental: {
     serverActions: { bodySizeLimit: "55mb" },
   },

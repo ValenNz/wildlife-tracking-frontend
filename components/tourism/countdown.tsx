@@ -2,10 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/**
- * Hitung mundur batas pembayaran; memanggil onExpire sekali saat waktu habis.
- * Beri `key` berbeda dari induk bila nilai `seconds` dari server perlu memulai ulang hitungan.
- */
+
 export function Countdown({ seconds, onExpire }: { seconds: number; onExpire?: () => void }) {
   const [deadline] = useState(() => Date.now() + seconds * 1000);
   const [left, setLeft] = useState(seconds);

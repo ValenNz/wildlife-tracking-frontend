@@ -3,7 +3,6 @@ import { api } from "@/services/api";
 import type { ApiResponse, BlobResponse } from "@/types/api.type";
 import type { TYPE_MODEL_SOURCE, TYPE_SPECIES_PROFILE, TYPE_SPECIES_PROFILE_PAYLOAD, TYPE_WILDLIFE_PARAMS } from "@/types/wildlife.type";
 
-/** Ensiklopedia satwa 3D. Baca dari katalog publik; ubah lewat endpoint master data (izin manage_master_data). */
 export const WILDLIFE_SERVICE = {
   GET_ALL: async (params?: TYPE_WILDLIFE_PARAMS): Promise<ApiResponse<TYPE_SPECIES_PROFILE[]>> =>
     api.get<ApiResponse<TYPE_SPECIES_PROFILE[]>>("/wildlife/species", { params }),
@@ -11,7 +10,6 @@ export const WILDLIFE_SERVICE = {
   GET_BY_ID: async (id: number): Promise<ApiResponse<TYPE_SPECIES_PROFILE>> =>
     api.get<ApiResponse<TYPE_SPECIES_PROFILE>>(`/wildlife/species/${id}`),
 
-  /** Versi staf: juga spesies yang disembunyikan dari publik. */
   GET_FOR_STAFF: async (id: number): Promise<ApiResponse<TYPE_SPECIES_PROFILE>> =>
     api.get<ApiResponse<TYPE_SPECIES_PROFILE>>(`/species/${id}`),
 

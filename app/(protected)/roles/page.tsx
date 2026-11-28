@@ -22,7 +22,7 @@ import {
 import { formatApiError, getApiFieldErrors, toApiErrorState } from "@/services/api";
 import { BUILT_IN_ROLES, type TYPE_PERMISSION, type TYPE_ROLE } from "@/types/role.type";
 
-/** Matriks role x izin: centang langsung menyimpan lewat POST/DELETE /roles/{id}/permissions/{permissionId}. */
+
 export default function RolesPage() {
   const { showToast } = useToast();
   const rolesQuery = useRoles();

@@ -16,7 +16,7 @@ import { useGeoZoneVisits } from "@/hooks/use-zone-visits";
 import { DEVICE_TYPE_LABELS, type DeviceType } from "@/types/device.type";
 import { formatDateTime } from "@/utils/format";
 
-/** Isi zona: satwa di dalamnya, perangkat terpasang, riwayat kunjungan (GET /geo-zones/{id}/...). */
+
 export function ZoneContents({ zoneId }: { zoneId: number }) {
   const animals = useGeoZoneAnimals(zoneId);
   const devices = useGeoZoneDevices(zoneId);
@@ -80,7 +80,7 @@ export function ZoneContents({ zoneId }: { zoneId: number }) {
   );
 }
 
-/** GET /geo-zones/locate: zona mana yang memuat sebuah koordinat. */
+
 export function ZoneLocator() {
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");

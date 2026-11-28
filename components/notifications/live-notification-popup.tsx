@@ -54,7 +54,7 @@ export function isCriticalNotification(notification: Notification): boolean {
 export function LiveNotificationPopup() {
   const { locale } = usePreferences();
   const queryClient = useQueryClient();
-  // Keep polling active while the user is inside the protected shell.
+
   useUnreadNotifications();
   const markAsRead = useMarkNotificationAsRead();
 
@@ -87,7 +87,7 @@ export function LiveNotificationPopup() {
       if (payload === undefined) return;
       const items = payload.data ?? [];
 
-      // First payload establishes the baseline so existing unread items don't spam on page load.
+
       if (!initializedRef.current) {
         for (const item of items) {
           seenIdsRef.current.add(item.notif_id);
@@ -122,7 +122,7 @@ export function LiveNotificationPopup() {
       setPopups((current) => [...incoming, ...current].slice(0, 4));
     };
 
-    // Seed baseline if query already resolved before mount.
+
     processSnapshot(
       queryClient.getQueryData<ApiResponse<Notification[]>>([
         "notifications-unread",
@@ -143,7 +143,7 @@ export function LiveNotificationPopup() {
     });
   }, [queryClient]);
 
-  // Auto-dismiss timers: critical alerts stay longer (12s), normal alerts stay 6.5s.
+
   useEffect(() => {
     if (popups.length === 0) return;
 

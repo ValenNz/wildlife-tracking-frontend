@@ -12,7 +12,7 @@ const MEDIA_LABELS: Record<string, string> = {
   audio: "Audio",
 };
 
-/** Temuan utama sebuah prediksi berancaman, dalam satu baris teks. */
+
 export const describeThreat = (prediction: AiPrediction): string =>
   prediction.sound_label ??
   (prediction.unknown_face_count

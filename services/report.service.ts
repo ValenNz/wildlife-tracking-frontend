@@ -12,7 +12,6 @@ export const REPORT_SERVICE = {
   GET_ALL: async (): Promise<ApiResponse<TYPE_AGGREGATE_REPORT[]>> =>
     api.get<ApiResponse<TYPE_AGGREGATE_REPORT[]>>("/aggregate-reports"),
 
-  /** 409 bila laporan periode yang sama sudah ada; kirim overwrite=true untuk membuat ulang. */
   GENERATE: async (
     payload: TYPE_AGGREGATE_REPORT_PAYLOAD,
   ): Promise<ApiResponse<TYPE_AGGREGATE_REPORT>> =>
@@ -29,7 +28,6 @@ export const REPORT_SERVICE = {
 } as const;
 
 export const EXPORT_SERVICE = {
-  /** Semua endpoint GET /export/* (CSV atau GeoJSON). */
   DOWNLOAD: async (
     path: string,
     params?: { start_date?: string; end_date?: string },

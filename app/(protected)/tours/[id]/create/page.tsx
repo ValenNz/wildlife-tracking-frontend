@@ -83,7 +83,7 @@ function TourBookContent() {
   const shift = shifts.find((item) => item.shift_id === shiftId) ?? null;
   const people = counts.wni + counts.wna + counts.pelajar;
 
-  // Kunci string stabil agar debounce tidak memicu render berulang; harga tetap dihitung server.
+
   const quoteKey =
     route && shift && people > 0
       ? JSON.stringify({

@@ -91,7 +91,7 @@ export function PaymentSimulatorModal({
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      // Clipboard bisa diblokir di konteks non-HTTPS; abaikan saja.
+
     }
   };
 

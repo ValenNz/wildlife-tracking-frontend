@@ -13,7 +13,7 @@ export type Map3DRoute = {
   id: number;
   name: string;
   color: string;
-  /** [lintang, bujur, ketinggian m] dari backend. */
+
   waypoints: [number, number, number][];
   meeting?: { lat: number; lon: number; label: string } | null;
 };
@@ -23,9 +23,7 @@ export type RouteMap3DHandle = { flyThrough: (id: number) => void; stop: () => v
 export type Basemap = "hybrid" | "topo" | "street";
 export type ReliefScale = 1 | 1.8 | 2.5;
 
-/*
- * Sumber tile publik gratis tanpa API key, tetap dapat diganti via NEXT_PUBLIC_MAP_* bila memakai penyedia berbayar.
- */
+
 const TERRARIUM =
   process.env.NEXT_PUBLIC_MAP_TERRAIN_URL ||
   "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
@@ -47,7 +45,7 @@ const STREET =
 const SATELLITE_ATTRIBUTION =
   process.env.NEXT_PUBLIC_MAP_SATELLITE_ATTRIBUTION || "Citra © Esri, Maxar, Earthstar Geographics";
 const DEFAULT_EXAGGERATION: ReliefScale = 1.8;
-/** Pusat TN Gunung Leuser bila belum ada rute. */
+
 export const LEUSER: [number, number] = [97.6, 3.75];
 
 export const buildStyle = (basemap: Basemap, showLabels: boolean, exaggeration: ReliefScale): StyleSpecification => ({
@@ -125,7 +123,7 @@ const bearing = (a: [number, number], b: [number, number]) => {
   return (Math.atan2(y, x) / rad + 360) % 360;
 };
 
-/** Titik di sepanjang jalur pada jarak `d` meter, beserta ketinggian hasil interpolasi. */
+
 const pointAt = (points: [number, number, number][], cumulative: number[], d: number) => {
   let index = cumulative.findIndex((value) => value >= d);
   if (index <= 0) index = 1;
@@ -295,7 +293,7 @@ export const RouteMap3D = forwardRef<
 
   useImperativeHandle(ref, () => ({ flyThrough: (id) => void flyThrough(id), stop, focus: (id) => fitTo(id) }), [fitTo, flyThrough, stop]);
 
-  // Inisialisasi peta (sekali).
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -348,7 +346,7 @@ export const RouteMap3D = forwardRef<
         try {
           map.setProjection({ type: "globe" });
         } catch {
-          // Abaikan bila versi GPU/driver tidak mendukung proyeksi globe.
+
         }
         map.addSource("routes", { type: "geojson", data: routesGeoJson(routesRef.current) });
         map.addLayer({
@@ -392,7 +390,7 @@ export const RouteMap3D = forwardRef<
     };
   }, [stop]);
 
-  // Data rute & penanda titik kumpul.
+
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map) return;
@@ -419,11 +417,9 @@ export const RouteMap3D = forwardRef<
     return () => {
       active = false;
     };
-    // selectedId sengaja tidak memicu efek ini (ditangani efek di bawah).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedId sengaja tidak memicu efek ini
   }, [ready, routes, fitTo]);
 
-  // Sorot rute terpilih + tampilkan penanda Start & Puncak.
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map) return;
@@ -521,7 +517,7 @@ export const RouteMap3D = forwardRef<
 
   return (
     <div className={cn("relative overflow-hidden rounded-2xl border border-line bg-forest-black", className)}>
-      {/* maplibre memberi .maplibregl-map position:relative, jadi ukuran harus eksplisit (bukan absolute inset-0). */}
+
       <div ref={containerRef} className="h-full w-full" />
 
       <div className="absolute left-3 top-3 flex max-w-[calc(100%-4rem)] flex-wrap items-center gap-2">

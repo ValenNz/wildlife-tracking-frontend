@@ -1,6 +1,5 @@
 import type { TYPE_META_PAGGINATION } from "@/types/meta.type";
 
-/** Satu catatan satwa masuk/keluar zona (tabel animal_geo_zones). */
 export type TYPE_ZONE_VISIT = {
   visit_id: number;
   animal_id: number;

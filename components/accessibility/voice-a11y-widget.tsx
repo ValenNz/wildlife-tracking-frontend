@@ -120,9 +120,9 @@ function VoiceA11yEmblem({ listening, className }: { listening: boolean; classNa
       aria-hidden="true"
       className={cn("size-6", className)}
     >
-      {/* Head */}
+
       <circle cx="11.5" cy="7.5" r="2.7" fill="currentColor" />
-      {/* Open arms & torso (universal accessibility posture) */}
+
       <path
         d="M4.5 13.2C7.2 11.9 15.8 11.9 18.5 13.2"
         stroke="currentColor"
@@ -136,7 +136,7 @@ function VoiceA11yEmblem({ listening, className }: { listening: boolean; classNa
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Acoustic voice-wave arcs */}
+
       <path
         d="M21.2 11.8C23.1 13.9 23.1 18.1 21.2 20.2"
         stroke={listening ? "#fda4af" : "#fbbf24"}
@@ -226,7 +226,7 @@ export function VoiceA11yWidget() {
     autoReadRef.current = autoRead;
   }, [autoRead]);
 
-  // Hydrate persisted preferences & speech voices without synchronous setState in effect
+
   useEffect(() => {
     const loadVoices = () => {
       if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -264,7 +264,7 @@ export function VoiceA11yWidget() {
           setAutoRead(true);
         }
       } catch {
-        // Ignore storage errors
+
       }
 
       const win = window as SpeechWindow;
@@ -283,7 +283,7 @@ export function VoiceA11yWidget() {
     return undefined;
   }, [locale]);
 
-  // Sync visual accessibility attributes on <html>
+
   useEffect(() => {
     const root = document.documentElement;
     if (fontScale === "md") {
@@ -349,7 +349,7 @@ export function VoiceA11yWidget() {
         const allVoices = window.speechSynthesis.getVoices();
         const chosen = allVoices.find((v) => v.voiceURI === voiceUriRef.current);
 
-        // Split long text (e.g. full page readouts) into ~180-char chunks so browsers never silently drop them
+
         const sentences = message
           .split(/(?<=[.!?])\s+/)
           .flatMap((part) => (part.length > 180 ? part.match(/.{1,180}(?:\s|$)/g) ?? [part] : [part]))
@@ -386,7 +386,7 @@ export function VoiceA11yWidget() {
     [locale],
   );
 
-  // Auto-announce page change when enabled
+
   useEffect(() => {
     if (!autoReadRef.current) return;
     const timer = window.setTimeout(() => {
@@ -402,7 +402,7 @@ export function VoiceA11yWidget() {
     try {
       window.localStorage.setItem(STORAGE_RATE, String(clamped));
     } catch {
-      // Ignore
+
     }
     return clamped;
   }, []);
@@ -412,7 +412,7 @@ export function VoiceA11yWidget() {
     try {
       window.localStorage.setItem(STORAGE_FONT, next);
     } catch {
-      // Ignore
+
     }
   }, []);
 
@@ -425,7 +425,7 @@ export function VoiceA11yWidget() {
         window.localStorage.removeItem(STORAGE_CONTRAST);
       }
     } catch {
-      // Ignore
+
     }
   }, []);
 
@@ -438,7 +438,7 @@ export function VoiceA11yWidget() {
         window.localStorage.removeItem(STORAGE_READABLE);
       }
     } catch {
-      // Ignore
+
     }
   }, []);
 
@@ -584,7 +584,7 @@ export function VoiceA11yWidget() {
           try {
             window.localStorage.setItem("color-scheme", action.scheme);
           } catch {
-            // Ignore
+
           }
           const meta = document.querySelector('meta[name="color-scheme"]');
           if (meta) meta.setAttribute("content", action.scheme);
@@ -718,7 +718,7 @@ export function VoiceA11yWidget() {
           try {
             window.localStorage.setItem("color-scheme", action.scheme);
           } catch {
-            // Ignore
+
           }
           const meta = document.querySelector('meta[name="color-scheme"]');
           if (meta) meta.setAttribute("content", action.scheme);
@@ -842,7 +842,7 @@ export function VoiceA11yWidget() {
       const cleaned = rawText.trim();
       if (!cleaned) return;
 
-      // 1. Instant local confirmation for pending SOS emergency
+
       if (pendingEmergencyRef.current) {
         const confirmation = interpretConfirmation(cleaned);
         if (confirmation === "yes") {
@@ -876,7 +876,7 @@ export function VoiceA11yWidget() {
         return;
       }
 
-      // 2. Instant local handling for critical safety & speech stop (zero latency)
+
       const quickLocal = interpretVoiceCommand(cleaned, locale, userRole);
       if (
         quickLocal.type === "stop_speech" ||
@@ -886,7 +886,7 @@ export function VoiceA11yWidget() {
         return;
       }
 
-      // 3. Full AI Chatbot via backend Groq LLM (with automatic local fallback)
+
       setThinking(true);
       setFeedback(locale === "en" ? "Thinking..." : "Sedang memproses...");
 
@@ -947,7 +947,7 @@ export function VoiceA11yWidget() {
       try {
         current.stop();
       } catch {
-        // Ignore
+
       }
     }
     setListening(false);
@@ -988,7 +988,7 @@ export function VoiceA11yWidget() {
       try {
         previous.abort();
       } catch {
-        // Ignore
+
       }
     }
 
@@ -1037,7 +1037,7 @@ export function VoiceA11yWidget() {
         try {
           recognition.stop();
         } catch {
-          // Ignore
+
         }
         setListening(false);
         executeCommand(combined);
@@ -1132,7 +1132,7 @@ export function VoiceA11yWidget() {
     }
   }, [listening, startListening, stopListening]);
 
-  // Global keyboard shortcuts: Alt+A (toggle panel), Alt+V (toggle voice), Escape (stop/close)
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.altKey && e.key.toLowerCase() === "a") {
@@ -1158,7 +1158,7 @@ export function VoiceA11yWidget() {
 
   return (
     <>
-      {/* Unique Right-Edge Docked Accessibility & Voice AI Tab */}
+
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -1186,7 +1186,7 @@ export function VoiceA11yWidget() {
         </span>
       </button>
 
-      {/* Accessible Voice & Visual Aids Panel */}
+
       {open ? (
         <section
           id="a11y-voice-dialog"
@@ -1199,7 +1199,7 @@ export function VoiceA11yWidget() {
           }
           className="fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-50 flex max-h-[min(85dvh,calc(100dvh-1rem))] flex-col gap-3 overflow-y-auto overscroll-contain rounded-2xl border border-line bg-surface p-4 text-ink shadow-2xl sm:inset-x-auto sm:bottom-auto sm:right-16 sm:top-1/2 sm:max-h-[calc(100dvh-2.5rem)] sm:w-[min(23rem,calc(100vw-4.5rem))] sm:-translate-y-1/2"
         >
-          {/* Header */}
+
           <div className="flex items-center justify-between gap-2 border-b border-line pb-2.5">
             <div className="flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
@@ -1224,7 +1224,7 @@ export function VoiceA11yWidget() {
             </button>
           </div>
 
-          {/* Voice Mic Primary Control */}
+
           <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-muted p-3">
             <div className="flex items-center gap-2">
               <button
@@ -1269,7 +1269,7 @@ export function VoiceA11yWidget() {
               </p>
             ) : null}
 
-            {/* Chatbot Conversation History & Live Transcript */}
+
             <div className="flex flex-col gap-1.5">
               {chatHistory.length > 0 ? (
                 <div className="flex items-center justify-between px-0.5">
@@ -1331,7 +1331,7 @@ export function VoiceA11yWidget() {
               </div>
             </div>
 
-            {/* Text command fallback */}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -1367,7 +1367,7 @@ export function VoiceA11yWidget() {
             </form>
           </div>
 
-          {/* Voice Model & Speed Controls (jatimbissa.id style) */}
+
           <div className="flex flex-col gap-2.5 rounded-xl border border-line bg-surface p-3">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor="a11y-voice-select" className="flex items-center gap-1.5 text-xs font-bold text-ink">
@@ -1399,7 +1399,7 @@ export function VoiceA11yWidget() {
                 try {
                   window.localStorage.setItem(STORAGE_VOICE, uri);
                 } catch {
-                  // Ignore
+
                 }
               }}
               className="ui-input h-9 text-xs"
@@ -1470,7 +1470,7 @@ export function VoiceA11yWidget() {
                       window.localStorage.removeItem(STORAGE_AUTOREAD);
                     }
                   } catch {
-                    // Ignore
+
                   }
                 }}
                 className="size-4 rounded border-line accent-primary"
@@ -1483,7 +1483,7 @@ export function VoiceA11yWidget() {
             </label>
           </div>
 
-          {/* Quick Page Reading & Visual Accessibility Aids */}
+
           <div className="grid grid-cols-2 gap-1.5">
             <button
               type="button"

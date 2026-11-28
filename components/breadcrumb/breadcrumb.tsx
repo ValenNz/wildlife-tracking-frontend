@@ -60,7 +60,7 @@ export const buildPathBreadcrumbs = (
     home,
     ...segments.slice(1).map((segment, index) => ({
       label: formatSegment(segment),
-      // Segmen ID (mis. /species/1) tidak punya halaman sendiri — hanya /detail dan /edit — jadi bukan tautan.
+
       href: /^\d+$/.test(segment) ? undefined : `/${segments.slice(0, index + 2).join("/")}`,
     })),
   ];

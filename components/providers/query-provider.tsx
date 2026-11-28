@@ -12,21 +12,15 @@ type QueryProviderProps = {
 
 let redirecting = false;
 
-/**
- * Token dicabut backend (idle 2 jam, logout di perangkat lain, akun dinonaktifkan, password direset):
- * hapus cookie sesi lalu arahkan ke login dengan pesan, alih-alih menampilkan error di setiap halaman.
- */
 const handleUnauthorized = (error: unknown) => {
   if (!(error instanceof ApiError) || error.status !== 401 || redirecting) return;
   redirecting = true;
   void logoutAction()
     .catch(() => undefined)
-    // Reload penuh (bukan router.push) agar seluruh cache data pengguna sebelumnya ikut terhapus.
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- muat ulang penuh agar cache data pengguna ikut terhapus
     .finally(() => window.location.assign("/login?reason=expired"));
 };
 
-/** 4xx (validasi, izin, tidak ditemukan) tidak akan berhasil bila diulang; hanya error jaringan/5xx yang dicoba lagi. */
 const shouldRetry = (failureCount: number, error: unknown) =>
   failureCount < 1 && !(error instanceof ApiError && error.status >= 400 && error.status < 500);
 

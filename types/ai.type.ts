@@ -475,7 +475,6 @@ export const AI_ACCEPTED_FILE_TYPES = [
 
 export const AI_MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 
-/** Ekstensi yang diterima backend (/ai/upload). Browser sering memberi MIME audio berbeda (audio/x-wav, audio/x-m4a). */
 export const AI_ACCEPTED_EXTENSIONS = [
   "jpg", "jpeg", "png", "webp",
   "mp4", "mov", "webm",

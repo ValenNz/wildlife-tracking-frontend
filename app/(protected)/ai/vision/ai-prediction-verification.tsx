@@ -21,7 +21,7 @@ type AiPredictionVerificationProps = {
   predictionId: number;
   defaultSpeciesId?: number | null;
   defaultAnimalId?: number | null;
-  /** Spesies wajib saat menerima hasil foto/video (aturan backend); audio boleh tanpa spesies. */
+
   requireSpecies?: boolean;
   onVerified?: () => void;
 };

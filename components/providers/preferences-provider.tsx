@@ -232,7 +232,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     try {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
     } catch {
-      // Abaikan jika penyimpanan browser diblokir.
+
     }
     window.dispatchEvent(new Event(LOCALE_EVENT));
   }, []);

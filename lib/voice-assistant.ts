@@ -260,7 +260,6 @@ const FILLER_WORDS = new Set([
 ]);
 
 const SYNONYM_MAP: Record<string, string[]> = {
-  // Indonesian <-> English bidirectional pairs for mixed Indoglish speech
   staff: ["staf", "pegawai", "karyawan"],
   staf: ["staff", "pegawai", "karyawan"],
   pegawai: ["staf", "staff"],
@@ -515,7 +514,6 @@ export function interpretConfirmation(raw: string): "yes" | "no" | "unknown" {
 function detectEmergencyDistress(
   text: string,
 ): "cedera" | "kebakaran" | "satwa_agresif" | "tersesat" | "pemburu" | "lainnya" | null {
-  // Do not hijack explicit page-navigation requests such as "buka halaman kontak darurat"
   if (
     /^(?:tolong\s+)?(?:buka|lihat|tampilkan|arahkan\s+ke|pergi\s+ke|open|show|go\s+to)\s+(?:halaman\s+|menu\s+)?(?:kontak\s+darurat|emergency\s+contacts|ancaman|ai\s+threats)/.test(
       text,
@@ -566,18 +564,15 @@ export function interpretVoiceCommand(
   const text = raw.trim().toLowerCase();
   if (!text) return { type: "unknown", transcript: raw };
 
-  // 1. Stop speech
   if (/^(diam|berhenti bicara|stop|hening|tutup suara|stop talking|be quiet)$/.test(text)) {
     return { type: "stop_speech" };
   }
 
-  // 2. Emergency distress detection (prioritized BEFORE generic "bantuan" / help!)
   const emergencyType = detectEmergencyDistress(text);
   if (emergencyType) {
     return { type: "emergency_distress", emergencyType, transcript: raw };
   }
 
-  // 3. Logout / Sign out (supports ID, EN, and mixed phrases)
   if (
     /(logout|log out|sign out|signout|keluar akun|keluar dari akun|mau keluar|ingin keluar|tolong keluar|cabut sesi|\bkeluar\b)/.test(
       text,
@@ -586,12 +581,10 @@ export function interpretVoiceCommand(
     return { type: "logout" };
   }
 
-  // 4. Help / command list
   if (/(bantuan|perintah|menu apa saja|bisa apa|akses apa|help|commands|what can you do)/.test(text)) {
     return { type: "list_commands" };
   }
 
-  // 5. Read / explain page content thoroughly (ID, EN, and mixed phrases)
   if (
     /(bacakan|baca\s+(?:isi|semua|halaman|layar|konten|apa)|jelaskan|terangkan|deskripsikan|ceritakan|rangkum|ringkas|di mana saya|ini halaman apa|sedang di mana|read\s+(?:this\s+)?(?:page|screen|content|all|everything)|explain|describe|what\s+is\s+on\s+this\s+page|where\s+am\s+i|summarize)/.test(
       text,
@@ -601,7 +594,6 @@ export function interpretVoiceCommand(
     return { type: "read_page" };
   }
 
-  // 5. History navigation (works inside polite sentences)
   if (/(halaman sebelumnya|go back|previous page|\bkembali\b|\bback\b)/.test(text)) {
     return { type: "history", direction: "back" };
   }
@@ -609,7 +601,6 @@ export function interpretVoiceCommand(
     return { type: "history", direction: "forward" };
   }
 
-  // 6. Scroll
   if (/(paling atas|scroll top|back to top|go to top)/.test(text)) {
     return { type: "scroll", direction: "top" };
   }
@@ -623,7 +614,6 @@ export function interpretVoiceCommand(
     return { type: "scroll", direction: "up" };
   }
 
-  // 7. Theme & Language
   if (/(mode gelap|tema gelap|terlalu terang|silau|dark mode|switch to dark)/.test(text)) {
     return { type: "set_theme", scheme: "dark" };
   }
@@ -637,7 +627,6 @@ export function interpretVoiceCommand(
     return { type: "set_locale", locale: "id" };
   }
 
-  // 8. Speech rate
   if (/(lebih cepat|percepat suara|kecepatan naik|faster|speak faster|speed up)/.test(text)) {
     return { type: "set_rate", delta: 0.2 };
   }
@@ -648,7 +637,6 @@ export function interpretVoiceCommand(
     return { type: "set_rate", exact: 1.0 };
   }
 
-  // 9. Contrast, font size, & reset
   if (/(kontras tinggi|high contrast|mode kontras|kurang jelas)/.test(text)) {
     return { type: "set_contrast", high: true };
   }
@@ -668,7 +656,6 @@ export function interpretVoiceCommand(
     return { type: "reset_a11y" };
   }
 
-  // 10. Fill input (flexible ID/EN/mixed)
   const fillMatch = text.match(
     /(?:isi|ketik|masukkan|fill|type|enter)\s+(?:kolom|field|input)?\s*(.+?)\s+(?:dengan|with|ke|as)\s+(.+)$/,
   );
@@ -676,7 +663,6 @@ export function interpretVoiceCommand(
     return { type: "fill_input", field: fillMatch[1].trim(), value: fillMatch[2].trim() };
   }
 
-  // 11. Click element (flexible ID/EN/mixed)
   const clickMatch = text.match(
     /(?:klik|tekan|pencet|pilih|click|press|tap)\s+(?:tombol|button|menu|link|tautan)?\s*(.+)$/,
   );
@@ -687,7 +673,6 @@ export function interpretVoiceCommand(
     }
   }
 
-  // 12. Semantic + fuzzy intent matching across all app routes (with role priority)
   const rawTokens = tokenize(text);
   const userTokens = expandTokens(rawTokens);
   if (userTokens.length > 0) {
@@ -721,7 +706,6 @@ export function interpretVoiceCommand(
     }
   }
 
-  // 13. Smart DOM fallback: check if remaining meaningful words match a button/link on the current page
   const cleanedPhrase = rawTokens.join(" ");
   if (cleanedPhrase && findClickableMatch(cleanedPhrase)) {
     return { type: "click_element", query: cleanedPhrase };
@@ -750,10 +734,6 @@ export function summarizeAllowedRoutesForRole(
     : `Menu yang tersedia untuk role Anda antara lain: ${listed}. Anda juga bisa mengucapkan bacakan isi halaman, logout, mode gelap, kontras tinggi, perbesar tulisan, atau klik nama tombol.`;
 }
 
-/**
- * Extracts a thorough, deduplicated spoken summary of the active page's visible contents:
- * heading, alerts, stat cards (dt/dd), section headings, paragraphs, lists, and table rows.
- */
 export function extractPageSummary(locale: AppLocale): string {
   if (typeof document === "undefined") return "";
 
@@ -775,12 +755,10 @@ export function extractPageSummary(locale: AppLocale): string {
     );
   }
 
-  // Alerts / notices
   root.querySelectorAll("[role='alert'], .ui-alert").forEach((el) => {
     pushUnique(el.textContent);
   });
 
-  // Stat cards / definition pairs (dt + dd)
   const dts = Array.from(root.querySelectorAll("dt"));
   const statPairs: string[] = [];
   for (const dt of dts.slice(0, 8)) {
@@ -799,7 +777,6 @@ export function extractPageSummary(locale: AppLocale): string {
     );
   }
 
-  // Section headings, paragraphs, and list items
   root.querySelectorAll("h2, h3, p, li").forEach((el) => {
     if (el.closest("#a11y-voice-dialog, nav, [aria-hidden='true']")) return;
     const text = el.textContent?.replace(/\s+/g, " ").trim() ?? "";
@@ -808,7 +785,6 @@ export function extractPageSummary(locale: AppLocale): string {
     }
   });
 
-  // Summarize tables if present
   const tables = Array.from(root.querySelectorAll("table"));
   tables.slice(0, 2).forEach((table) => {
     const rows = Array.from(table.querySelectorAll("tbody tr"));

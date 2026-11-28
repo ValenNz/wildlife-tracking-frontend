@@ -109,7 +109,6 @@ export function useGeoZoneDevices(id: number) {
   });
 }
 
-/** Zona yang memuat sebuah koordinat (GET /geo-zones/locate). */
 export function useLocateGeoZones(point: { lat: number; lon: number } | null) {
   return useQuery({
     queryKey: ["geo-zones", "locate", point],

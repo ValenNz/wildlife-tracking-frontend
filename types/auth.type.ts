@@ -140,7 +140,6 @@ export type TYPE_REGISTER_REQUEST = {
   password_confirmation: string;
   captcha_token: string;
   captcha_answer: string;
-  /** Honeypot: selalu kosong untuk manusia. */
   website?: string;
 };
 

@@ -24,7 +24,6 @@ export const WEATHER_SERVICE = {
     };
   },
 
-  /** Ambil cuaca Open-Meteo untuk titik GPS terbaru yang belum punya data cuaca. */
   SYNC: async (limit = 20): Promise<ApiResponse<TYPE_WEATHER_SYNC_RESULT>> =>
     api.post<ApiResponse<TYPE_WEATHER_SYNC_RESULT>>("/weather-data/sync", {
       body: { limit },

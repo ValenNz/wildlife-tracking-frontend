@@ -143,7 +143,7 @@ function Figure({ label, value, note }: { label: string; value: number; note?: s
   );
 }
 
-/** Satu kolom per hari: tinggi = jumlah analisis, tanda gelap di bawah = hari dengan ancaman. */
+
 function DailyStrip({ days }: { days: AiRecap["daily"] }) {
   const max = Math.max(1, ...days.map((day) => day.analyzed));
   const threatDays = days.filter((day) => day.threats > 0).length;

@@ -1,6 +1,5 @@
 import type { DetailedHTMLProps, HTMLAttributes } from "react";
 
-/** Elemen web <model-viewer> (@google/model-viewer) untuk JSX. Atribut kebab-case diteruskan apa adanya. */
 declare module "react" {
   namespace JSX {
     interface IntrinsicElements {

@@ -32,7 +32,6 @@ export const useAiPendingPredictions = () =>
 const isProcessing = (status?: string) =>
   status === "queued" || status === "processing";
 
-/** Detail prediksi; dimuat ulang tiap 2 detik selama masih antre/diproses (AI_QUEUE=true). */
 export const useAiPrediction = (id: number) =>
   useQuery({
     queryKey: [...AI_PREDICTIONS_KEY, id],

@@ -43,7 +43,6 @@ export const USER_SERVICE = {
   ): Promise<ApiResponse<TYPE_USER_ACCOUNT>> =>
     api.put<ApiResponse<TYPE_USER_ACCOUNT>>(`/users/${id}`, { body: payload }),
 
-  /** Menonaktifkan akun langsung mencabut semua sesinya di backend. */
   UPDATE_STATUS: async (
     id: number,
     status: TYPE_USER_STATUS,

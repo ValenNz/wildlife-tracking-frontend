@@ -44,7 +44,7 @@ export default function SpeciesDetailPage() {
   const canManage = userRole ? roleHasPermission(userRole, "manage_master_data") : false;
   const params = useParams<{ id: string }>();
   const id = Number(params.id ?? 0);
-  // Pengelola melihat versi staf (termasuk spesies yang disembunyikan dari publik).
+
   const detailQuery = useWildlifeSpeciesDetail(id, canManage);
   const species = detailQuery.data;
   const model = useSpeciesModelUrl(id, Boolean(species?.has_model), `${species?.model_credit ?? ""}|${species?.model_source ?? ""}`, canManage);
@@ -189,7 +189,7 @@ export default function SpeciesDetailPage() {
           onPickingChange={(value, handler) => {
             setPicking(value);
             setPickHandler(() => handler ?? null);
-            // Panel kelola ada di bawah; bawa model ke layar agar bisa diklik.
+
             if (value) document.getElementById("species-viewer")?.scrollIntoView({ behavior: "smooth", block: "center" });
           }}
         />

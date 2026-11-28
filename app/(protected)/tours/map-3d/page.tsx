@@ -14,7 +14,7 @@ import { toApiErrorState } from "@/services/api";
 import { DIFFICULTY_LABELS } from "@/types/tourism.type";
 import { formatRupiah } from "@/utils/format";
 
-// MapLibre (WebGL) hanya di browser.
+
 const RouteMap3D = dynamic(() => import("@/components/tourism/route-map-3d").then((module) => module.RouteMap3D), {
   ssr: false,
   loading: () => <div className="h-full min-h-[360px] animate-pulse rounded-2xl bg-surface-muted sm:min-h-[520px]" />,

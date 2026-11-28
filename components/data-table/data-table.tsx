@@ -22,7 +22,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Loading } from "@/components/ui/loading";
 import { cn } from "@/lib/utils";
 
-/** Plain-text column label used by the stacked (card) table layout on narrow screens. */
+
 function columnLabel<TData>(column: Column<TData, unknown>): string {
   const header = column.columnDef.header;
   if (typeof header === "string") return header;

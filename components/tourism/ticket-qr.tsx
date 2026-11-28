@@ -4,7 +4,7 @@
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 
-/** QR tiket dibuat di browser dari payload "KODE.TOKEN" (tidak dikirim ke layanan pihak ketiga). */
+
 export function TicketQr({ payload, size = 220 }: { payload: string; size?: number }) {
   const [src, setSrc] = useState<string | null>(null);
 

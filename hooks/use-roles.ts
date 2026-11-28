@@ -39,7 +39,6 @@ export const useRoleDelete = () => {
   });
 };
 
-/** Centang/hapus satu izin pada satu role. */
 export const useRolePermissionToggle = () => {
   const queryClient = useQueryClient();
 

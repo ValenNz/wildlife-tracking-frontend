@@ -33,7 +33,6 @@ import type {
 
 const enc = encodeURIComponent;
 
-/** Katalog publik (rute, pemandu, jadwal, tarif, simulasi harga). */
 export const TOURISM_CATALOG_SERVICE = {
   GET_ROUTES: async (): Promise<ApiResponse<TYPE_TOUR_ROUTE[]>> =>
     api.get<ApiResponse<TYPE_TOUR_ROUTE[]>>("/tourism/routes"),
@@ -74,7 +73,6 @@ export const TOURISM_CATALOG_SERVICE = {
     api.get<ApiResponse<TYPE_PAYMENT_INFO>>("/tourism/payment-info"),
 } as const;
 
-/** Pemesanan milik pengunjung yang login (izin book_tickets). */
 export const VISITOR_BOOKING_SERVICE = {
   GET_ALL: async (): Promise<ApiResponse<TYPE_BOOKING[]>> =>
     api.get<ApiResponse<TYPE_BOOKING[]>>("/visitor/bookings"),
@@ -98,11 +96,9 @@ export const VISITOR_BOOKING_SERVICE = {
     });
   },
 
-  /** Buat transaksi Midtrans Snap; kembalikan URL halaman pembayaran Midtrans. */
   PAY_ONLINE: async (code: string): Promise<ApiResponse<{ redirect_url: string; reference: string }>> =>
     api.post<ApiResponse<{ redirect_url: string; reference: string }>>(`/visitor/bookings/${enc(code)}/pay-online`, { timeoutMs: 30_000 }),
 
-  /** Simulasi pembayaran gateway gratis (QRIS / VA / E-Wallet) dengan verifikasi otomatis. */
   SIMULATE_PAYMENT: async (
     code: string,
     payload: TYPE_SIMULATE_PAYMENT_PAYLOAD,
@@ -119,7 +115,6 @@ export const VISITOR_BOOKING_SERVICE = {
     api.post<ApiResponse<TYPE_TOUR_REVIEW>>(`/visitor/bookings/${enc(code)}/review`, { body: payload }),
 } as const;
 
-/** Pemeriksaan tiket di loket (izin validate_tickets). */
 export const TICKET_CHECK_IN_SERVICE = {
   CHECK_IN: async (ticket: string): Promise<ApiResponse<TYPE_BOOKING>> =>
     api.post<ApiResponse<TYPE_BOOKING>>("/tourism/check-in", { body: { ticket } }),
@@ -128,7 +123,6 @@ export const TICKET_CHECK_IN_SERVICE = {
     api.get<ApiResponse<TYPE_BOOKING[]>>("/tourism/check-in/today"),
 } as const;
 
-/** Pengelolaan wisata (izin manage_tourism). */
 export const TOURISM_ADMIN_SERVICE = {
   GET_ROUTES: async (): Promise<ApiResponse<TYPE_TOUR_ROUTE[]>> =>
     api.get<ApiResponse<TYPE_TOUR_ROUTE[]>>("/tourism/admin/routes"),

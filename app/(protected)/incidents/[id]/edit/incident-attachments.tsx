@@ -34,7 +34,7 @@ type IncidentAttachmentsProps = {
   canSync: boolean;
 };
 
-/** Lampiran bukti insiden (foto, video, audio) dan status sinkronisasi laporan. */
+
 export function IncidentAttachments({
   reportId,
   syncStatus,

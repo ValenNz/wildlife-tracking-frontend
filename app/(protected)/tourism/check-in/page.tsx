@@ -56,7 +56,7 @@ export default function TicketCheckInPage() {
     setScanning(false);
   };
 
-  // Pemindaian QR memakai BarcodeDetector bawaan browser (Chrome/Edge/Android); tanpa library tambahan.
+
   useEffect(() => {
     const Detector = getDetector();
     if (!scanning || !Detector) return;

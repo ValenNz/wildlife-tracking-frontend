@@ -53,9 +53,7 @@ export type NavItem = {
   label: string;
   href: string;
   icon: NavIcon;
-  /** Izin backend (tabel role_permissions) yang dibutuhkan; jika array, cukup salah satu. */
   permission: AppPermission | AppPermission[];
-  /** Sub-halaman yang digabung di bawah 1 menu sidebar (tampil sebagai tab modul di bagian atas halaman). */
   subItems?: NavSubItem[];
 };
 
@@ -181,7 +179,6 @@ const SYSTEM_AND_ACCOUNT_ITEMS: NavItem[] = [
   { label: "Profil Saya", href: "/profile", icon: "profile", permission: ["view_data", "book_tickets", "sell_tickets"] },
 ];
 
-/** Halaman tambahan yang dapat diakses tanpa perlu duplikat di sidebar (mis. tombol lonceng Notifikasi di header). */
 const UTILITY_ROUTES: NavSubItem[] = [
   { label: "Notifikasi", href: "/notifications", permission: ["view_data", "book_tickets", "sell_tickets"] },
 ];
@@ -227,7 +224,6 @@ export const NAV_SECTIONS: Record<TYPE_USER_ROLE, NavSection[]> = {
   pengunjung: sectionsForRole("pengunjung"),
 };
 
-/** Halaman tambah/ubah memakai izin backend yang lebih ketat daripada menu daftarnya. */
 const WRITE_ROUTES: { pattern: RegExp; permission: AppPermission }[] = [
   {
     pattern: /^\/(animals|species|devices|geo-zones)\/(create|[^/]+\/(edit|update))$/,
@@ -294,11 +290,9 @@ const findActiveEntry = (role: TYPE_USER_ROLE, pathname: string) =>
     .filter((entry) => isRouteActive(pathname, entry.href))
     .sort((left, right) => right.href.length - left.href.length)[0];
 
-/** Sidebar item href yang aktif untuk path ini (termasuk ketika berada di sub-halaman). */
 export const findActiveHref = (role: TYPE_USER_ROLE, pathname: string): string | null =>
   findActiveEntry(role, pathname)?.parentHref ?? null;
 
-/** Sub-tab modul untuk path saat ini (tampil di atas halaman ketika menu memiliki beberapa sub-halaman). */
 export const findModuleSubItems = (role: TYPE_USER_ROLE, pathname: string): NavSubItem[] => {
   const subs = findActiveEntry(role, pathname)?.subItems ?? [];
   return subs.length > 1 ? subs : [];

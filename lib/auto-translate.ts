@@ -1,11 +1,4 @@
-/**
- * Mesin penerjemah Bahasa Indonesia -> Bahasa Inggris untuk seluruh antarmuka frontend.
- * Menjaga istilah/kode teknis (TNGL, BBTNGL, QRIS, PNBP, WIB, WNI, WNA, kode booking, URL, email) tetap utuh,
- * dan hanya aktif saat mode bahasa = "en". Mode "id" mengembalikan teks asli 100%.
- */
-
 const EXACT_MAP: Record<string, string> = {
-  // --- Auth & Login/Register ---
   "SELAMAT DATANG": "WELCOME",
   "Selamat datang": "Welcome",
   "Masuk ke akun": "Sign in to your account",
@@ -53,7 +46,6 @@ const EXACT_MAP: Record<string, string> = {
   "Setujui ketentuan kunjungan terlebih dahulu.":
     "Please agree to the visitor terms first.",
 
-  // --- Dashboard ---
   "Dashboard Pemantauan Satwa": "Wildlife Monitoring Dashboard",
   "Pantau aktivitas satwa liar, kondisi perangkat GPS, dan laporan lapangan dalam satu tempat.":
     "Monitor wildlife activity, GPS device health, and field reports in one place.",
@@ -98,7 +90,6 @@ const EXACT_MAP: Record<string, string> = {
   "Ditemukan aktivitas ilegal di zona lindung":
     "Illegal activity detected in protected zone",
 
-  // --- Common UI / Table / Actions ---
   "Memuat data...": "Loading data...",
   "Memuat...": "Loading...",
   "Tidak ada data": "No data available",
@@ -153,7 +144,6 @@ const EXACT_MAP: Record<string, string> = {
   "Berikutnya": "Next",
   "Total": "Total",
 
-  // --- Role Labels ---
   "Administrator Sistem": "System Administrator",
   "Peneliti Ekologi": "Ecologist",
   "Konservasionis Lapangan": "Field Conservationist",
@@ -161,7 +151,6 @@ const EXACT_MAP: Record<string, string> = {
   "Petugas Loket": "Ticket Counter Staff",
   "Pengunjung": "Visitor",
 
-  // --- Conservation / Species / Animal / Device / Zone ---
   "Risiko Rendah (Least Concern)": "Least Concern",
   "Hampir Terancam (Near Threatened)": "Near Threatened",
   "Rentan (Vulnerable)": "Vulnerable",
@@ -205,7 +194,6 @@ const EXACT_MAP: Record<string, string> = {
   "Selesai": "Completed",
   "Ditolak": "Rejected",
 
-  // --- AI Labels ---
   "Antrean": "Queued",
   "Diproses": "Processing",
   "Gagal": "Failed",
@@ -250,7 +238,6 @@ const EXACT_MAP: Record<string, string> = {
   "Ciri fisik": "Distinctive marks",
   "Kandidat tunggal": "Single candidate",
 
-  // --- Tourism / Booking / Payment / POS ---
   "Wisata TN Gunung Leuser": "Gunung Leuser NP Tourism",
   "Jelajah Tur & Rute": "Explore Tours & Routes",
   "Pilih rute, cek jadwal pemandu per shift, lalu pesan tiket. Semua tur wajib didampingi pemandu berlisensi.":
@@ -344,7 +331,6 @@ const EXACT_MAP: Record<string, string> = {
   "Memuat rute...": "Loading routes...",
   "Memuat pemesanan...": "Loading booking...",
 
-  // --- 3D Wildlife Encyclopedia ---
   "Ensiklopedia": "Encyclopedia",
   "Satwa Leuser dalam 3D": "Leuser Wildlife in 3D",
   "Putar dan perbesar model 3D satwa, lalu pelajari ciri, perilaku, makanan, habitat, dan status konservasinya. Lokasi individu satwa sengaja tidak ditampilkan demi keamanan dari perburuan.":
@@ -359,7 +345,6 @@ const EXACT_MAP: Record<string, string> = {
   "Memuat model 3D…": "Loading 3D model…",
   "Model 3D belum tersedia": "3D model not available yet",
 
-  // --- Notifications ---
   "Zona Risiko": "Risk Zone",
   "Peringatan Perangkat": "Device Alert",
   "Sistem": "System",
@@ -525,7 +510,6 @@ export function translateIdToEn(raw: string): string {
   if (!raw || !raw.trim()) return raw;
 
   const trimmed = raw.trim();
-  // Lewati angka murni, kode booking/payment, email, URL, dan koordinat.
   if (
     /^[\d\s.,:/+\-°%×]+$/.test(trimmed) ||
     /^(TNGL|PAY|SIM)-[A-Z0-9-]+$/i.test(trimmed) ||
@@ -538,14 +522,12 @@ export function translateIdToEn(raw: string): string {
   const leading = raw.slice(0, raw.indexOf(trimmed));
   const trailing = raw.slice(raw.indexOf(trimmed) + trimmed.length);
 
-  // 1. Exact match
   if (EXACT_MAP[trimmed]) {
     return `${leading}${EXACT_MAP[trimmed]}${trailing}`;
   }
 
   let text = trimmed;
 
-  // 2. Dynamic templates (notifications, tourism cards, pagination, elevation)
   text = text
     .replace(
       /^Perangkat\s+#(\d+)\s+\(([^)]+)\):\s+baterai rendah\s+\(([^)]+)\)\.?$/i,
@@ -594,7 +576,6 @@ export function translateIdToEn(raw: string): string {
     .replace(/\bShift\s+Siang\b/gi, "Afternoon Shift")
     .replace(/\bShift\s+Malam\b/gi, "Night Shift");
 
-  // 3. Hari & bulan Indonesia
   for (const [idDay, enDay] of Object.entries(WEEKDAYS_ID_TO_EN)) {
     text = text.replace(new RegExp(`\\b${idDay}\\b`, "g"), enDay);
   }
@@ -602,7 +583,6 @@ export function translateIdToEn(raw: string): string {
     text = text.replace(new RegExp(`\\b${idMonth}\\b`, "g"), enMonth);
   }
 
-  // 4. Longest-match phrase replacement
   for (const { regex, en } of PHRASE_REGEXES) {
     text = text.replace(regex, (matched) => {
       if (PRESERVE_ACRONYMS.has(matched)) return matched;

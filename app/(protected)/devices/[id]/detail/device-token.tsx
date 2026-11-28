@@ -15,10 +15,7 @@ import { formatDateTime } from "@/utils/format";
 
 type TokenInfo = { exists: boolean; created_at: string | null; last_used_at: string | null };
 
-/**
- * Token API khusus perangkat (kamera jebak/perekam/kalung GPS): tidak kedaluwarsa karena idle,
- * hanya bisa mengirim data perangkat ini. Ditampilkan sekali saat dibuat.
- */
+
 export function DeviceTokenPanel({ deviceId }: { deviceId: number }) {
   const { showToast } = useToast();
   const queryClient = useQueryClient();

@@ -8,7 +8,7 @@ type RouteMapProps = {
   meeting: { lat: number; lon: number; label: string } | null;
 };
 
-/** Jalur tur (lat, lon, elevasi) di atas OpenStreetMap + titik kumpul. */
+
 export function RouteMap({ waypoints, meeting }: RouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -56,7 +56,7 @@ export function RouteMap({ waypoints, meeting }: RouteMapProps) {
   return <div ref={containerRef} className="h-72 w-full overflow-hidden rounded-2xl border border-line" />;
 }
 
-/** Profil ketinggian sederhana dari elevasi waypoint (meter dpl). */
+
 export function ElevationProfile({ waypoints }: { waypoints: [number, number, number][] }) {
   if (waypoints.length < 2) return null;
 

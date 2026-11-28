@@ -43,7 +43,7 @@ export function ThemeToggle() {
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const handleMediaChange = () => {
-      // Hanya ubah tampilan ikon bila user mengikuti sistem (tidak menghapus pilihan tersimpan).
+
       if (!readStoredScheme()) {
         setRendered(getSystemScheme());
       }
@@ -74,7 +74,7 @@ export function ThemeToggle() {
         window.localStorage.setItem(STORAGE_KEY, nextStored);
       }
     } catch {
-      // Tetap terapkan di DOM meski localStorage tidak tersedia.
+
     }
 
     applyMetaScheme(nextStored);

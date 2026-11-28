@@ -17,7 +17,6 @@ export type TYPE_ROLE_PAYLOAD = {
   description?: string | null;
 };
 
-/** Role bawaan dipakai backend untuk target notifikasi: tidak bisa diganti nama atau dihapus. */
 export const BUILT_IN_ROLES = [
   "konservasionis_lapangan",
   "peneliti_ekologi",

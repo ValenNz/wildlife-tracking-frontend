@@ -32,7 +32,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "incidents", label: "Insiden" },
 ];
 
-/** Data satwa dari endpoint /animals/{id}/...: galeri re-identifikasi, observasi AI, kunjungan zona, insiden. */
+
 export function AnimalInsights({ animalId, canManage }: { animalId: number; canManage: boolean }) {
   const [tab, setTab] = useState<Tab>("photos");
 

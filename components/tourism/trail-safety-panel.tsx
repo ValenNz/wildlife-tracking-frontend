@@ -109,7 +109,7 @@ export function TrailSafetyPanel({ slug }: { slug: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. Keadaan Darurat Jalur (Deteksi AI & Instant Alert SOS) */}
+
       <section className="ui-panel p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -258,7 +258,7 @@ export function TrailSafetyPanel({ slug }: { slug: string }) {
         </div>
       </section>
 
-      {/* 2. Detail Informasi Setiap Pos */}
+
       <section className="ui-panel p-5 sm:p-6">
         <div className="mb-4 flex items-center gap-2.5">
           <Compass className="size-5 text-primary" />
@@ -308,7 +308,7 @@ export function TrailSafetyPanel({ slug }: { slug: string }) {
         </ol>
       </section>
 
-      {/* 3. Kontak Darurat beserta Detailnya */}
+
       <section className="ui-panel p-5 sm:p-6">
         <div className="mb-4 flex items-center gap-2.5">
           <PhoneCall className="size-5 text-primary" />

@@ -23,10 +23,6 @@ export const useWildlifeSpeciesDetail = (id: number, staff = false) =>
     enabled: id > 0,
   });
 
-/**
- * Model GLB sebagai object URL. `version` ikut kunci cache agar model baru langsung dimuat setelah diunggah.
- * Object URL dicabut saat komponen dilepas/berganti model (mencegah kebocoran memori).
- */
 export const useSpeciesModelUrl = (id: number, enabled: boolean, version: string, staff = false) => {
   const query = useQuery({
     queryKey: [...WILDLIFE_KEY, "model", id, version, staff],

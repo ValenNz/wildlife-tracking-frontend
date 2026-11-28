@@ -3,10 +3,7 @@ import QRCode from "qrcode";
 import { POS_METHOD_LABELS, type TYPE_POS_SALE, type TYPE_POS_SESSION, type TYPE_POS_SUMMARY } from "@/types/pos.type";
 import { PAYMENT_METHOD_LABELS, SHIFT_LABELS, VISITOR_TYPE_LABELS } from "@/types/tourism.type";
 
-/**
- * Struk thermal (58/80 mm) dan laporan sesi kas dibuat sebagai dokumen HTML terpisah lalu dicetak dari iframe,
- * sehingga ukuran kertas tidak bentrok dengan @page A4 aplikasi. Semua teks dari pengguna di-escape.
- */
+
 const esc = (value: unknown): string =>
   String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -114,7 +111,7 @@ const summaryBlock = (summary: TYPE_POS_SUMMARY) => `
   <div class="row s"><span>&nbsp;PNBP (setor kas negara)</span><span>${rp(summary.pnbp)}</span></div>
   <div class="row s"><span>&nbsp;Jasa pemandu</span><span>${rp(summary.guide_fee)}</span></div>`;
 
-/** Laporan sesi kas (X-report saat masih buka, Z-report setelah ditutup). */
+
 export function buildSessionReportHtml(session: TYPE_POS_SESSION, paper: PaperWidth = "80mm"): string {
   const closed = !session.is_open;
   const body = `

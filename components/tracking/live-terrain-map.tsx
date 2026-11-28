@@ -20,7 +20,7 @@ export type TrackedAnimal = {
   longitude: number;
   recordedAt: string;
   isActive: boolean;
-  /** Titik kronologis [bujur, lintang] dalam ±15 menit terakhir. */
+
   trail: [number, number][];
   speedKmh: number | null;
   headingDeg: number | null;
@@ -37,7 +37,7 @@ type Props = {
 
 const RELIEF = 1.8 as const;
 
-/** Zona rawan konflik diberi warna hangat, zona lindung hijau muda; keduanya tetap terbaca di atas citra satelit. */
+
 const ZONE_COLORS: Record<string, string> = {
   permukiman: "#f59e0b",
   perkebunan: "#eab308",
@@ -165,7 +165,7 @@ export function LiveTerrainMap({ animals, zones, selectedKey, onSelect }: Props)
       map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
 
       map.on("load", () => {
-        // Atribusi tetap ada, tetapi dilipat agar tidak menutupi peta di layar kecil.
+
         containerRef.current?.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
         map.addSource("zones", { type: "geojson", data: zonesGeoJson([]) });
         map.addLayer({ id: "zone-fill", type: "fill", source: "zones", paint: { "fill-color": ["get", "color"], "fill-opacity": 0.12 } });
@@ -201,7 +201,7 @@ export function LiveTerrainMap({ animals, zones, selectedKey, onSelect }: Props)
     (map.getSource("zones") as GeoJSONSource | undefined)?.setData(zonesGeoJson(zones));
   }, [zones, ready]);
 
-  // Penanda & jejak. Posisi baru dianimasikan ±1 detik agar perpindahan tiap 10 detik terlihat sebagai gerakan.
+
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map) return;
@@ -263,11 +263,9 @@ export function LiveTerrainMap({ animals, zones, selectedKey, onSelect }: Props)
       active = false;
       cancelAnimationFrame(frame);
     };
-    // `relief` hanya dibaca untuk pitch awal.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- relief hanya dibaca untuk pitch awal
   }, [animals, selectedKey, ready]);
 
-  // Terbang ke satwa terpilih (hanya saat pilihan berubah, bukan tiap pembaruan posisi).
   const animalsRef = useRef(animals);
   useEffect(() => {
     animalsRef.current = animals;

@@ -23,7 +23,7 @@ type Props = {
   onPickingChange: (picking: boolean, handler?: (point: { position: string; normal: string }) => void) => void;
 };
 
-/** Panel peneliti/admin (izin manage_master_data): model 3D, titik keterangan, dan profil ensiklopedia. */
+
 export function ManagePanel({ species, hotspots, onHotspotsChange, picking, onPickingChange }: Props) {
   const { showToast } = useToast();
   const uploadMutation = useSpeciesModelUpload();

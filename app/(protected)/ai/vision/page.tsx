@@ -60,7 +60,7 @@ const ACCEPTED_FILE_ATTRIBUTE = [
 ].join(",");
 
 const validateFile = (file: File): string | null => {
-  // Cek ekstensi, bukan MIME: browser memberi MIME audio berbeda-beda (audio/x-wav, audio/x-m4a).
+
   if (getAiMediaKind(file) === null) {
     return "Format file harus gambar, video, atau audio yang didukung.";
   }
@@ -86,7 +86,7 @@ export default function AiVisionUploadPage() {
   const [predictionId, setPredictionId] = useState(0);
   const zonesQuery = useGeoZones();
   const devicesQuery = useTrackingDevices();
-  // Hasil diperbarui otomatis selama prediksi masih antre/diproses.
+
   const predictionQuery = useAiPrediction(predictionId);
   const result = predictionQuery.data?.data ?? null;
   const zones = zonesQuery.data ?? [];
@@ -100,7 +100,7 @@ export default function AiVisionUploadPage() {
     [file],
   );
 
-  // Hasil muncul di bawah formulir; bawa ke layar agar tidak terlihat seperti "tidak terjadi apa-apa".
+
   const resultId = result?.prediction_id ?? 0;
   useEffect(() => {
     if (!resultId) return;

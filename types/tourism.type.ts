@@ -1,5 +1,3 @@
-/** Modul wisata TNGL: rute tur, pemandu, shift, tarif PNBP, pemesanan, pembayaran, tiket, ulasan. */
-
 export type TYPE_DIFFICULTY = "mudah" | "sedang" | "sulit";
 export type TYPE_SHIFT_TYPE = "pagi" | "siang" | "malam";
 export type TYPE_VISITOR_TYPE = "wni" | "wna" | "pelajar";
@@ -148,7 +146,6 @@ export type TYPE_TOUR_GUIDE_PAYLOAD = Omit<
   "guide_id" | "has_photo" | "reviews_avg_guide_rating" | "reviews_count"
 >;
 
-/** Shift publik (sudah diringkas server, termasuk sisa kuota). */
 export type TYPE_PUBLIC_SHIFT = {
   shift_id: number;
   shift_date: string;
@@ -161,7 +158,6 @@ export type TYPE_PUBLIC_SHIFT = {
   route: Pick<TYPE_TOUR_ROUTE, "route_id" | "slug" | "name" | "entry_point"> | null;
 };
 
-/** Shift versi admin (baris tabel guide_shifts + remaining). */
 export type TYPE_GUIDE_SHIFT = {
   shift_id: number;
   guide_id: number;

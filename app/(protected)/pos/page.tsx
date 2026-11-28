@@ -25,13 +25,13 @@ export default function PosPage() {
   const [closedReport, setClosedReport] = useState<TYPE_POS_SESSION | null>(null);
   const [paper, setPaper] = useState<PaperWidth>("80mm");
 
-  // Lebar kertas printer adalah preferensi per komputer loket (boleh hilang, default 80 mm).
+
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(PAPER_KEY);
       if (saved === "58mm" || saved === "80mm") queueMicrotask(() => setPaper(saved));
     } catch {
-      /* penyimpanan browser tidak tersedia */
+
     }
   }, []);
 
@@ -40,7 +40,7 @@ export default function PosPage() {
     try {
       window.localStorage.setItem(PAPER_KEY, value);
     } catch {
-      /* abaikan */
+
     }
   };
 

@@ -2,7 +2,6 @@ import type { TYPE_META_PAGGINATION } from "@/types/meta.type";
 
 export type TYPE_USER_STATUS = "aktif" | "nonaktif";
 
-/** Akun dari GET /users (berbeda dari TYPE_USER sesi login di auth.type). */
 export type TYPE_USER_ACCOUNT = {
   user_id: number;
   role_id: number;

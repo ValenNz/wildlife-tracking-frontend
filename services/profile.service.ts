@@ -14,7 +14,6 @@ export const PROFILE_SERVICE = {
   UPDATE: async (payload: TYPE_PROFILE_PAYLOAD): Promise<ApiResponse<TYPE_PROFILE>> =>
     api.patch<ApiResponse<TYPE_PROFILE>>("/me", { body: payload }),
 
-  /** Sesi lain milik user dikeluarkan; sesi yang sedang dipakai tetap aktif. */
   CHANGE_PASSWORD: async (payload: TYPE_PASSWORD_PAYLOAD): Promise<ApiResponse<null>> =>
     api.put<ApiResponse<null>>("/me/password", { body: payload }),
 } as const;

@@ -18,16 +18,12 @@ type ModelViewerElement = HTMLElement & {
 
 export type SpeciesViewerHandle = { focusHotspot: (index: number) => void; reset: () => void };
 
-/** Sudut tiga perempat dari depan-samping: bentuk tubuh lebih terbaca daripada tampak depan lurus. */
+
 const DEFAULT_ORBIT = "35deg 75deg auto";
 
 const vec = (value: Vector) => `${value.x.toFixed(3)}m ${value.y.toFixed(3)}m ${value.z.toFixed(3)}m`;
 
-/**
- * Penampil model 3D satwa berbasis <model-viewer>: putar (seret), perbesar (scroll/cubit), geser (klik kanan / dua jari),
- * putar otomatis, titik keterangan bernomor, layar penuh, dan AR (WebXR) di ponsel yang mendukung.
- * Mode `picking`: klik pada permukaan model mengembalikan posisi & normal untuk membuat titik keterangan baru.
- */
+
 export const SpeciesViewer = forwardRef<
   SpeciesViewerHandle,
   {
@@ -50,7 +46,7 @@ export const SpeciesViewer = forwardRef<
   const [autoRotate, setAutoRotate] = useState(!compact);
   const [showLabels, setShowLabels] = useState(true);
 
-  // model-viewer mendaftarkan custom element saat diimpor; hanya di browser.
+
   useEffect(() => {
     let active = true;
     import("@google/model-viewer")

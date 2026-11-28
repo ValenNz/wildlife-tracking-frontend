@@ -3,7 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { TYPE_ACTIVITY_LOG } from "@/types/activity-log.type";
 import { formatDateTime } from "@/utils/format";
 
-/** Detail log berupa objek JSON; tampilkan sebagai "kunci: nilai". */
+
 const describeDetails = (details: unknown): string => {
   if (details === null || details === undefined || details === "") return "-";
   if (typeof details === "string") return details;

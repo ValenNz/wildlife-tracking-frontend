@@ -57,12 +57,9 @@ const unauthorizedResult = (): BackendActionResult => ({
   errors: null,
 });
 
-// Base64 per potongan harus kelipatan 3 byte; dengan potongan 32 KB padding "=" muncul
-// di tengah string dan atob() di browser gagal untuk berkas > 32 KB. Buffer Node menangani semuanya.
 const encodeBytesToBase64 = (bytes: Uint8Array): string =>
   Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString("base64");
 
-/** Respons berkas (media, ekspor CSV/GeoJSON) diteruskan sebagai base64, bukan JSON. */
 const BINARY_CONTENT_TYPES = [
   "image/",
   "video/",
@@ -74,11 +71,6 @@ const BINARY_CONTENT_TYPES = [
   "model/",
 ];
 
-/**
- * IP pengunjung asli diteruskan ke Laravel (X-Forwarded-For) agar rate limit login/daftar dihitung per pengunjung,
- * bukan per server Next.js. Laravel hanya memercayainya bila IP server ini terdaftar di TRUSTED_PROXIES.
- * Diambil entri paling kanan = alamat yang dilihat langsung oleh server ini (tidak bisa dipalsukan klien).
- */
 const clientIpHeaders = async (): Promise<Record<string, string>> => {
   try {
     const incoming = await headers();
@@ -90,7 +82,6 @@ const clientIpHeaders = async (): Promise<Record<string, string>> => {
   }
 };
 
-/** Soal keamanan pendaftaran (publik, tanpa token). */
 export const registerChallengeAction = async (): Promise<
   { ok: true; challenge: TYPE_REGISTER_CHALLENGE } | { ok: false; message: string }
 > => {
@@ -159,7 +150,6 @@ export const loginAction = async (
   }
 };
 
-/** Daftar akun pengunjung lalu langsung masuk (cookie sesi diset seperti login). */
 export const registerAction = async (
   payload: TYPE_REGISTER_REQUEST,
 ): Promise<LoginActionResult> => {

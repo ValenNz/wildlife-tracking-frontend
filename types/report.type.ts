@@ -37,7 +37,6 @@ export const REPORT_STATISTIC_LABELS: Record<string, string> = {
   total_predictions: "Prediksi AI",
 };
 
-/** Endpoint GET /export/* yang tersedia untuk izin export_data. */
 export type TYPE_EXPORT_ITEM = {
   path: string;
   filename: string;

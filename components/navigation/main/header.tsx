@@ -102,7 +102,7 @@ export function Header({ user, onLogout, onMenuOpen }: HeaderProps) {
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-        {/* Language & theme toggles live in the mobile drawer on small phones */}
+
         <div className="hidden items-center gap-2 sm:flex">
           <button
             type="button"

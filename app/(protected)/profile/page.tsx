@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/ui/panel";
 import { usePasswordChange, useProfile, useProfileUpdate } from "@/hooks/use-profile";
 import { formatApiError, getApiFieldErrors, toApiErrorState } from "@/services/api";
 
-/** GET/PATCH /me dan PUT /me/password. */
+
 export default function ProfilePage() {
   const { showToast } = useToast();
   const profileQuery = useProfile();
@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pw, setPw] = useState({ current_password: "", password: "", password_confirmation: "" });
   const [pwErrors, setPwErrors] = useState<Record<string, string>>({});
-  // Nilai tampil = data backend, ditimpa yang sudah diketik pengguna.
+
   const form = {
     full_name: draft.full_name ?? me.data?.full_name ?? "",
     username: draft.username ?? me.data?.username ?? "",

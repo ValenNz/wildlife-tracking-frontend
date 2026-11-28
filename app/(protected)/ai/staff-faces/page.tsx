@@ -20,7 +20,7 @@ import { formatApiError, toApiErrorState } from "@/services/api";
 
 import { StaffFaceThumbnail } from "./staff-face-thumbnail";
 
-/** Galeri wajah staf (admin): dasar pengenalan "staf vs Tidak dikenal / pengunjung". */
+
 export default function StaffFacesPage() {
   const { showToast } = useToast();
   const facesQuery = useStaffFaces();

@@ -10,7 +10,6 @@ import type {
 
 const enc = encodeURIComponent;
 
-/** POS loket (izin sell_tickets; laporan harian butuh manage_tourism). */
 export const POS_SERVICE = {
   GET_SESSION: async (): Promise<ApiResponse<TYPE_POS_SESSION | null>> =>
     api.get<ApiResponse<TYPE_POS_SESSION | null>>("/pos/session"),

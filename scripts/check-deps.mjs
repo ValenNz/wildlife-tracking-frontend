@@ -1,5 +1,3 @@
-// Dijalankan otomatis sebelum `npm run dev` / `npm run build` (predev/prebuild).
-// Mencegah error "Module not found" setelah `git pull` yang menambah paket baru tetapi `npm install` belum dijalankan.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
